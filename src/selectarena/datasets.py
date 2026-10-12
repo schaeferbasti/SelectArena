@@ -1,6 +1,7 @@
 """The SelectArena dataset suite and how it becomes a TabArena task collection.
 
 The suite is a list of Data Foundry containers (``<dataset>/<container uuid>``). They are
+hosted on Hugging Face (:data:`HF_REPO_ID`) or read from a local Data Foundry warehouse, and
 converted once into TabArena ``UserTask``s with :func:`prepare_datasets` (writes the task pickles
 into the OpenML cache and a ``<COLLECTION_NAME>_tasks_metadata.csv`` next to them); afterwards
 :func:`make_task_metadata_collection` reads that CSV without touching Data Foundry again.
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
 
 COLLECTION_NAME = "feature_selection_benchmark"
 COLLECTION_DESCRIPTION = "SelectArena: tabular datasets for benchmarking feature selection methods."
+#: Hugging Face dataset repo hosting the containers (layout ``<dataset>/<uuid>/``).
+HF_REPO_ID = "SelectArena/datasets"
 
 BENCHMARK_DATA_FOUNDRY_TASKS = [
     "allstate_claims_severity/019dab3b-bfcc-7f19-8def-ddc92f50f1fd",
@@ -96,23 +99,34 @@ BENCHMARK_DATA_FOUNDRY_TASKS = [
 ]
 
 
-def make_collection(warehouse_dir: str | Path) -> DatasetCollection:
-    """The suite as a Data Foundry collection read from a local warehouse directory.
+def make_collection(warehouse_dir: str | Path | None = None, *, repo_id: str = HF_REPO_ID) -> DatasetCollection:
+    """The suite as a Data Foundry collection.
 
-    ``warehouse_dir`` holds the containers at ``<warehouse_dir>/<dataset>/<container uuid>``.
+    With ``warehouse_dir``, the containers are read from a local warehouse
+    (``<warehouse_dir>/<dataset>/<container uuid>``); otherwise they are downloaded on demand from
+    the Hugging Face dataset repo ``repo_id``, which mirrors that layout (see
+    :mod:`selectarena.data_release`).
     """
-    from data_foundry.collections import DatasetCollection, LocalWarehouseSource
+    from data_foundry.collections import DatasetCollection, HuggingFaceSource, LocalWarehouseSource
 
+    source = (
+        LocalWarehouseSource(base_dir=Path(warehouse_dir).expanduser())
+        if warehouse_dir is not None
+        else HuggingFaceSource(repo_id=repo_id)
+    )
     return DatasetCollection.from_relative_paths(
         name=COLLECTION_NAME,
         description=COLLECTION_DESCRIPTION,
         relative_paths=list(BENCHMARK_DATA_FOUNDRY_TASKS),
-        source=LocalWarehouseSource(base_dir=Path(warehouse_dir)),
+        source=source,
     )
 
 
-def prepare_datasets(*, warehouse_dir: str | Path, openml_cache: str | Path | None = None) -> Path:
-    """Convert the suite into TabArena ``UserTask``s and write its metadata CSV; return the CSV path."""
+def prepare_datasets(*, warehouse_dir: str | Path | None = None, openml_cache: str | Path | None = None) -> Path:
+    """Convert the suite into TabArena ``UserTask``s and write its metadata CSV; return the CSV path.
+
+    Reads the containers from ``warehouse_dir``, or downloads them from Hugging Face without it.
+    """
     from tabarena.benchmark.task.data_foundry.metadata_cache import prepare_collection_for_tabarena
 
     return prepare_collection_for_tabarena(
@@ -128,23 +142,15 @@ def make_task_metadata_collection(
     """The suite's ``TaskMetadataCollection``.
 
     Reads the metadata CSV written by :func:`prepare_datasets` (from the OpenML cache the active
-    ``CacheConfig`` points at). If it is missing and ``warehouse_dir`` is given, the suite is
-    converted first.
+    ``CacheConfig`` points at). If it is missing, the suite is converted first, from
+    ``warehouse_dir`` or, without it, from Hugging Face.
     """
     from tabarena.benchmark.task.metadata import TaskMetadataCollection
     from tabarena.benchmark.task.metadata.sources.data_foundry import DataFoundryTaskMetadataSource
 
     source = DataFoundryTaskMetadataSource(
-        collection_factory=partial(make_collection, warehouse_dir) if warehouse_dir is not None else _no_warehouse,
+        collection_factory=partial(make_collection, warehouse_dir),
         name=COLLECTION_NAME,
         cache_dir=str(cache_dir) if cache_dir is not None else None,
     )
     return TaskMetadataCollection.from_source(source)
-
-
-def _no_warehouse() -> DatasetCollection:
-    raise FileNotFoundError(
-        f"No metadata CSV for {COLLECTION_NAME!r} in the OpenML cache and no Data Foundry warehouse "
-        "configured. Run `python scripts/prepare_datasets.py` (or set `data_foundry_warehouse` in "
-        "the cluster config) first."
-    )
