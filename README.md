@@ -82,6 +82,24 @@ python scripts/run_extra_benchmark.py collect   # stability_results.csv, validit
 Both config files can be passed explicitly with `--config` and `--cluster-config`; the cluster
 config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
 
+## Leaderboard
+
+The public leaderboard is the Hugging Face Space
+[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard); its code is in
+`leaderboard/`. After a run:
+
+```bash
+python scripts/run_benchmark.py eval            # results.csv
+python scripts/run_extra_benchmark.py collect   # optional: stability / validity
+hf auth login                                   # token with write access to the SelectArena organization
+python scripts/export_leaderboard.py --push     # builds leaderboard/data/ and uploads it to the Space
+```
+
+Methods are ranked within each dataset split, downstream model configuration and budget; the
+metrics are explained in `selectarena/evaluation/leaderboard.py` and on the Space's About tab.
+To change the app itself, upload the whole folder:
+`hf upload SelectArena/Leaderboard leaderboard . --repo-type=space`.
+
 ## Feature selection methods
 
 | Class | Paper name | Proxy model |
@@ -115,11 +133,12 @@ src/selectarena/
   methods/          feature selectors, their base class and the registry
   benchmark/        FSBench pipelines and the TabArena subclasses
   extra_benchmark/  stability / validity benchmark (selection only)
-  evaluation/       reading results.pkl files into a table
+  evaluation/       reading results.pkl files into a table, leaderboard tables
   datasets.py       the dataset suite (Data Foundry containers)
   config.py         YAML configs and the tabflow_slurm plan built from them
 configs/            benchmark.yaml, cluster.example.yaml
-scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py
+scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py, export_leaderboard.py
+leaderboard/        the Hugging Face Space (Gradio app, data/ filled by export_leaderboard.py)
 examples/           quickstart.py, run_local.py
 tests/
 ```
