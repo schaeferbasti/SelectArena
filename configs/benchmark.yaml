@@ -1,0 +1,53 @@
+# What SelectArena benchmarks. Machine-specific settings live in configs/cluster.yaml.
+# The model jobs and splits follow the last downstream-performance launcher of tabarena_fork_fs;
+# adjust them to the run you want.
+#
+#   python scripts/run_benchmark.py setup  --config configs/benchmark.yaml
+#   python scripts/run_benchmark.py eval   --config configs/benchmark.yaml
+
+benchmark_name: selectarena_2026
+
+feature_selection:
+  # Registry names (selectarena.methods.FEATURE_SELECTION_METHODS) or "all".
+  methods: all
+  # Number of feature-count budgets per dataset. For d features and budget index i (0-based) the
+  # selector keeps ceil(d * (i+1)/(b+1)) features when d <= 100, else ceil(d ** ((i+1)/(b+1))).
+  total_budget: 5
+  proxy_models: [lgbm]
+  # Seconds when >= 1, a fraction of time_limit when < 1.
+  fs_time_limits: [3600]
+  include_default: false
+  no_fallback: false
+  encoding_permutation_seeds: []
+
+# Time limit of one model fit in seconds. The feature selection time is added on top when
+# sizing the SLURM jobs.
+time_limit: 3600
+
+# Extra SelectArenaExperimentBundle fields.
+experiment:
+  n_random_configs: 0
+  # custom_model_constraints:
+  #   TA-TABICL: {max_n_samples_train_per_fold: 50000, max_n_features: 500, regression_support: false}
+
+# Scope of the run (tabarena TaskSubset fields). Omit to run every split of every dataset.
+task_subset:
+  split_indices: [r0f0, r0f1, r0f2]
+
+# One entry per group of models sharing resources (tabflow_slurm.ModelJob fields).
+model_jobs:
+  - name: gpu
+    models:
+      - [TabICLv2, all]
+      - [RealMLP, all]
+    resources:
+      num_gpus: 1
+      fake_memory_for_estimates: 140  # GPU VRAM in GB
+  # - name: cpu
+  #   models:
+  #     - [LightGBM, 0]
+
+# Stability / validity benchmark (selection only).
+extra_benchmark:
+  modes: [stability, validity]
+  noise_type: gaussian

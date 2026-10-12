@@ -1,0 +1,17 @@
+target-version = "py311"
+line-length = 120
+src = ["src", "tests", "examples", "scripts"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "RUF"]
+ignore = [
+  "E501",    # long lines are left to the formatter
+  "B905",    # zip() without strict=; the ported selector code relies on the default
+  "RUF001",  # ambiguous unicode in strings (author names, docs)
+  "RUF002",
+  "RUF003",
+]
+
+[lint.isort]
+required-imports = ["from __future__ import annotations"]
+known-first-party = ["selectarena"]
