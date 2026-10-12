@@ -2,8 +2,7 @@
 
     python scripts/prepare_datasets.py [--cluster-config configs/cluster.yaml]
 
-Reads the containers from ``data_foundry_warehouse`` (or downloads them from the Hugging Face dataset
-repo when it is not set), writes the ``UserTask`` pickles and the
+Reads the containers from ``data_foundry_warehouse``, writes the ``UserTask`` pickles and the
 suite's metadata CSV into the configured OpenML cache. Needs ``tabarena[data-foundry]``.
 """
 
@@ -21,6 +20,8 @@ def main() -> None:
     args = parser.parse_args()
 
     cluster = load_cluster_config(args.cluster_config)
+    if cluster.data_foundry_warehouse is None:
+        raise SystemExit("Set `data_foundry_warehouse` in the cluster config.")
     cache_config = build_cache_config(cluster)
     if cache_config is not None:
         cache_config.apply()

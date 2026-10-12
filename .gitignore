@@ -16,6 +16,3 @@ dist/
 AutogluonModels/
 *.pkl
 examples/local_run/
-
-# Generated dataset card files (scripts/upload_datasets.py)
-data_release/

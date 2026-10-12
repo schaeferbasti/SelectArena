@@ -62,8 +62,7 @@ and the selection time.
 
 1. Describe your machine: `cp configs/cluster.example.yaml configs/cluster.yaml` and set the
    workspace, the Python of your environment, the cache directories, the Data Foundry warehouse
-   (or `null` to download the datasets from Hugging Face) and the SLURM partitions.
-   `configs/cluster.yaml` is git-ignored.
+   and the SLURM partitions. `configs/cluster.yaml` is git-ignored.
 2. Convert the dataset suite into TabArena tasks (once per cluster):
    `python scripts/prepare_datasets.py`
 3. Choose what to run in `configs/benchmark.yaml` (methods, budgets, time limits, models, splits).
@@ -82,28 +81,6 @@ python scripts/run_extra_benchmark.py collect   # stability_results.csv, validit
 
 Both config files can be passed explicitly with `--config` and `--cluster-config`; the cluster
 config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
-
-## Datasets
-
-The 71 datasets are Data Foundry curated containers hosted in the Hugging Face dataset repo
-[SelectArena/datasets](https://huggingface.co/datasets/SelectArena/datasets), laid out like the
-warehouse (`<dataset>/<uuid>/`), as TabArena does for BeyondArena. `selectarena.datasets.make_collection()`
-reads from there and downloads only the datasets a run needs; pass a local warehouse directory to
-use that instead.
-
-To publish or update the datasets from a local Data Foundry warehouse:
-
-```bash
-# Check that all 71 containers are there, print their licences, write data_release/ (README, LICENSE.md, ...)
-python scripts/upload_datasets.py --warehouse /path/to/data_foundry/local_data_warehouse
-
-hf auth login   # token with write access to the SelectArena organization
-python scripts/upload_datasets.py --warehouse /path/to/data_foundry/local_data_warehouse --upload
-```
-
-`--exclude excluded.txt` leaves out datasets whose licence does not allow redistribution (one name
-per line; they are listed in the dataset card instead) and `--private` creates the repo as private.
-The upload resumes where it stopped when rerun.
 
 ## Leaderboard
 
