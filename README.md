@@ -95,8 +95,13 @@ hf auth login                                   # token with write access to the
 python scripts/export_leaderboard.py --push     # builds leaderboard/data/ and uploads it to the Space
 ```
 
-Methods are ranked within each dataset split, downstream model configuration and budget; the
-metrics are explained in `selectarena/evaluation/leaderboard.py` and on the Space's About tab.
+The Space opens with the paper's main figure: the Elo rating of every method (Bradley-Terry fit on
+pairwise matches within each dataset, budget and downstream model, Random at 1000, 95%
+cluster-bootstrap intervals), with each method's bars shaded by stability and validity.
+`export_leaderboard.py` also writes it as `leaderboard/data/main_figure.pdf`. The Elo computation
+(`selectarena/evaluation/elo.py`) ports `performance/baseline/elo_v4.py` from the paper's plotting
+code; the other metrics are explained in `selectarena/evaluation/leaderboard.py` and on the Space's
+About tab.
 To change the app itself, upload the whole folder:
 `hf upload SelectArena/Leaderboard leaderboard . --repo-type=space`.
 
@@ -107,18 +112,18 @@ To change the app itself, upload the whole folder:
 | `RandomFeatureSelector` | Random | |
 | `FTestFeatureSelector` | F-Test | |
 | `MIFeatureSelector` | MI | |
-| `GainRatioFeatureSelector` | Gain Ratio | |
+| `GainRatioFeatureSelector` | GainRatio | |
 | `mRMRFeatureSelector` | mRMR | |
 | `ReliefFFeatureSelector` | (R)ReliefF | |
-| `LaplacianScoreFeatureSelector` | Laplacian Score | |
-| `MarkovBlanketFeatureSelector` | Markov Blanket | |
+| `LaplacianScoreFeatureSelector` | LaplacianScore | |
+| `MarkovBlanketFeatureSelector` | MarkovBlanket | |
 | `LassoFeatureSelector` | Lasso | |
-| `ElasticNetFeatureSelector` | Elastic Net | |
+| `ElasticNetFeatureSelector` | ElasticNet | |
 | `CARTFeatureSelector` | CART | |
-| `RFImportanceFeatureSelector` | RF Importance | |
+| `RFImportanceFeatureSelector` | RFImportance | |
 | `LOCOFeatureSelector` | LOCO | yes |
 | `SequentialForwardSelectionFeatureSelector` | SFS | yes |
-| `SequentialBackwardEliminationFeatureSelector` | RFE | yes |
+| `SequentialBackwardEliminationFeatureSelector` | SBE | yes |
 
 Methods with a proxy model fit a LightGBM model (configurable through `ProxyModelConfig`) inside
 the selection.

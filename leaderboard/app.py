@@ -22,6 +22,8 @@ VIEWS = {
 }
 COLUMN_NAMES = {
     "method": "Method",
+    "elo": "Elo ↑",
+    "elo_ci": "Elo 95% CI",
     "avg_rank": "Avg. rank ↓",
     "win_rate": "Win rate ↑",
     "improvability": "Improvability ↓",
@@ -44,6 +46,11 @@ Each feature selection method keeps a budgeted number of features of a dataset; 
 model is then trained on the selected features only. Methods are compared within a *comparison
 group*: one dataset split, one downstream model configuration and one budget.
 
+- **Elo**: Bradley-Terry rating fit on all pairwise matches. Within each dataset, every
+  combination of budget and downstream model (errors averaged over seeds) is a setting in which
+  every pair of methods plays a match won by the lower error. Random is anchored at 1000; a gap of
+  150 points means about 70% win probability. The interval comes from 1000 cluster-bootstrap
+  resamples of the datasets.
 - **Avg. rank**: mean rank of the method's downstream error within the groups (1 is best).
 - **Win rate**: share of pairwise comparisons won against the other methods (ties count half).
 - **Improvability**: mean relative gap `(error - best error) / error` to the best method of the
@@ -55,7 +62,8 @@ group*: one dataset split, one downstream model configuration and one budget.
 - **Stability**: agreement of the selected features across bootstrap resamples
   (Nogueira, Sechidis & Brown, JMLR 2018; 1 means identical selections).
 - **Validity**: share of selected features that are original features when synthetic noise
-  features are added to the data.
+  features are added to the data. The main figure uses 100% added noise (as many noise as
+  original features); the Stability & validity tab shows every noise level.
 
 The budget index `i` of a total budget `b` keeps `ceil(d * (i+1)/(b+1))` of the `d` features when
 `d <= 100`, and `ceil(d ** ((i+1)/(b+1)))` otherwise.
@@ -81,6 +89,10 @@ def _meta() -> dict:
 
 
 def _display(df: pd.DataFrame) -> pd.DataFrame:
+    if {"elo_ci_low", "elo_ci_high"} <= set(df.columns):
+        ci = "[" + df["elo_ci_low"].map("{:.0f}".format) + ", " + df["elo_ci_high"].map("{:.0f}".format) + "]"
+        df = df.drop(columns=["elo_ci_low", "elo_ci_high"])
+        df.insert(df.columns.get_loc("elo") + 1, "elo_ci", ci.where(df["elo"].notna(), ""))
     return df.rename(columns={c: COLUMN_NAMES.get(c, c) for c in df.columns})
 
 
@@ -120,27 +132,33 @@ def update_filter(view: str):
     return gr.update(choices=choices, value="All", visible=VIEWS[view][1] is not None)
 
 
-def rank_plot_data() -> pd.DataFrame:
-    df = _read("overall")
-    return df[["method", "avg_rank"]] if not df.empty else pd.DataFrame({"method": [], "avg_rank": []})
+MAIN_FIGURE = DATA_DIR / "main_figure.png"
+MAIN_FIGURE_CAPTION = (
+    "**Elo rating of each feature selection method, from worst to best.** Elo summarizes how often a "
+    "method beats another on the same dataset, budget and downstream model, with Random anchored at "
+    "1000. Error bars are 95% intervals from 1000 cluster-bootstrap resamples of the datasets. The left "
+    "bar of each pair is shaded by *stability* (how much the selected subset changes across resamples), "
+    "the right bar by *validity* (how well injected noise features are rejected); darker is better for both."
+)
 
 
 with gr.Blocks(title="SelectArena Leaderboard", theme=gr.themes.Soft()) as demo:
     gr.Markdown(_header())
     with gr.Tabs():
         with gr.Tab("Leaderboard"):
+            if MAIN_FIGURE.exists():
+                gr.Image(
+                    value=str(MAIN_FIGURE),
+                    show_label=False,
+                    show_download_button=True,
+                    container=False,
+                    interactive=False,
+                )
+                gr.Markdown(MAIN_FIGURE_CAPTION)
             with gr.Row():
                 view = gr.Dropdown(list(VIEWS), value="Overall", label="View")
                 value = gr.Dropdown(["All"], value="All", label="Filter", visible=False)
             table = gr.Dataframe(value=leaderboard("Overall", "All"), interactive=False, wrap=True)
-            gr.BarPlot(
-                value=rank_plot_data(),
-                x="method",
-                y="avg_rank",
-                title="Average rank (lower is better)",
-                sort="y",
-                height=360,
-            )
             view.change(update_filter, inputs=view, outputs=value).then(
                 leaderboard, inputs=[view, value], outputs=table
             )

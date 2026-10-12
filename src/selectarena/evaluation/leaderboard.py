@@ -4,6 +4,8 @@ Feature selection methods compete within a *comparison group*: one dataset split
 model configuration and one budget. Within each group every method is ranked by the downstream
 ``metric_error``; the leaderboard aggregates over groups:
 
+* ``elo``: Bradley-Terry Elo with Random at 1000 and a 95% cluster-bootstrap interval
+  (:mod:`selectarena.evaluation.elo`, the paper's main metric);
 * ``avg_rank``: mean rank in the groups (1 is best, ties share the mean rank);
 * ``win_rate``: share of pairwise comparisons won against the other methods (ties count half);
 * ``improvability``: mean of ``(error - best error) / error``, how far a method is from the best
@@ -29,10 +31,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from selectarena.evaluation.elo import compute_elo
 from selectarena.methods.registry import PAPER_NAMES
 
 _CONFIG_NAME = re.compile(r"^(?P<model>.+?)_(?P<config>[cr]\d+)_(?P<pipeline>.+)_BAG_L1$")
 GROUP_COLUMNS = ["dataset", "split_idx", "model", "config", "budget_index"]
+#: Noise level whose validity shades the main figure (the paper's Figure 1 values match 100% noise).
+VALIDITY_NOISE_MAIN_FIGURE = 1.0
 
 
 def parse_method_name(name: str) -> dict:
@@ -219,18 +224,43 @@ def _summarize(df: pd.DataFrame, column: str, extra: list[str] | None = None) ->
     return out.round(4)
 
 
+def main_figure_table(
+    elo: pd.DataFrame,
+    stability: pd.DataFrame | None,
+    validity: pd.DataFrame | None,
+    *,
+    validity_noise: float | None = VALIDITY_NOISE_MAIN_FIGURE,
+) -> pd.DataFrame:
+    """Elo with its interval plus mean stability and validity per method (the main figure's data)."""
+    main = elo.copy()
+    if stability is not None and not stability.empty:
+        main = main.merge(stability[["method", "stability"]], on="method", how="left")
+    if validity is not None and not validity.empty:
+        v = validity if validity_noise is None else validity[validity["noise"] == validity_noise]
+        main = main.merge(v.groupby("method", as_index=False)["validity"].mean(), on="method", how="left")
+    return main
+
+
 def build_leaderboard(
     results: pd.DataFrame,
     *,
     stability: pd.DataFrame | None = None,
     validity: pd.DataFrame | None = None,
     benchmark_name: str = "SelectArena",
+    n_bootstrap: int = 1000,
+    validity_noise: float | None = VALIDITY_NOISE_MAIN_FIGURE,
 ) -> dict[str, pd.DataFrame | dict]:
-    """All tables the leaderboard Space shows, keyed by file stem (plus ``meta``)."""
+    """All tables the leaderboard Space shows, keyed by file stem (plus ``meta``).
+
+    ``main_figure`` holds the Elo ratings with stability and validity (validity at
+    ``validity_noise``, or averaged over noise levels when ``None``).
+    """
     df = prepare_results(results)
     scores = per_group_scores(df)
+    elo = compute_elo(scores, n_bootstrap=n_bootstrap)
+    overall = elo.merge(aggregate(scores), on="method", how="outer").sort_values("elo", ascending=False)
     tables: dict[str, pd.DataFrame | dict] = {
-        "overall": aggregate(scores),
+        "overall": overall,
         "by_budget": aggregate(scores, ["budget_index"]),
         "by_model": aggregate(scores, ["model"]),
         "by_problem_type": aggregate(scores, ["problem_type"]),
@@ -242,6 +272,9 @@ def build_leaderboard(
         tables["stability"] = stability_table(stability)
     if validity is not None and not validity.empty:
         tables["validity"] = validity_table(validity)
+    tables["main_figure"] = main_figure_table(
+        elo, tables.get("stability"), tables.get("validity"), validity_noise=validity_noise
+    )
     tables["meta"] = {
         "benchmark_name": benchmark_name,
         "updated": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
@@ -249,6 +282,8 @@ def build_leaderboard(
         "n_datasets": int(df["dataset"].nunique()),
         "n_methods": int(scores["method"].nunique()),
         "models": sorted(df["model"].dropna().unique().tolist()),
+        "elo_bootstrap_samples": n_bootstrap,
+        "validity_noise_main_figure": validity_noise,
     }
     return tables
 
