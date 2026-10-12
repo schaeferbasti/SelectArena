@@ -1,0 +1,40 @@
+# Machine-specific settings. Copy to configs/cluster.yaml (git-ignored) and edit, or point
+# $SELECTARENA_CLUSTER_CONFIG / --cluster-config at your copy.
+# The values below are the Freiburg (dlclarge) setup the paper's runs used.
+
+# Persistent directory reachable from every node. Results land in <workspace>/output/<benchmark_name>/.
+workspace: /work/dlclarge1/purucker-fs_benchmark/selectarena_workspace
+# Python of the environment SelectArena is installed in, as seen from the compute nodes.
+python_path: /work/dlclarge1/purucker-fs_benchmark/venvs/selectarena/bin/python
+
+# tabarena.caching.CacheConfig fields. null keeps the library default.
+caches:
+  openml: /work/dlclarge1/purucker-fs_benchmark/.openml-cache
+  data_foundry: /work/dlclarge1/purucker-fs_benchmark/.data_foundry_cache
+  huggingface: null
+  tabarena: null
+
+# Directory holding the suite's Data Foundry containers as <dataset>/<container uuid>.
+data_foundry_warehouse: /work/dlclarge1/purucker-fs_benchmark/.data_foundry_cache
+
+# tabflow_slurm.SlurmSetup fields.
+slurm:
+  gpu_partition: alldlc2_gpu-l40s
+  cpu_partition: alldlc2_cpu-epyc9655
+  extra_gres: localtmp:100
+  exclusive_node: false
+  time_limit_overhead: 1
+  array_job_limit: 100
+
+# tabflow_slurm.ResourcesSetup fields (defaults: 8 CPUs, 32 GB, no GPU).
+resources:
+  num_cpus: 8
+  memory_limit: 32
+
+# SLURM settings for the stability/validity array jobs.
+extra_benchmark_slurm:
+  partition: mlhiwidlc_gpu-rtx2080
+  cpus_per_task: 8
+  mem: 32G
+  time: "10:00:00"
+  parallel: 100

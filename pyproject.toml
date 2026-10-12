@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "selectarena"
+version = "0.1.0"
+description = "SelectArena: a benchmark for feature selection on tabular data, built on TabArena"
+readme = "README.md"
+license = "Apache-2.0"
+authors = [{ name = "Bastian Schäfer" }]
+requires-python = ">=3.11,<3.14"
+keywords = ["feature-selection", "tabular", "benchmark", "automl", "autogluon", "tabarena"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+  # TabArena is pinned to one upstream commit so every benchmark run is traceable to it. The
+  # commit is newer than the 0.1.0 PyPI release. Bump the SHA deliberately (both lines, and the
+  # `models` extra below) and rerun the tests. A direct URL dependency cannot be published to
+  # PyPI; see README "Installation" before releasing.
+  "tabarena[data-foundry] @ git+https://github.com/autogluon/tabarena.git@57d47e71cf256920a844f965f13c9ebeb121acdc#subdirectory=packages/tabarena",
+  "tabflow_slurm @ git+https://github.com/autogluon/tabarena.git@57d47e71cf256920a844f965f13c9ebeb121acdc#subdirectory=packages/tabflow_slurm",
+  # Same range as TabArena's own pin (pre-release builds carry the API TabArena needs);
+  # LightGBM is the default proxy model of the wrapper methods.
+  "autogluon.tabular[lightgbm]>=1.6.3b20260917,!=1.6.3,<1.7",
+  "numpy",
+  "pandas",
+  "scikit-learn",
+  "scipy",
+  "pyyaml",
+]
+
+[project.optional-dependencies]
+# Downstream models used in the benchmark config beyond AutoGluon's defaults.
+models = [
+  "tabarena[tabicl,realmlp] @ git+https://github.com/autogluon/tabarena.git@57d47e71cf256920a844f965f13c9ebeb121acdc#subdirectory=packages/tabarena",
+]
+dev = ["pytest", "ruff"]
+
+[project.urls]
+Repository = "https://github.com/schaeferbasti/SelectArena"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: end-to-end runs through TabArena's experiment runner"]
