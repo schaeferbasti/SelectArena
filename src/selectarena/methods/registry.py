@@ -34,22 +34,22 @@ FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL: list[str] = [
     "SequentialForwardSelectionFeatureSelector",
 ]
 
-#: Names used in the paper for methods whose class name differs.
+#: Method names as used in the paper (Table 2, Figure 1).
 PAPER_NAMES: dict[str, str] = {
     "LOCOFeatureSelector": "LOCO",
     "RandomFeatureSelector": "Random",
     "FTestFeatureSelector": "F-Test",
     "CARTFeatureSelector": "CART",
-    "ElasticNetFeatureSelector": "Elastic Net",
-    "GainRatioFeatureSelector": "Gain Ratio",
-    "LaplacianScoreFeatureSelector": "Laplacian Score",
+    "ElasticNetFeatureSelector": "ElasticNet",
+    "GainRatioFeatureSelector": "GainRatio",
+    "LaplacianScoreFeatureSelector": "LaplacianScore",
     "LassoFeatureSelector": "Lasso",
-    "MarkovBlanketFeatureSelector": "Markov Blanket",
+    "MarkovBlanketFeatureSelector": "MarkovBlanket",
     "MIFeatureSelector": "MI",
     "mRMRFeatureSelector": "mRMR",
     "ReliefFFeatureSelector": "(R)ReliefF",
-    "RFImportanceFeatureSelector": "RF Importance",
-    "SequentialBackwardEliminationFeatureSelector": "RFE",
+    "RFImportanceFeatureSelector": "RFImportance",
+    "SequentialBackwardEliminationFeatureSelector": "SBE",
     "SequentialForwardSelectionFeatureSelector": "SFS",
 }
 
