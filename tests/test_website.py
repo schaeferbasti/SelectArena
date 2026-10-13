@@ -191,3 +191,33 @@ def test_ablations_are_left_out_by_default(tmp_path):
         both, out_dir=tmp_path / "b", n_bootstrap=2, paper_figures=False, include_ablations=True, log=lambda _: None
     )
     assert "MI [nofallback]" in json.loads((kept.website_data / "meta.json").read_text())["methods"]
+
+
+def test_fork_era_results(tmp_path):
+    """Results written by tabarena_fork_fs: old class names, a retired method, duplicated extra rows."""
+    df = results()
+    df["experiment_method_name_string"] = df["experiment_method_name_string"].str.replace(
+        "LassoFeatureSelector", "AccuracyFeatureSelector"
+    )
+    retired = df[df["experiment_method_name_string"].str.contains("CARTFeatureSelector")].copy()
+    retired["experiment_method_name_string"] = retired["experiment_method_name_string"].str.replace(
+        "CARTFeatureSelector", "AccuracyLinearFeatureSelector"
+    )
+    stability = extra_results("stability")
+    artifacts = generate_website_artifacts(
+        pd.concat([df, retired]),
+        out_dir=tmp_path,
+        stability=pd.concat([stability, stability]),
+        n_bootstrap=2,
+        paper_figures=False,
+        log=lambda _: None,
+    )
+    meta = json.loads((artifacts.website_data / "meta.json").read_text())
+    assert meta["methods"] == ["CART", "LOCO", "MI", "Random"]
+    single = generate_website_artifacts(
+        df, out_dir=tmp_path / "single", stability=stability, n_bootstrap=2, paper_figures=False, log=lambda _: None
+    )
+    path = "subsets/tasks_all/models_all/budgets_all/website_leaderboard.csv"
+    doubled = pd.read_csv(artifacts.website_data / path).set_index("Method")["Stability"]
+    once = pd.read_csv(single.website_data / path).set_index("Method")["Stability"]
+    pd.testing.assert_series_equal(doubled.sort_index(), once.sort_index())

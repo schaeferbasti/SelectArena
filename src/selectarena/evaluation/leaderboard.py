@@ -30,7 +30,7 @@ import numpy as np
 import pandas as pd
 
 from selectarena.evaluation.elo import compute_elo
-from selectarena.methods.registry import PAPER_NAMES
+from selectarena.methods.registry import LEGACY_NAMES, PAPER_NAMES
 
 _CONFIG_NAME = re.compile(r"^(?P<model>.+?)_(?P<config>[cr]\d+)_(?P<pipeline>.+)_BAG_L1$")
 GROUP_COLUMNS = ["dataset", "split_idx", "model", "config", "budget_index"]
@@ -46,12 +46,21 @@ def parse_method_name(name: str) -> dict:
     return match.groupdict()
 
 
+def method_class(pipeline: str | None) -> str | None:
+    """Current class name of an FSBench pipeline's method (fork-era names are translated)."""
+    if not isinstance(pipeline, str) or not pipeline.startswith("FSBench__"):
+        return None
+    name = pipeline.split("__")[1]
+    return LEGACY_NAMES.get(name, name)
+
+
 def method_label(pipeline: str) -> str | None:
     """Display name of an FSBench pipeline's method plus any ablation tokens, ``None`` for ``default``."""
-    if pipeline is None or not pipeline.startswith("FSBench__"):
+    cls = method_class(pipeline)
+    if cls is None:
         return None
     parts = pipeline.split("__")
-    label = PAPER_NAMES.get(parts[1], parts[1])
+    label = PAPER_NAMES.get(cls, cls)
     ablations = [p for p in parts[6:] if p]
     return f"{label} [{', '.join(ablations)}]" if ablations else label
 
@@ -62,6 +71,7 @@ def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
     parsed = pd.DataFrame([parse_method_name(n) for n in df["experiment_method_name_string"]], index=df.index)
     df = df.join(parsed)
     df["method"] = df["pipeline"].map(method_label)
+    df["method_class"] = df["pipeline"].map(method_class)
     df["dataset"] = df["name"] if "name" in df.columns else df["dataset"]
     df["budget_index"] = df["feature_selection_budget_index"].astype("Int64")
     df["used_fallback"] = df.get("random_feature_names", pd.Series(index=df.index, dtype=object)).map(
@@ -178,9 +188,18 @@ def task_dataset(task_id: str) -> str:
     return (parts[2] if len(parts) > 2 else parts[0]).split("/")[0]
 
 
+#: One extra-benchmark run: older runners wrote every row twice, so rows are deduplicated on these.
+_EXTRA_RUN_KEYS = ["method", "data_foundry_task_id", "mode", "mode_kwargs", "repeat"]
+
+
+def _drop_duplicate_runs(df: pd.DataFrame) -> pd.DataFrame:
+    return df.drop_duplicates(subset=[c for c in _EXTRA_RUN_KEYS if c in df.columns], keep="last")
+
+
 def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
     """Nogueira stability of each (method, task) over its bootstrap repeats."""
     rows = []
+    stability = _drop_duplicate_runs(stability)
     for (method_name, task), group in stability.groupby(["method", "data_foundry_task_id"]):
         selections = [_as_list(s) for s in group["selected_features"]]
         features = _as_list(group["original_features"].iloc[0])
@@ -198,7 +217,7 @@ def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
 
 def validity_per_run(validity: pd.DataFrame) -> pd.DataFrame:
     """Validity (share of the budget filled with original features) of each validity run."""
-    df = validity.copy()
+    df = _drop_duplicate_runs(validity).copy()
     df["noise"] = df["mode_kwargs"].map(lambda v: ast.literal_eval(v).get("noise") if isinstance(v, str) else None)
     df["budget_index"] = df["method"].map(_budget_index)
     df["dataset"] = df["data_foundry_task_id"].map(task_dataset)
