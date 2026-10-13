@@ -85,8 +85,9 @@ config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
 ## Leaderboard
 
 The public leaderboard is the Hugging Face Space
-[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). As for TabArena,
-the Space repo holds the Gradio app and this repo generates the data it serves:
+[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard), a **static** Space
+(HTML + JavaScript, no compute, free; Gradio and Docker Spaces need a paid Hugging Face plan). As for
+TabArena, the Space repo holds the site and this repo generates the data it serves:
 
 ```bash
 python scripts/run_benchmark.py eval                # results.csv
@@ -119,7 +120,8 @@ paper's plotting code.
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
 (`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
 has a family, regenerates the artifacts, swaps them into the Space's `data/`, adds a version history
-entry, runs the Space's smoke test and leaves the commit and `git push` (which deploys) to you. The
+entry, runs the Space's smoke test and a local preview, and leaves the commit and `git push`
+(which deploys) to you. The
 manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`.
 
 ## Feature selection methods

@@ -24,9 +24,9 @@ Publishing procedure (or run the ``update-leaderboard`` skill):
    (log in once with ``hf auth login --add-to-git-credential``).
 3. Replace its ``data/``: delete the old ``data/`` content, then copy in the content of
    ``generated_website_artifacts/clean_website_artifacts/website_data/``.
-4. Add a version history entry in the Space's ``website_texts.py`` and bump ``version`` in its
-   ``pyproject.toml``.
-5. Preview with ``python main.py`` in the Space checkout, then commit and ``git push``.
+4. In the Space's ``index.html``, bump ``selectarena-version`` and add a version history entry.
+5. In the Space checkout: ``python smoke_test.py``, preview with ``python -m http.server 8000``
+   (http://localhost:8000), then commit and ``git push``.
 """
 
 from __future__ import annotations

@@ -11,7 +11,8 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``subsets/tasks_<t>/models_<m>/budgets_<b>/``: per subset ``website_leaderboard.csv``,
     ``leaderboard_table.html`` and ``elo_explorer.html`` (see :mod:`selectarena.website.subsets`);
   - ``per_dataset.csv`` and ``per_dataset_table.html``: mean rank per dataset and method;
-  - ``stability.csv`` and ``validity.csv``: the full stability / validity tables, if available.
+  - ``stability.csv`` / ``validity.csv`` and ``stability_table.html`` / ``validity_table.html``:
+    the full stability / validity tables, if available.
 
 * ``clean_website_artifacts.zip``: the same folder zipped.
 
@@ -44,7 +45,7 @@ from selectarena.evaluation.leaderboard import (
     validity_table,
 )
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
-from selectarena.website.html import elo_explorer_html, leaderboard_table_html, per_dataset_table_html
+from selectarena.website.html import elo_explorer_html, extra_table_html, leaderboard_table_html, per_dataset_table_html
 from selectarena.website.subsets import ALL, Subset, enumerate_subsets, model_key
 from selectarena.website.website_format import format_leaderboard, unclassified_methods
 
@@ -220,10 +221,13 @@ def generate_website_artifacts(
     val_table = validity_table(validity) if validity is not None and not validity.empty else None
     stab_table = stab_table[stab_table["method"].isin(ranked)] if stab_table is not None else None
     val_table = val_table[val_table["method"].isin(ranked)] if val_table is not None else None
-    if stab_table is not None:
-        stab_table.to_csv(website_data / "stability.csv", index=False)
-    if val_table is not None:
-        val_table.to_csv(website_data / "validity.csv", index=False)
+    total_budget = _total_budget(df)
+    for name, table in (("stability", stab_table), ("validity", val_table)):
+        if table is not None:
+            table.to_csv(website_data / f"{name}.csv", index=False)
+            (website_data / f"{name}_table.html").write_text(
+                extra_table_html(table, name, title=f"SelectArena: {name}", total_budget=total_budget)
+            )
 
     meta = {
         "benchmark_name": benchmark_name,
@@ -235,7 +239,7 @@ def generate_website_artifacts(
         "methods": sorted(scores["method"].dropna().unique().tolist()),
         "models": model_names,
         "budgets": sorted(int(b) for b in scores["budget_index"].dropna().unique()),
-        "total_budget": _total_budget(df),
+        "total_budget": total_budget,
         "task_types": sorted({s["tasks"] for s in published}),
         "elo_bootstrap_rounds": n_bootstrap,
         "validity_noise": validity_noise,

@@ -12,8 +12,8 @@ the Space repo needs no Git LFS:
 
 Every page posts ``{saFrameHeight: <px>}`` to its parent window so the Space can size the iframe.
 
-The generated JavaScript avoids ``${`` and ``{{`` because Gradio's ``gr.HTML`` treats its template
-as a JS template string.
+The generated JavaScript avoids ``${`` and ``{{`` so the pages can also be embedded through
+template engines (e.g. Gradio's ``gr.HTML``) that treat them as placeholders.
 """
 
 from __future__ import annotations
@@ -285,6 +285,36 @@ def per_dataset_table_html(per_dataset: pd.DataFrame, *, title: str) -> str:
         csv_name="selectarena_per_dataset_ranks.csv",
         hint="Mean rank of each method per dataset (lower is better). Click a column to sort.",
     )
+
+
+def _budget_label(index: int, total_budget: int | None) -> str:
+    label = f"Budget {index + 1}"
+    if total_budget and index == 0:
+        return f"{label} (smallest)"
+    if total_budget and index == total_budget - 1:
+        return f"{label} (largest)"
+    return label
+
+
+def extra_table_html(table: pd.DataFrame, metric: str, *, title: str, total_budget: int | None = None) -> str:
+    """``stability_table.html`` / ``validity_table.html``: the mean ``metric`` per method, overall
+    and per budget (and per noise level for validity)."""
+    budget_columns = sorted(
+        (c for c in table.columns if c.startswith(f"{metric}_budget_")), key=lambda c: int(c.rsplit("_", 1)[1])
+    )
+    columns = []
+    if "noise" in table:
+        columns.append(
+            {"key": "noise", "label": "Noise level", "digits": 1, "help": "Noise features per original feature."}
+        )
+    columns += [
+        {"key": "method", "label": "Method", "cls": "method"},
+        {"key": metric, "label": f"{metric.capitalize()} ↑", "digits": 3, "help": "Mean over datasets and budgets."},
+    ]
+    columns += [
+        {"key": c, "label": _budget_label(int(c.rsplit("_", 1)[1]), total_budget), "digits": 3} for c in budget_columns
+    ]
+    return table_html(table, columns, title=title, csv_name=f"selectarena_{metric}.csv")
 
 
 # --------------------------------------------------------------------------------------------------

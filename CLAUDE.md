@@ -18,9 +18,10 @@ overview.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`).
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`).
   The Space's app lives in its own repo (`huggingface.co/spaces/SelectArena/Leaderboard`), as for
-  TabArena; the folder names in `website/subsets.py` and the columns in `website/website_format.py`
-  are the contract with its `data_loading.py`. To publish results, use the `update-leaderboard`
-  skill (`.claude/skills/update-leaderboard/`).
+  TabArena. It is a static site (keep it static: Gradio Spaces need a paid plan); the folder names
+  in `website/subsets.py` and the columns in `website/website_format.py` are the contract with its
+  `assets/app.js`. To publish results, use the `update-leaderboard` skill
+  (`.claude/skills/update-leaderboard/`).
 
 ## Adding a feature selection method
 

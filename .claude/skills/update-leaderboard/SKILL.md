@@ -1,6 +1,6 @@
 ---
 name: update-leaderboard
-description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a family (not "❓ Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the Space repo (delete-then-copy), bumps the version history in its `website_texts.py`, runs its smoke test and optional preview, and hands the commit + push (which deploys) back to the maintainer.
+description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a family (not "❓ Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the (static) Space repo (delete-then-copy), bumps the version and history in its `index.html`, runs its smoke test and a local preview, and hands the commit + push (which deploys) back to the maintainer.
 argument-hint: <space-checkout-dir> [<results.csv>] [<extra-results-dir>]
 user-invocable: true
 ---
@@ -9,8 +9,9 @@ user-invocable: true
 
 The leaderboard works like TabArena's: this repo turns `results.csv` (and the stability / validity
 results) into **website artifacts** (CSV + self-contained HTML), and the **Space repo**
-(`huggingface.co/spaces/SelectArena/Leaderboard`, a separate git repo with the Gradio app) serves
-them from its `data/` folder. Pushing the Space repo deploys it.
+(`huggingface.co/spaces/<org>/Leaderboard`, a separate git repo) serves them from its `data/`
+folder. The Space is a **static** site (`sdk: static`: `index.html` + `assets/app.js`), which is free;
+Gradio and Docker Spaces need a paid plan. Pushing the Space repo deploys it.
 
 The authoritative manual procedure is the docstring of `scripts/run_generate_website_artifacts.py`;
 the Space side is described in the Space repo's `AGENTS.md`. This skill runs that procedure and
@@ -25,11 +26,11 @@ Parse `$ARGUMENTS`. Ask only for what is missing or ambiguous.
 
 | Input | Default | Notes |
 |---|---|---|
-| `space_dir` | none, **required** | A clone of the Space repo (has `main.py`, `data/`, `website_texts.py`). If the maintainer has none, offer `git clone https://huggingface.co/spaces/SelectArena/Leaderboard <dir>` (needs `hf auth login --add-to-git-credential` once). |
+| `space_dir` | none, **required** | A clone of the Space repo (has `index.html`, `assets/`, `data/`, `smoke_test.py`). If the maintainer has none, offer `git clone https://huggingface.co/spaces/<org>/<space> <dir>` (needs `hf auth login --add-to-git-credential` once). |
 | `results` | `<output_dir>/<benchmark_name>/results.csv` | From `configs/benchmark.yaml` + the cluster config (`configs/cluster.yaml` or `$SELECTARENA_CLUSTER_CONFIG`). Pass `--results` when the CSV is elsewhere (e.g. copied from the cluster). |
 | `extra_dir` | `<run dir>/<extra_benchmark.results_subdir>` | Folder with `stability_results.csv` / `validity_results.csv`. Optional: without them the Stability / Validity columns are empty and the figure's bars are hatched. |
 | what changed | infer | New method(s), a rerun, more datasets? Needed for the version-history entry (Step 4). Infer from `git log`, the results, or the diff of `meta.json` (Step 3); ask if unclear. |
-| Python envs | current env | Generation needs SelectArena installed (`pip install -e .` in this repo). The preview needs the Space's requirements (`pip install -r <space_dir>/requirements.txt`, ideally in `<space_dir>/.venv`). |
+| Python env | current env | Generation needs SelectArena installed (`pip install --pre -e .` in this repo). The Space needs nothing: its smoke test uses the standard library. |
 
 Run every command from the SelectArena repo root unless noted.
 
@@ -107,7 +108,7 @@ DST=<space_dir>/data
 
 # 1. Only generated files may live in data/ (so the delete is safe). Expect no output:
 find "$DST" -mindepth 1 -maxdepth 1 ! -name subsets ! -name meta.json ! -name 'per_dataset*' \
-     ! -name stability.csv ! -name validity.csv ! -name .gitkeep
+     ! -name 'stability*' ! -name 'validity*' ! -name .gitkeep
 
 # 2. What changes for the version-history entry (before the swap):
 diff <(python -c "import json;m=json.load(open('$DST/meta.json'));print({k:m[k] for k in ['n_datasets','n_methods','methods','models']})" 2>/dev/null) \
@@ -127,37 +128,36 @@ Added or deleted files under `subsets/` mean a subset appeared or disappeared (a
 model, budget or task type, or one with fewer than two methods). That is fine when the run changed
 accordingly; mention it in the report.
 
-## Step 4: Bump the version history (Claude does now)
+## Step 4: Bump the version (Claude does now)
 
-In the Space repo, read then edit `website_texts.py` and `pyproject.toml`:
+In the Space repo, read then edit `index.html`:
 
-1. Bump `CURRENT_VERSION` and `version` in `pyproject.toml` to the same number: the **patch**
-   component for a data refresh (`0.1.0` → `0.1.1`), the **minor** one for app changes or a new
-   benchmark release.
-2. Add a dated entry at the **top** of the list in `VERSION_HISTORY_TEXT` (newest first, date
-   `YYYY/MM/DD`, today), matching the existing format and describing what changed, e.g.:
+1. Bump `<meta name="selectarena-version" content="X.Y.Z">`: the **patch** component for a data
+   refresh (`0.1.0` → `0.1.1`), the **minor** one for site changes or a new benchmark release.
+2. Add an entry at the **top** of `<ul id="version-history">` (newest first, today's date) with
+   the same version, matching the existing format and describing what changed, e.g.:
 
-```
-* 2026/11/02-v0.1.1:
-    * Add new method: Boruta
-    * Results for 71 datasets and 3 downstream models (LightGBM, RealMLP, TabICLv2)
+```html
+<li><strong>2026/11/02 · v0.1.1</strong>: Add new method: Boruta. Results for 71 datasets and
+  3 downstream models (LightGBM, RealMLP, TabICLv2).</li>
 ```
 
-The `**Current Version: SelectArena-v...**` line renders from `CURRENT_VERSION`; do not edit it by hand.
+The footer's "current version" renders from the meta tag; `smoke_test.py` fails if the meta tag
+and the newest entry differ.
 
 ## Step 5: Smoke test and preview
 
-With the Space's environment, from `<space_dir>`:
+From `<space_dir>` (no extra packages needed):
 
 ```bash
-python smoke_test.py          # renders every subset, calls every API endpoint; must end with "0 errors"
-nohup python main.py > <scratch>/lb_serve.log 2>&1 &
-curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:7860/
+python smoke_test.py                     # must end with "0 errors"
+nohup python -m http.server 8000 > <scratch>/lb_serve.log 2>&1 &
+curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/data/meta.json   # 200
 ```
 
-Gradio buffers its stdout, so confirm the server by the port, not the log. Ask the maintainer to
-open http://127.0.0.1:7860 (forward port 7860 on a remote machine) and look at the four tabs and a
-few selections. Stop the server afterwards.
+Ask the maintainer to open http://localhost:8000 and look at the four tabs, a few selections and
+dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
+files). Stop the server afterwards.
 
 ## Step 6: Hand off (the maintainer commits and pushes)
 
@@ -165,16 +165,17 @@ By default the maintainer pushes, because pushing deploys the Space. Push yourse
 and when `git push` is authenticated (`hf auth login --add-to-git-credential`). From `<space_dir>`:
 
 ```bash
-git add -A data website_texts.py pyproject.toml
+git add -A data index.html
 git commit -m "Update leaderboard data (vX.Y.Z)"
 git push
 ```
 
-`git add -A data` matters: a refresh modifies, adds and deletes files under `data/`.
+`git add -A data` matters: a refresh modifies, adds and deletes files under `data/`. The site is
+live a few seconds after the push (static Spaces have no build or start-up).
 
 Caveats to mention:
-- The Space only starts if the SelectArena organization has a free CPU Basic slot; a "CPU Basic quota
-  limit" message on the Space means another Space of the organization must be paused first.
+- Keep the Space static. A "CPU Basic quota limit" message means someone switched it to Gradio or
+  Docker, which need a paid plan (PRO for users, Team/Enterprise for organizations).
 - `data/` is text only (no Git LFS), so the Space's storage limit is not a concern.
 
 ## Step 7: Report
