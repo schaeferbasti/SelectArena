@@ -32,18 +32,24 @@ import pandas as pd
 from selectarena.evaluation.elo import compute_elo
 from selectarena.methods.registry import LEGACY_NAMES, PAPER_NAMES
 
-_CONFIG_NAME = re.compile(r"^(?P<model>.+?)_(?P<config>[cr]\d+)_(?P<pipeline>.+)_BAG_L1$")
+_CONFIG_NAME = re.compile(r"^(?P<model>.+?)_(?P<config>[cr]\d+)(?:_(?P<pipeline>.+))?_BAG_L1$")
 GROUP_COLUMNS = ["dataset", "split_idx", "model", "config", "budget_index"]
 #: Noise level whose validity shades the main figure (the paper's Figure 1 values match 100% noise).
 VALIDITY_NOISE_MAIN_FIGURE = 1.0
 
 
 def parse_method_name(name: str) -> dict:
-    """Split a result's method name, e.g. ``LightGBM_c1_FSBench__MIFeatureSelector__5__0__lgbm__3600_BAG_L1``."""
+    """Split a result's method name, e.g. ``LightGBM_c1_FSBench__MIFeatureSelector__5__0__lgbm__3600_BAG_L1``.
+
+    A name without a pipeline (``LightGBM_c1_BAG_L1``, how the fork named runs on all features) is
+    the ``default`` pipeline.
+    """
     match = _CONFIG_NAME.match(name)
     if match is None:
         return {"model": name, "config": None, "pipeline": None}
-    return match.groupdict()
+    parsed = match.groupdict()
+    parsed["pipeline"] = parsed["pipeline"] or "default"
+    return parsed
 
 
 def method_class(pipeline: str | None) -> str | None:
@@ -69,9 +75,17 @@ def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
     """Add ``model``, ``config``, ``pipeline``, ``method``, ``budget_index`` and ``dataset`` columns."""
     df = results.copy()
     parsed = pd.DataFrame([parse_method_name(n) for n in df["experiment_method_name_string"]], index=df.index)
-    df = df.join(parsed)
+    df = df.drop(columns=[c for c in parsed.columns if c in df.columns]).join(parsed)
     df["method"] = df["pipeline"].map(method_label)
     df["method_class"] = df["pipeline"].map(method_class)
+    if "feature_selection_method" in df.columns:
+        # Results whose name carries no FSBench pipeline: take the method from the result itself.
+        recorded = df["feature_selection_method"].map(
+            lambda v: LEGACY_NAMES.get(v, v) if isinstance(v, str) and v else None
+        )
+        missing = df["method"].isna() & recorded.notna()
+        df.loc[missing, "method_class"] = recorded[missing]
+        df.loc[missing, "method"] = recorded[missing].map(lambda c: PAPER_NAMES.get(c, c))
     df["dataset"] = df["name"] if "name" in df.columns else df["dataset"]
     df["budget_index"] = df["feature_selection_budget_index"].astype("Int64")
     df["used_fallback"] = df.get("random_feature_names", pd.Series(index=df.index, dtype=object)).map(
@@ -80,15 +94,29 @@ def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+#: ``np.float64(0.5)``-style reprs (numpy >= 2) and ``nan`` / ``inf``, which ``ast.literal_eval`` rejects.
+_NUMPY_SCALAR = re.compile(r"np\.\w+\(([^()]*)\)")
+_NON_LITERAL = re.compile(r"\b(?:nan|inf)\b")
+
+
 def _as_list(value) -> list:
+    """A list stored in a CSV cell (its Python repr), ``[]`` if it is missing or unreadable."""
     if isinstance(value, list):
         return value
     if isinstance(value, str) and value.startswith("["):
-        try:
-            return list(ast.literal_eval(value))
-        except (ValueError, SyntaxError):
-            return []
+        cleaned = _NON_LITERAL.sub("None", _NUMPY_SCALAR.sub(r"\1", value))
+        for text in (value, cleaned):
+            try:
+                return list(ast.literal_eval(text))
+            except (ValueError, SyntaxError):
+                continue
     return []
+
+
+def feature_names(value) -> list:
+    """Selected features as names. Current runs store names; runs of the fork before commit
+    ``0dcac02a`` stored the selector's ``{"feature": name, "value": score}`` entries."""
+    return [item.get("feature") if isinstance(item, dict) else item for item in _as_list(value)]
 
 
 def _pairwise_wins(group: pd.DataFrame) -> pd.Series:
@@ -201,8 +229,9 @@ def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
     rows = []
     stability = _drop_duplicate_runs(stability)
     for (method_name, task), group in stability.groupby(["method", "data_foundry_task_id"]):
-        selections = [_as_list(s) for s in group["selected_features"]]
-        features = _as_list(group["original_features"].iloc[0])
+        # A missing selection is a failed run, not an empty selection.
+        selections = [feature_names(s) for s in group["selected_features"].dropna()]
+        features = feature_names(group["original_features"].iloc[0])
         rows.append(
             {
                 "method": method_label(method_name),
@@ -223,8 +252,10 @@ def validity_per_run(validity: pd.DataFrame) -> pd.DataFrame:
     df["dataset"] = df["data_foundry_task_id"].map(task_dataset)
 
     def _validity(row) -> float:
-        selected = _as_list(row["selected_features"])
-        original = set(_as_list(row["original_features"]))
+        if not isinstance(row["selected_features"], (str, list)):
+            return np.nan  # failed run
+        selected = feature_names(row["selected_features"])
+        original = set(feature_names(row["original_features"]))
         return len([f for f in selected if f in original]) / row["max_features"] if row["max_features"] else np.nan
 
     df["validity"] = df.apply(_validity, axis=1)
