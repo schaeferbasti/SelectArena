@@ -30,6 +30,8 @@ dependencies = [
   # Same range as TabArena's own pin (pre-release builds carry the API TabArena needs);
   # LightGBM is the default proxy model of the wrapper methods.
   "autogluon.tabular[lightgbm]>=1.6.3b20260917,!=1.6.3,<1.7",
+  # The paper version of the main figure (scripts/run_generate_website_artifacts.py).
+  "matplotlib",
   "numpy",
   "pandas",
   "scikit-learn",

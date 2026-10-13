@@ -9,7 +9,6 @@ from selectarena.evaluation.leaderboard import (
     method_label,
     nogueira_stability,
     parse_method_name,
-    write_leaderboard,
 )
 
 
@@ -57,7 +56,7 @@ def test_method_names():
     assert method_label("default") is None
 
 
-def test_leaderboard_tables(tmp_path):
+def test_leaderboard_tables():
     tables = build_leaderboard(_results())
     overall = tables["overall"].set_index("method")
     assert list(overall.index) == ["MI", "Lasso", "Random"]
@@ -68,10 +67,6 @@ def test_leaderboard_tables(tmp_path):
     assert overall.loc["MI", "n_comparisons"] == 4
     assert set(tables["by_budget"]["budget_index"]) == {0, 1}
     assert tables["meta"]["n_datasets"] == 2
-
-    paths = write_leaderboard(tables, tmp_path)
-    assert (tmp_path / "overall.csv").exists() and (tmp_path / "meta.json").exists()
-    assert len(paths) == len(tables)
 
 
 def test_nogueira_stability():

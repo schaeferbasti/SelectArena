@@ -53,6 +53,28 @@ PAPER_NAMES: dict[str, str] = {
     "SequentialForwardSelectionFeatureSelector": "SFS",
 }
 
+#: Method family shown in the leaderboard's Type column: ``filter`` (scores features from the data
+#: alone), ``wrapper`` (searches subsets by refitting a proxy model), ``embedded`` (reads the
+#: selection off a fitted model) or ``baseline``. Every registered method needs an entry, or the
+#: leaderboard shows it as "Other".
+METHOD_FAMILIES: dict[str, str] = {
+    "LOCOFeatureSelector": "wrapper",
+    "RandomFeatureSelector": "baseline",
+    "FTestFeatureSelector": "filter",
+    "CARTFeatureSelector": "embedded",
+    "ElasticNetFeatureSelector": "embedded",
+    "GainRatioFeatureSelector": "filter",
+    "LaplacianScoreFeatureSelector": "filter",
+    "LassoFeatureSelector": "embedded",
+    "MarkovBlanketFeatureSelector": "filter",
+    "MIFeatureSelector": "filter",
+    "mRMRFeatureSelector": "filter",
+    "ReliefFFeatureSelector": "filter",
+    "RFImportanceFeatureSelector": "embedded",
+    "SequentialBackwardEliminationFeatureSelector": "wrapper",
+    "SequentialForwardSelectionFeatureSelector": "wrapper",
+}
+
 
 def get_feature_selector_from_name(*, name: str) -> type[AbstractFeatureSelector]:
     """Return the feature selector class registered under ``name``.
