@@ -3,7 +3,7 @@
 Every subset is a folder ``tasks_<t>/models_<m>/budgets_<b>/`` of the website artifacts, the same
 idea as TabArena's ``splits_*/tasks_*/datasets_*`` folders. The Space reads the folder of the
 selection the viewer makes, so the folder names are the contract between the generator here and
-the Space's ``data_loading.Subset``: change them in both places.
+the Space's ``assets/app.js`` (``subsetDir``): change them in both places.
 """
 
 from __future__ import annotations

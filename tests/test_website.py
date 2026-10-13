@@ -123,7 +123,14 @@ def test_layout(artifacts):
     for subset in meta["subsets"]:
         for name in SUBSET_FILES:
             assert (data / subset["path"] / name).is_file()
-    for name in ["per_dataset.csv", "per_dataset_table.html", "stability.csv", "validity.csv"]:
+    for name in [
+        "per_dataset.csv",
+        "per_dataset_table.html",
+        "stability.csv",
+        "validity.csv",
+        "stability_table.html",
+        "validity_table.html",
+    ]:
         assert (data / name).is_file()
     assert not list(data.rglob("*.png"))
     assert (artifacts.raw_dir / "main_figure.pdf").is_file()
