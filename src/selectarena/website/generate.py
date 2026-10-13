@@ -43,6 +43,7 @@ from selectarena.evaluation.leaderboard import (
     validity_per_run,
     validity_table,
 )
+from selectarena.methods.registry import NAME_TO_MODULE_MAP
 from selectarena.website.html import elo_explorer_html, leaderboard_table_html, per_dataset_table_html
 from selectarena.website.subsets import ALL, Subset, enumerate_subsets, model_key
 from selectarena.website.website_format import format_leaderboard, unclassified_methods
@@ -100,6 +101,7 @@ def generate_website_artifacts(
     paper_figures: bool = True,
     zip_clean: bool = True,
     include_ablations: bool = False,
+    include_unregistered: bool = False,
     log: Callable[[str], None] = print,
 ) -> WebsiteArtifacts:
     """Write the raw and clean website artifacts for ``results`` (a run's ``results.csv``).
@@ -110,6 +112,8 @@ def generate_website_artifacts(
         validity_noise: noise level whose validity the leaderboard shows (``None``: mean over levels).
         include_ablations: keep ablation runs (``MI [nofallback]``, ``MI [permenc1]``) as methods of
             their own; by default only the main runs are ranked.
+        include_unregistered: keep methods that are not in the registry (e.g. retired fork-era
+            methods such as ``AccuracyLinearFeatureSelector``); by default they are left out.
     """
     out_dir = Path(out_dir)
     raw_dir, clean_dir = out_dir / RAW_DIR, out_dir / CLEAN_DIR
@@ -123,6 +127,14 @@ def generate_website_artifacts(
     website_data.mkdir(parents=True)
 
     df = prepare_results(results)
+    if not include_unregistered:
+        unregistered = df["method_class"].notna() & ~df["method_class"].isin(NAME_TO_MODULE_MAP)
+        if unregistered.any():
+            log(
+                f"Leaving out {int(unregistered.sum())} results of methods not in the registry "
+                f"({sorted(df.loc[unregistered, 'method_class'].unique())})."
+            )
+            df = df[~unregistered]
     if not include_ablations:
         ablations = df["method"].fillna("").str.contains(" [", regex=False)
         if ablations.any():
@@ -142,6 +154,9 @@ def generate_website_artifacts(
     val_rows = validity_per_run(validity) if validity is not None and not validity.empty else None
     if val_rows is not None and validity_noise is not None:
         val_rows = val_rows[val_rows["noise"] == validity_noise]
+    ranked = set(scores["method"].dropna())
+    stab_rows = stab_rows[stab_rows["method"].isin(ranked)].copy() if stab_rows is not None else None
+    val_rows = val_rows[val_rows["method"].isin(ranked)].copy() if val_rows is not None else None
     for rows in (stab_rows, val_rows):
         if rows is not None:
             rows["dataset"] = rows["dataset"].map(_dataset_key)
@@ -203,6 +218,8 @@ def generate_website_artifacts(
 
     stab_table = stability_table(stability) if stab_rows is not None else None
     val_table = validity_table(validity) if validity is not None and not validity.empty else None
+    stab_table = stab_table[stab_table["method"].isin(ranked)] if stab_table is not None else None
+    val_table = val_table[val_table["method"].isin(ranked)] if val_table is not None else None
     if stab_table is not None:
         stab_table.to_csv(website_data / "stability.csv", index=False)
     if val_table is not None:

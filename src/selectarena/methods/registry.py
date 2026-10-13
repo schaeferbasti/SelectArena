@@ -53,6 +53,13 @@ PAPER_NAMES: dict[str, str] = {
     "SequentialForwardSelectionFeatureSelector": "SFS",
 }
 
+#: Class names in results written by tabarena_fork_fs before the methods were renamed, mapped to
+#: their current class. Reading old results through these keeps one name per method.
+LEGACY_NAMES: dict[str, str] = {
+    "AccuracyFeatureSelector": "LOCOFeatureSelector",
+    "ANOVAFeatureSelector": "FTestFeatureSelector",
+}
+
 #: Method family shown in the leaderboard's Type column: ``filter`` (scores features from the data
 #: alone), ``wrapper`` (searches subsets by refitting a proxy model), ``embedded`` (reads the
 #: selection off a fitted model) or ``baseline``. Every registered method needs an entry, or the

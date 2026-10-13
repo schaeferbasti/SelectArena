@@ -53,6 +53,9 @@ PY
 
 - **Unclassified method**: add it to `METHOD_FAMILIES` (`filter`, `wrapper`, `embedded` or `baseline`;
   confirm the family with the maintainer if unsure) and to `PAPER_NAMES`, then `pytest tests/test_website.py`.
+- **Methods not in the registry** (e.g. the retired `AccuracyLinearFeatureSelector` in fork-era
+  results) are left out by default and listed in the log; `--include-unregistered` keeps them.
+  Fork-era names `AccuracyFeatureSelector` / `ANOVAFeatureSelector` are read as LOCO / F-Test.
 - **Labels with brackets** (`MI [nofallback]`, `MI [permenc1]`) are ablation runs. They are left out
   by default; pass `--include-ablations` only if the maintainer wants them ranked.
 - **Sanity**: the dataset count should match the suite (71) unless the run is partial, and every

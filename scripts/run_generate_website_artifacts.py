@@ -68,6 +68,11 @@ def main() -> None:
     parser.add_argument(
         "--include-ablations", action="store_true", help="Rank ablation runs (e.g. 'MI [nofallback]') as methods."
     )
+    parser.add_argument(
+        "--include-unregistered",
+        action="store_true",
+        help="Rank methods that are not in the registry (e.g. retired fork-era methods); left out by default.",
+    )
     args = parser.parse_args()
 
     benchmark = load_benchmark_config(args.config)
@@ -99,6 +104,7 @@ def main() -> None:
         paper_figures=not args.no_paper_figures,
         zip_clean=not args.no_zip,
         include_ablations=args.include_ablations,
+        include_unregistered=args.include_unregistered,
     )
     print(f"\n{len(artifacts.subsets)} subsets written to {artifacts.website_data}")
     if artifacts.zip_path:

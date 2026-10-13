@@ -94,6 +94,19 @@ python scripts/run_extra_benchmark.py collect       # optional: stability / vali
 python scripts/run_generate_website_artifacts.py    # generated_website_artifacts/
 ```
 
+With result files copied off the cluster, put them in `results/` (git-ignored) and pass them
+explicitly; no cluster config is needed then:
+
+```bash
+python scripts/run_generate_website_artifacts.py \
+    --results results/performance_results.csv --extra-dir results   # stability_results.csv, validity_results.csv
+```
+
+Results written by `tabarena_fork_fs` work too: the old class names (`AccuracyFeatureSelector`,
+`ANOVAFeatureSelector`) are mapped to LOCO and F-Test, methods that are no longer in the registry
+(e.g. `AccuracyLinearFeatureSelector`) are left out, and duplicated stability/validity rows are
+counted once.
+
 `generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
 folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
 sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figure as an interactive
