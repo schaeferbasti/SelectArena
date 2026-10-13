@@ -22,11 +22,9 @@ resamples) and ``validity`` (share of selected features that are original, not i
 from __future__ import annotations
 
 import ast
-import json
 import re
 from datetime import UTC, datetime
 from itertools import combinations
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -174,10 +172,14 @@ def _budget_index(method_name: str) -> int | None:
     return int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else None
 
 
-def stability_table(stability: pd.DataFrame) -> pd.DataFrame:
-    """Mean stability per method (and budget) from the stability benchmark's results."""
-    if stability.empty:
-        return pd.DataFrame()
+def task_dataset(task_id: str) -> str:
+    """Dataset name of a TabArena ``task_id_str`` (``UserTask|<id>|<dataset>/<uuid>[|...]``)."""
+    parts = str(task_id).split("|")
+    return (parts[2] if len(parts) > 2 else parts[0]).split("/")[0]
+
+
+def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
+    """Nogueira stability of each (method, task) over its bootstrap repeats."""
     rows = []
     for (method_name, task), group in stability.groupby(["method", "data_foundry_task_id"]):
         selections = [_as_list(s) for s in group["selected_features"]]
@@ -187,20 +189,19 @@ def stability_table(stability: pd.DataFrame) -> pd.DataFrame:
                 "method": method_label(method_name),
                 "budget_index": _budget_index(method_name),
                 "task": task,
+                "dataset": task_dataset(task),
                 "stability": nogueira_stability(selections, features),
             }
         )
-    per_task = pd.DataFrame(rows)
-    return _summarize(per_task, "stability")
+    return pd.DataFrame(rows, columns=["method", "budget_index", "task", "dataset", "stability"])
 
 
-def validity_table(validity: pd.DataFrame) -> pd.DataFrame:
-    """Mean validity (share of selected features that are original) per method, budget and noise level."""
-    if validity.empty:
-        return pd.DataFrame()
+def validity_per_run(validity: pd.DataFrame) -> pd.DataFrame:
+    """Validity (share of the budget filled with original features) of each validity run."""
     df = validity.copy()
     df["noise"] = df["mode_kwargs"].map(lambda v: ast.literal_eval(v).get("noise") if isinstance(v, str) else None)
     df["budget_index"] = df["method"].map(_budget_index)
+    df["dataset"] = df["data_foundry_task_id"].map(task_dataset)
 
     def _validity(row) -> float:
         selected = _as_list(row["selected_features"])
@@ -209,7 +210,21 @@ def validity_table(validity: pd.DataFrame) -> pd.DataFrame:
 
     df["validity"] = df.apply(_validity, axis=1)
     df["method"] = df["method"].map(method_label)
-    return _summarize(df, "validity", extra=["noise"])
+    return df[["method", "budget_index", "noise", "dataset", "validity"]]
+
+
+def stability_table(stability: pd.DataFrame) -> pd.DataFrame:
+    """Mean stability per method (and budget) from the stability benchmark's results."""
+    if stability.empty:
+        return pd.DataFrame()
+    return _summarize(stability_per_task(stability), "stability")
+
+
+def validity_table(validity: pd.DataFrame) -> pd.DataFrame:
+    """Mean validity (share of selected features that are original) per method, budget and noise level."""
+    if validity.empty:
+        return pd.DataFrame()
+    return _summarize(validity_per_run(validity), "validity", extra=["noise"])
 
 
 def _summarize(df: pd.DataFrame, column: str, extra: list[str] | None = None) -> pd.DataFrame:
@@ -286,19 +301,3 @@ def build_leaderboard(
         "validity_noise_main_figure": validity_noise,
     }
     return tables
-
-
-def write_leaderboard(tables: dict[str, pd.DataFrame | dict], out_dir: str | Path) -> list[Path]:
-    """Write the tables as ``<out_dir>/<name>.csv`` and ``meta.json``."""
-    out_dir = Path(out_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
-    paths = []
-    for name, table in tables.items():
-        if isinstance(table, dict):
-            path = out_dir / f"{name}.json"
-            path.write_text(json.dumps(table, indent=2))
-        else:
-            path = out_dir / f"{name}.csv"
-            table.to_csv(path, index=False)
-        paths.append(path)
-    return paths

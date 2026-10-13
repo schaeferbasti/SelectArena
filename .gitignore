@@ -16,3 +16,6 @@ dist/
 AutogluonModels/
 *.pkl
 examples/local_run/
+
+# Website artifacts (scripts/run_generate_website_artifacts.py)
+generated_website_artifacts/

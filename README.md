@@ -85,25 +85,29 @@ config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
 ## Leaderboard
 
 The public leaderboard is the Hugging Face Space
-[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard); its code is in
-`leaderboard/`. After a run:
+[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). As for TabArena,
+the Space repo holds the Gradio app and this repo generates the data it serves:
 
 ```bash
-python scripts/run_benchmark.py eval            # results.csv
-python scripts/run_extra_benchmark.py collect   # optional: stability / validity
-hf auth login                                   # token with write access to the SelectArena organization
-python scripts/export_leaderboard.py --push     # builds leaderboard/data/ and uploads it to the Space
+python scripts/run_benchmark.py eval                # results.csv
+python scripts/run_extra_benchmark.py collect       # optional: stability / validity
+python scripts/run_generate_website_artifacts.py    # generated_website_artifacts/
 ```
 
-The Space opens with the paper's main figure: the Elo rating of every method (Bradley-Terry fit on
-pairwise matches within each dataset, budget and downstream model, Random at 1000, 95%
-cluster-bootstrap intervals), with each method's bars shaded by stability and validity.
-`export_leaderboard.py` also writes it as `leaderboard/data/main_figure.pdf`. The Elo computation
-(`selectarena/evaluation/elo.py`) ports `performance/baseline/elo_v4.py` from the paper's plotting
-code; the other metrics are explained in `selectarena/evaluation/leaderboard.py` and on the Space's
-About tab.
-To change the app itself, upload the whole folder:
-`hf upload SelectArena/Leaderboard leaderboard . --repo-type=space`.
+`generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
+folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
+sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figure as an interactive
+SVG), the per-dataset ranks and the stability / validity tables, all as text. `raw_website_artifacts/`
+keeps the main figure as PNG/PDF for the paper. The generator lives in `selectarena/website/`; the
+Elo computation (`selectarena/evaluation/elo.py`) ports `performance/baseline/elo_v4.py` from the
+paper's plotting code.
+
+**Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
+ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
+(`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
+has a family, regenerates the artifacts, swaps them into the Space's `data/`, adds a version history
+entry, runs the Space's smoke test and leaves the commit and `git push` (which deploys) to you. The
+manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`.
 
 ## Feature selection methods
 
@@ -138,12 +142,14 @@ src/selectarena/
   methods/          feature selectors, their base class and the registry
   benchmark/        FSBench pipelines and the TabArena subclasses
   extra_benchmark/  stability / validity benchmark (selection only)
-  evaluation/       reading results.pkl files into a table, leaderboard tables
+  evaluation/       reading results.pkl files into a table, leaderboard tables, Elo
+  website/          the leaderboard Space's data (subsets, tables, interactive figure)
   datasets.py       the dataset suite (Data Foundry containers)
   config.py         YAML configs and the tabflow_slurm plan built from them
 configs/            benchmark.yaml, cluster.example.yaml
-scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py, export_leaderboard.py
-leaderboard/        the Hugging Face Space (Gradio app, data/ filled by export_leaderboard.py)
+scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
+                    run_generate_website_artifacts.py
+.claude/skills/     update-leaderboard: regenerate and publish the leaderboard
 examples/           quickstart.py, run_local.py
 tests/
 ```
