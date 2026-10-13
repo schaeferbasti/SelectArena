@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import zipfile
 
@@ -228,3 +229,39 @@ def test_fork_era_results(tmp_path):
     doubled = pd.read_csv(artifacts.website_data / path).set_index("Method")["Stability"]
     once = pd.read_csv(single.website_data / path).set_index("Method")["Stability"]
     pd.testing.assert_series_equal(doubled.sort_index(), once.sort_index())
+
+
+def test_fork_era_selected_feature_entries(tmp_path):
+    """Before fork commit 0dcac02a, selected features were stored as {"feature", "value"} dicts."""
+    stability = extra_results("stability")
+    as_entries = stability.copy()
+    as_entries["selected_features"] = [
+        str([{"feature": f, "value": f"np.float64({0.5 + i})"} for i, f in enumerate(ast.literal_eval(v))])
+        .replace("'np.float64", "np.float64")
+        .replace(")'", ")")
+        for v in stability["selected_features"]
+    ]
+    assert "np.float64(0.5)" in as_entries["selected_features"].iloc[0]
+    validity = extra_results("validity")
+    validity_entries = validity.copy()
+    validity_entries["selected_features"] = [
+        str([{"feature": f, "value": None} for f in ast.literal_eval(v)]) for v in validity["selected_features"]
+    ]
+
+    def leaderboard(stab, val, out):
+        artifacts = generate_website_artifacts(
+            results(),
+            out_dir=tmp_path / out,
+            stability=stab,
+            validity=val,
+            n_bootstrap=2,
+            paper_figures=False,
+            log=lambda _: None,
+        )
+        path = artifacts.website_data / "subsets/tasks_all/models_all/budgets_all/website_leaderboard.csv"
+        return pd.read_csv(path).set_index("Method")[["Stability", "Validity"]].sort_index()
+
+    names = leaderboard(stability, validity, "names")
+    entries = leaderboard(as_entries, validity_entries, "entries")
+    assert names.notna().all().all()
+    pd.testing.assert_frame_equal(names, entries)

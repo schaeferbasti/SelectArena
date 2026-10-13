@@ -73,3 +73,9 @@ def test_nogueira_stability():
     features = ["a", "b", "c", "d"]
     assert nogueira_stability([["a", "b"]] * 3, features) == pytest.approx(1.0)
     assert nogueira_stability([["a", "b"], ["c", "d"]], features) < 0
+
+
+def test_fork_era_names():
+    assert parse_method_name("LightGBM_c1_BAG_L1") == {"model": "LightGBM", "config": "c1", "pipeline": "default"}
+    assert method_label("FSBench__AccuracyFeatureSelector__5__0__lgbm__3600") == "LOCO"
+    assert method_label("FSBench__ANOVAFeatureSelector__5__0__lgbm__3600") == "F-Test"
