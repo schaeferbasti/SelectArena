@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import ast
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from itertools import combinations
 
@@ -72,8 +73,12 @@ def method_label(pipeline: str) -> str | None:
     return f"{label} [{', '.join(ablations)}]" if ablations else label
 
 
-def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
-    """Add ``model``, ``config``, ``pipeline``, ``method``, ``budget_index`` and ``dataset`` columns."""
+def prepare_results(results: pd.DataFrame, *, task_names: Mapping[int, str] | None = None) -> pd.DataFrame:
+    """Add ``model``, ``config``, ``pipeline``, ``method``, ``budget_index`` and ``dataset`` columns.
+
+    ``task_names`` maps task ids to dataset names beyond the containers listed in
+    :mod:`selectarena.datasets` (see :func:`~selectarena.datasets.task_names_from_ids`).
+    """
     df = results.copy()
     parsed = pd.DataFrame([parse_method_name(n) for n in df["experiment_method_name_string"]], index=df.index)
     df = df.drop(columns=[c for c in parsed.columns if c in df.columns]).join(parsed)
@@ -88,7 +93,9 @@ def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
         df.loc[missing, "method_class"] = recorded[missing]
         df.loc[missing, "method"] = recorded[missing].map(lambda c: PAPER_NAMES.get(c, c))
     # Results identify the task by name, container path or TabArena task id; use the dataset name.
-    df["dataset"] = (df["name"] if "name" in df.columns else df["dataset"]).map(dataset_name)
+    df["dataset"] = (df["name"] if "name" in df.columns else df["dataset"]).map(
+        lambda task: dataset_name(task, task_names)
+    )
     df["budget_index"] = df["feature_selection_budget_index"].astype("Int64")
     df["used_fallback"] = df.get("random_feature_names", pd.Series(index=df.index, dtype=object)).map(
         lambda v: bool(_as_list(v))

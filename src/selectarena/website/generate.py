@@ -23,6 +23,7 @@ survive as a leftover.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -32,7 +33,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from selectarena.datasets import dataset_name
+from selectarena.datasets import dataset_name, task_names_from_ids
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
     VALIDITY_NOISE_MAIN_FIGURE,
@@ -128,7 +129,13 @@ def generate_website_artifacts(
     raw_dir.mkdir(parents=True)
     website_data.mkdir(parents=True)
 
-    df = prepare_results(results)
+    # The extra results name every task (UserTask|<id>|<dataset>/<uuid>): use them to name task ids
+    # whose containers are not listed in selectarena.datasets.
+    task_names = {}
+    for extra in (stability, validity):
+        if extra is not None and "data_foundry_task_id" in extra:
+            task_names.update(task_names_from_ids(extra["data_foundry_task_id"].dropna().unique()))
+    df = prepare_results(results, task_names=task_names)
     if not include_unregistered:
         unregistered = df["method_class"].notna() & ~df["method_class"].isin(NAME_TO_MODULE_MAP)
         if unregistered.any():
@@ -146,7 +153,7 @@ def generate_website_artifacts(
             df = df[~ablations]
     scores = per_group_scores(df)
     scores["dataset_key"] = scores["dataset"].map(_dataset_key)
-    unnamed = sorted({d for d in scores["dataset_key"] if str(d).isdigit()})
+    unnamed = sorted({d for d in scores["dataset_key"] if re.fullmatch(r"(?:Task-)?\d+", str(d))})
     if unnamed:
         log(
             f"WARNING: {len(unnamed)} task ids could not be mapped to dataset names (e.g. {unnamed[:3]}); "
