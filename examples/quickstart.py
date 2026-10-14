@@ -3,11 +3,13 @@
 Each selector is an AutoGluon feature generator, so it plugs into ``TabularPredictor.fit`` as a
 post generator. Downloads OpenML dataset 55 (hepatitis) on first run.
 
-    python examples/quickstart.py
+    python examples/quickstart.py                          # every registered method
+    python examples/quickstart.py MIFeatureSelector        # only the named methods
 """
 
 from __future__ import annotations
 
+import sys
 import tempfile
 
 import openml
@@ -24,7 +26,7 @@ from selectarena.methods import (
 )
 
 
-def run_example() -> None:
+def run_example(method_names: list[str] | None = None) -> None:
     dataset_id = 55
     problem_type = "binary"
     eval_metric = "roc_auc"
@@ -42,7 +44,7 @@ def run_example() -> None:
         model_hyperparameters={"num_boost_round": 5},
     )
 
-    for method_name in FEATURE_SELECTION_METHODS:
+    for method_name in method_names or FEATURE_SELECTION_METHODS:
         selector_cls = get_feature_selector_from_name(name=method_name)
         proxy = proxy_model_config if method_name in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL else None
         feature_selector = selector_cls(max_features=max_features, proxy_mode_config=proxy)
@@ -71,4 +73,4 @@ def run_example() -> None:
 
 
 if __name__ == "__main__":
-    run_example()
+    run_example(sys.argv[1:] or None)

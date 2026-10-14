@@ -144,6 +144,12 @@ manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`
 | `SequentialForwardSelectionFeatureSelector` | SFS | Forward search | yes |
 | `SequentialBackwardEliminationFeatureSelector` | SBE | Backward search | yes |
 
+To add a method, ask Claude Code to "add <method>" in this repo: the `add-method` skill
+(`.claude/skills/add-method/`) writes the `AbstractFeatureSelector` subclass from templates,
+registers it and verifies it. `python scripts/check_method.py <ClassName>` (or `--all`) checks any
+method against the benchmark's contract: registration, output format on binary / multiclass /
+regression data, determinism and the selection time limit.
+
 Search methods (forward, backward, leave-one-out) evaluate many feature subsets; non-search methods
 use a proxy instead (Appendix A of the paper). Methods with a proxy model fit a LightGBM model
 (configurable through `ProxyModelConfig`) inside the selection.
@@ -164,8 +170,9 @@ src/selectarena/
   config.py         YAML configs and the tabflow_slurm plan built from them
 configs/            benchmark.yaml, cluster.example.yaml
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
-                    run_generate_website_artifacts.py
-.claude/skills/     update-leaderboard: regenerate and publish the leaderboard
+                    run_generate_website_artifacts.py, check_method.py
+.claude/skills/     add-method: add a feature selection method;
+                    update-leaderboard: regenerate and publish the leaderboard
 examples/           quickstart.py, run_local.py
 tests/
 ```
