@@ -108,7 +108,9 @@ td.method { font-weight:600; }
 td .sub { color:var(--muted); font-size:12px; font-weight:400; margin-left:6px; }
 td.na { color:var(--muted); }
 .pill { display:inline-block; padding:0 8px; border:1px solid var(--line); border-radius:999px;
-  font-size:12px; color:var(--muted); }
+  font-size:12px; color:var(--fg); }
+.pill.cat-search { border-color:var(--accent); }
+.pill.cat-baseline { color:var(--muted); }
 """
 
 _TABLE_JS = """
@@ -196,13 +198,20 @@ LEADERBOARD_TABLE_COLUMNS = [
     {"key": "Rank", "label": "#", "digits": 0},
     {"key": "Method", "label": "Method", "cls": "method"},
     {
-        "key": "TypeName",
+        "key": "Subgroup",
         "label": "Type",
         "render": lambda r: (
-            f"<span class='pill'>{html.escape(str(r['Type']))} {html.escape(str(r['TypeName']))}</span>"
+            f"<span class='pill cat-{html.escape(str(r['Category']).lower(), quote=True)}'>"
+            f"{html.escape(str(r['Subgroup']))}</span>"
+            + (
+                ""
+                if r["Category"] in ("Baseline", "Other")
+                else f"<span class='sub'>{html.escape(str(r['Category']).lower())}</span>"
+            )
         ),
-        "help": "Filter: scores features from the data alone. Wrapper: searches feature subsets by refitting "
-        "a proxy model. Embedded: reads the selection off a fitted model.",
+        "help": "Taxonomy of the paper (Appendix A). Search methods evaluate many feature subsets with the model "
+        "(forward, backward, leave-one-out); non-search methods use a proxy instead (correlation, distance, "
+        "information theory, tree, regularization).",
     },
     {
         "key": "Elo",
@@ -458,7 +467,7 @@ def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
             f"transform='translate({cx + 4:.1f} {base + 14:.1f}) rotate(-35)'>{label}</text>"
         )
         tip = [
-            f"{row['Method']} ({row.get('TypeName', '')})",
+            f"{row['Method']} ({row.get('Subgroup', '')}, {str(row.get('Category', '')).lower()})",
             f"Elo {pt[i]:.0f}  [95% CI {lo[i]:.0f}–{hi[i]:.0f}]",
             "Stability " + ("n/a" if _is_missing(row.get("Stability")) else f"{row['Stability']:.3f}"),
             "Validity " + ("n/a" if _is_missing(row.get("Validity")) else f"{row['Validity']:.3f}"),
@@ -508,6 +517,6 @@ def elo_explorer_html(leaderboard: pd.DataFrame, *, title: str) -> str:
         "<button onclick='saSvg()'>SVG</button><button onclick='saPng()'>PNG</button>"
         "<button onclick=\"saCsv('selectarena_elo.csv')\">CSV</button></div>"
     )
-    columns = ["Method", "TypeName", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
+    columns = ["Method", "Category", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
     csv = leaderboard[[c for c in columns if c in leaderboard]]
     return _page(title, toolbar + elo_figure_svg(leaderboard) + _csv_block(csv), "", _FIGURE_JS)

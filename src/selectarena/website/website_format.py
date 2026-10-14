@@ -1,9 +1,10 @@
 """Turn leaderboard tables into the website's ``website_leaderboard.csv`` format.
 
 The equivalent of TabArena's ``tabarena.website.website_format``: it fixes the column names and
-order the Space shows, and adds the method family (``Type``/``TypeName``). A method whose family is
-not registered in :data:`selectarena.methods.registry.METHOD_FAMILIES` shows up as "Other"; the
-``update-leaderboard`` skill checks for that before generating.
+order the Space shows, and adds each method's place in the paper's taxonomy (``Category``: search,
+non-search or baseline; ``Subgroup``: e.g. tree, backward search). A method without an entry in
+:data:`selectarena.methods.registry.METHOD_SUBGROUPS` shows up as "Other"; the ``update-leaderboard``
+skill checks for that before generating.
 """
 
 from __future__ import annotations
@@ -11,24 +12,17 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from selectarena.methods.registry import METHOD_FAMILIES, PAPER_NAMES
+from selectarena.methods.registry import METHOD_SUBGROUPS, PAPER_NAMES, SUBGROUP_CATEGORIES
 
-FAMILY_EMOJI = {"baseline": "⚪", "filter": "🔍", "wrapper": "🔁", "embedded": "🌳", "other": "❓"}
-FAMILY_NAME = {
-    "baseline": "Baseline",
-    "filter": "Filter",
-    "wrapper": "Wrapper",
-    "embedded": "Embedded",
-    "other": "Other",
-}
+OTHER = "Other"
 _PAPER_NAME_TO_CLASS = {name: cls for cls, name in PAPER_NAMES.items()}
 
 #: Columns of ``website_leaderboard.csv``, in order. The Space formats them by these names.
 LEADERBOARD_COLUMNS = [
     "Rank",
-    "Type",
-    "TypeName",
     "Method",
+    "Category",
+    "Subgroup",
     "Elo",
     "Elo CI low",
     "Elo CI high",
@@ -45,15 +39,20 @@ LEADERBOARD_COLUMNS = [
 ]
 
 
-def method_family(method: str) -> str:
-    """Family key of a leaderboard method label (``MI`` or ``MI [nofallback]``), ``other`` if unknown."""
+def method_subgroup(method: str) -> str:
+    """Taxonomy subgroup of a leaderboard method label (``MI`` or ``MI [nofallback]``), ``Other`` if unknown."""
     base = method.split(" [")[0]
-    return METHOD_FAMILIES.get(_PAPER_NAME_TO_CLASS.get(base, base), "other")
+    return METHOD_SUBGROUPS.get(_PAPER_NAME_TO_CLASS.get(base, base), OTHER)
+
+
+def method_category(method: str) -> str:
+    """``Search``, ``Non-search`` or ``Baseline`` (``Other`` if unknown)."""
+    return SUBGROUP_CATEGORIES.get(method_subgroup(method), OTHER)
 
 
 def unclassified_methods(methods: list[str]) -> list[str]:
     """Methods that would show up as "Other" on the leaderboard."""
-    return sorted({m for m in methods if method_family(m) == "other"})
+    return sorted({m for m in methods if method_category(m) == OTHER})
 
 
 def format_leaderboard(
@@ -77,13 +76,12 @@ def format_leaderboard(
     df["validity"] = df["method"].map(validity if validity is not None else empty)
     df["n_datasets"] = df["method"].map(n_datasets if n_datasets is not None else empty)
     df = df.sort_values(["elo", "avg_rank"], ascending=[False, True], na_position="last").reset_index(drop=True)
-    family = df["method"].map(method_family)
     out = pd.DataFrame(
         {
             "Rank": np.arange(1, len(df) + 1),
-            "Type": family.map(FAMILY_EMOJI),
-            "TypeName": family.map(FAMILY_NAME),
             "Method": df["method"],
+            "Category": df["method"].map(method_category),
+            "Subgroup": df["method"].map(method_subgroup),
             "Elo": df["elo"].round(0),
             "Elo CI low": df["elo_ci_low"].round(0),
             "Elo CI high": df["elo_ci_high"].round(0),

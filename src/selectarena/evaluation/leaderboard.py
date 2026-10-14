@@ -29,6 +29,7 @@ from itertools import combinations
 import numpy as np
 import pandas as pd
 
+from selectarena.datasets import dataset_name
 from selectarena.evaluation.elo import compute_elo
 from selectarena.methods.registry import LEGACY_NAMES, PAPER_NAMES
 
@@ -86,7 +87,8 @@ def prepare_results(results: pd.DataFrame) -> pd.DataFrame:
         missing = df["method"].isna() & recorded.notna()
         df.loc[missing, "method_class"] = recorded[missing]
         df.loc[missing, "method"] = recorded[missing].map(lambda c: PAPER_NAMES.get(c, c))
-    df["dataset"] = df["name"] if "name" in df.columns else df["dataset"]
+    # Results identify the task by name, container path or TabArena task id; use the dataset name.
+    df["dataset"] = (df["name"] if "name" in df.columns else df["dataset"]).map(dataset_name)
     df["budget_index"] = df["feature_selection_budget_index"].astype("Int64")
     df["used_fallback"] = df.get("random_feature_names", pd.Series(index=df.index, dtype=object)).map(
         lambda v: bool(_as_list(v))
@@ -212,8 +214,7 @@ def _budget_index(method_name: str) -> int | None:
 
 def task_dataset(task_id: str) -> str:
     """Dataset name of a TabArena ``task_id_str`` (``UserTask|<id>|<dataset>/<uuid>[|...]``)."""
-    parts = str(task_id).split("|")
-    return (parts[2] if len(parts) > 2 else parts[0]).split("/")[0]
+    return dataset_name(task_id)
 
 
 #: One extra-benchmark run: older runners wrote every row twice, so rows are deduplicated on these.
