@@ -11,6 +11,8 @@ Requires ``tabarena[data-foundry]`` for the conversion step.
 from __future__ import annotations
 
 import hashlib
+import re
+from collections.abc import Mapping
 from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -187,12 +189,27 @@ TASK_ID_TO_DATASET: dict[int, str] = {
 }
 
 
-def dataset_name(task) -> str:
+_TASK_ID = re.compile(r"(?:Task-)?(\d+)(?:\.0)?")
+
+
+def task_names_from_ids(task_id_strs) -> dict[int, str]:
+    """Task id -> dataset name from TabArena ``task_id_str``s (``UserTask|<id>|<dataset>/<uuid>``),
+    e.g. the ``data_foundry_task_id`` column of the stability / validity results."""
+    names = {}
+    for value in task_id_strs:
+        parts = str(value).split("|")
+        if len(parts) > 2 and parts[0] == "UserTask" and parts[1].isdigit():
+            names[int(parts[1])] = parts[2].split("/")[0]
+    return names
+
+
+def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
     """Dataset name of whatever a result file uses to identify the task.
 
     Accepts a dataset name (``anneal``), a container path (``anneal/<uuid>``), a TabArena
-    ``task_id_str`` (``UserTask|<id>|anneal/<uuid>``) or a bare task id (``1386903908``). An unknown id
-    is returned unchanged, as a string.
+    ``task_id_str`` (``UserTask|<id>|anneal/<uuid>``), a task name as TabArena writes it into the
+    results (``Task-1386903908``) or a bare task id (``1386903908``). Ids are looked up in ``known``
+    and in :data:`TASK_ID_TO_DATASET`; an unknown id is returned unchanged, as a string.
     """
     text = str(task).strip()
     if text.startswith("UserTask|"):
@@ -200,9 +217,10 @@ def dataset_name(task) -> str:
         text = parts[2] if len(parts) > 2 else parts[1]
     if "/" in text:
         return text.split("/")[0]
-    number = text[:-2] if text.endswith(".0") else text
-    if number.isdigit():
-        return TASK_ID_TO_DATASET.get(int(number), number)
+    match = _TASK_ID.fullmatch(text)
+    if match:
+        task_id = int(match.group(1))
+        return (known or {}).get(task_id) or TASK_ID_TO_DATASET.get(task_id, text)
     return text
 
 

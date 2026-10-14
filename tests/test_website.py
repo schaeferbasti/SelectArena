@@ -293,6 +293,7 @@ def test_task_ids_are_named():
         assert dataset_name(float(user_task_id(path))) == name
         assert dataset_name(path) == name
         assert dataset_name(f"UserTask|{user_task_id(path)}|{path}") == name
+        assert dataset_name(f"Task-{user_task_id(path)}") == name  # TabArena's tabarena_task_name
     assert dataset_name("anneal") == "anneal"
     assert dataset_name("123") == "123"
 
@@ -308,3 +309,17 @@ def test_results_with_task_ids(tmp_path):
     artifacts = generate_website_artifacts(df, out_dir=tmp_path, n_bootstrap=2, paper_figures=False, log=lambda _: None)
     per_dataset = pd.read_csv(artifacts.website_data / "per_dataset.csv")
     assert sorted(per_dataset["dataset"]) == ["abalone", "anneal", "credit_approval", "diabetes"]
+
+
+def test_task_ids_named_from_extra_results(tmp_path):
+    """Task ids of containers not listed in selectarena.datasets are named from the extra results."""
+    df = results().replace({"name": {"anneal/0199-uuid": "Task-1234567890"}})
+    stability = extra_results("stability")
+    stability["data_foundry_task_id"] = stability["data_foundry_task_id"].str.replace(
+        "UserTask|123|anneal/0199-uuid", "UserTask|1234567890|anneal/0199-other-uuid", regex=False
+    )
+    artifacts = generate_website_artifacts(
+        df, out_dir=tmp_path, stability=stability, n_bootstrap=2, paper_figures=False, log=lambda _: None
+    )
+    per_dataset = pd.read_csv(artifacts.website_data / "per_dataset.csv")
+    assert "anneal" in set(per_dataset["dataset"]) and "Task-1234567890" not in set(per_dataset["dataset"])
