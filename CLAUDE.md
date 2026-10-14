@@ -25,6 +25,8 @@ overview.
 
 ## Adding a feature selection method
 
+Use the `add-method` skill (`.claude/skills/add-method/`); in short:
+
 1. Add `src/selectarena/methods/<name>.py` with a subclass of `AbstractFeatureSelector`
    (or `AbstractITFeatureSelector` for information-theoretic methods) and a `name` attribute.
 2. Register it in `methods/registry.py` (`NAME_TO_MODULE_MAP`, `PAPER_NAMES`, `METHOD_SUBGROUPS`
@@ -32,6 +34,8 @@ overview.
    fits a proxy model).
 3. `tests/test_selectors.py` picks it up automatically for binary, multiclass and regression;
    `tests/test_website.py` fails if it has no subgroup (it would show as "Other" on the leaderboard).
+4. `python scripts/check_method.py <ClassName>` checks registration, output format, determinism
+   and the time limit; it must pass before the method is benchmarked.
 
 ## Working style
 

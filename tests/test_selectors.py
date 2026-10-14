@@ -51,24 +51,25 @@ def test_feature_selector_dataset_combo(problem_type, evaluation_metric, method_
     missing_values_target = False
     only_positive_target = True
     if problem_type == "binary":
-        X, y = make_classification(n_samples=20, n_features=5, n_classes=2)
+        X, y = make_classification(n_samples=20, n_features=5, n_classes=2, random_state=0)
     elif problem_type == "multiclass":
         X, y = make_classification(
-            n_samples=20, n_features=5, n_classes=3, n_informative=4, n_redundant=1, n_repeated=0
+            n_samples=20, n_features=5, n_classes=3, n_informative=4, n_redundant=1, n_repeated=0, random_state=0
         )
     else:
-        X, y = make_regression(n_samples=20, n_features=5)
+        X, y = make_regression(n_samples=20, n_features=5, random_state=0)
         if only_positive_target:
             y = np.abs(y.astype(int))
     X = pd.DataFrame(X, columns=[f"feature_{i}" for i in range(X.shape[1])])
+    rng = np.random.default_rng(0)  # fixed data: a failure is the method's, not an unlucky draw
     for col in X.columns:
         if missing_values:
-            missing_mask = np.random.rand(len(X)) < 0.1
+            missing_mask = rng.random(len(X)) < 0.1
             X.loc[missing_mask, col] = np.nan
         if only_positive:
             X[col] = np.abs(X[col].astype(float))
     if missing_values_target:
-        y_mask = np.random.rand(len(y)) < 0.1
+        y_mask = rng.random(len(y)) < 0.1
         y[y_mask] = np.nan
     data = pd.concat([X, pd.Series(y, name="target")], axis=1)
     train_data, test_data = train_test_split(data, test_size=0.33, random_state=0)
