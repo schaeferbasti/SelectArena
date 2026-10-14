@@ -60,26 +60,39 @@ LEGACY_NAMES: dict[str, str] = {
     "ANOVAFeatureSelector": "FTestFeatureSelector",
 }
 
-#: Method family shown in the leaderboard's Type column: ``filter`` (scores features from the data
-#: alone), ``wrapper`` (searches subsets by refitting a proxy model), ``embedded`` (reads the
-#: selection off a fitted model) or ``baseline``. Every registered method needs an entry, or the
-#: leaderboard shows it as "Other".
-METHOD_FAMILIES: dict[str, str] = {
-    "LOCOFeatureSelector": "wrapper",
-    "RandomFeatureSelector": "baseline",
-    "FTestFeatureSelector": "filter",
-    "CARTFeatureSelector": "embedded",
-    "ElasticNetFeatureSelector": "embedded",
-    "GainRatioFeatureSelector": "filter",
-    "LaplacianScoreFeatureSelector": "filter",
-    "LassoFeatureSelector": "embedded",
-    "MarkovBlanketFeatureSelector": "filter",
-    "MIFeatureSelector": "filter",
-    "mRMRFeatureSelector": "filter",
-    "ReliefFFeatureSelector": "filter",
-    "RFImportanceFeatureSelector": "embedded",
-    "SequentialBackwardEliminationFeatureSelector": "wrapper",
-    "SequentialForwardSelectionFeatureSelector": "wrapper",
+#: Subgroup of each method in the paper's functional taxonomy (Table 2 and Appendix A): search
+#: methods evaluate many feature subsets with a model-dependent utility, non-search methods rely on a
+#: proxy (univariate relevance, distances, information theory, trees, regularization). Shown in the
+#: leaderboard's Type column; every registered method needs an entry, or it shows as "Other".
+METHOD_SUBGROUPS: dict[str, str] = {
+    "CARTFeatureSelector": "Tree",
+    "ElasticNetFeatureSelector": "Regularization",
+    "FTestFeatureSelector": "Correlation",
+    "GainRatioFeatureSelector": "Information theory",
+    "LaplacianScoreFeatureSelector": "Distance",
+    "LassoFeatureSelector": "Regularization",
+    "LOCOFeatureSelector": "Leave-one-out",
+    "MarkovBlanketFeatureSelector": "Backward search",
+    "mRMRFeatureSelector": "Information theory",
+    "MIFeatureSelector": "Information theory",
+    "RandomFeatureSelector": "Baseline",
+    "ReliefFFeatureSelector": "Distance",
+    "RFImportanceFeatureSelector": "Tree",
+    "SequentialBackwardEliminationFeatureSelector": "Backward search",
+    "SequentialForwardSelectionFeatureSelector": "Forward search",
+}
+
+#: Category of each subgroup (Figure A.1). A new subgroup needs an entry here as well.
+SUBGROUP_CATEGORIES: dict[str, str] = {
+    "Forward search": "Search",
+    "Backward search": "Search",
+    "Leave-one-out": "Search",
+    "Correlation": "Non-search",
+    "Distance": "Non-search",
+    "Information theory": "Non-search",
+    "Tree": "Non-search",
+    "Regularization": "Non-search",
+    "Baseline": "Baseline",
 }
 
 

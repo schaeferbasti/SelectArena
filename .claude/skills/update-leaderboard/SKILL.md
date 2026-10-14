@@ -1,6 +1,6 @@
 ---
 name: update-leaderboard
-description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a family (not "❓ Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the (static) Space repo (delete-then-copy), bumps the version and history in its `index.html`, runs its smoke test and a local preview, and hands the commit + push (which deploys) back to the maintainer.
+description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a subgroup in the paper's taxonomy (not "Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the (static) Space repo (delete-then-copy), bumps the version and history in its `index.html`, runs its smoke test and a local preview, and hands the commit + push (which deploys) back to the maintainer.
 argument-hint: <space-checkout-dir> [<results.csv>] [<extra-results-dir>]
 user-invocable: true
 ---
@@ -36,8 +36,9 @@ Run every command from the SelectArena repo root unless noted.
 
 ## Step 1: Pre-check the methods (before generating)
 
-Every method on the leaderboard needs a family in `METHOD_FAMILIES` (`src/selectarena/methods/registry.py`),
-otherwise it ships as `❓ Other`. List the methods in the results and the unclassified ones:
+Every method on the leaderboard needs a subgroup of the paper's taxonomy in `METHOD_SUBGROUPS`
+(`src/selectarena/methods/registry.py`, Table 2 / Appendix A of the paper), otherwise it ships as
+`Other`. List the methods in the results and the unclassified ones:
 
 ```bash
 python - <<'PY'
@@ -52,8 +53,12 @@ print("unclassified:", unclassified_methods(methods))
 PY
 ```
 
-- **Unclassified method**: add it to `METHOD_FAMILIES` (`filter`, `wrapper`, `embedded` or `baseline`;
-  confirm the family with the maintainer if unsure) and to `PAPER_NAMES`, then `pytest tests/test_website.py`.
+- **Unclassified method**: add it to `METHOD_SUBGROUPS` (an existing subgroup such as `Tree` or
+  `Forward search`, or a new one, which then also needs an entry in `SUBGROUP_CATEGORIES`: `Search` or
+  `Non-search`; confirm with the maintainer if unsure) and to `PAPER_NAMES`, then `pytest tests/test_website.py`.
+- **Dataset names**: results may identify tasks by TabArena task id; `selectarena.datasets.dataset_name`
+  maps the ids of every container in `BENCHMARK_DATA_FOUNDRY_TASKS` and `EARLIER_DATA_FOUNDRY_TASKS`.
+  A "task ids could not be mapped" warning in Step 2 means a container is missing from both lists.
 - **Methods not in the registry** (e.g. the retired `AccuracyLinearFeatureSelector` in fork-era
   results) are left out by default and listed in the log; `--include-unregistered` keeps them.
   Fork-era names `AccuracyFeatureSelector` / `ANOVAFeatureSelector` are read as LOCO / F-Test.
@@ -87,9 +92,9 @@ meta = json.load(open(f"{W}/meta.json"))
 print({k: meta[k] for k in ["n_results", "n_datasets", "n_methods", "models", "budgets", "has_stability", "has_validity"]})
 print(len(meta["subsets"]), "subsets")
 lb = pd.read_csv(f"{W}/subsets/tasks_all/models_all/budgets_all/website_leaderboard.csv")
-print(lb[["Rank", "TypeName", "Method", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]].to_string(index=False))
+print(lb[["Rank", "Method", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]].to_string(index=False))
 assert (lb.loc[lb.Method == "Random", "Elo"] == 1000).all(), "Random must be anchored at 1000"
-assert "Other" not in set(lb.TypeName), "unclassified method"
+assert "Other" not in set(lb.Category), "unclassified method"
 PY
 find "$W" -name '*.png' | wc -l                          # must be 0: the Space gets text only
 ```
@@ -181,6 +186,6 @@ Caveats to mention:
 ## Step 7: Report
 
 Tell the maintainer: what was generated (methods, datasets, models, number of subsets), anything
-left out (ablations, missing stability / validity), the code edits made (`METHOD_FAMILIES`,
+left out (ablations, missing stability / validity), the code edits made (`METHOD_SUBGROUPS`,
 `PAPER_NAMES`), the Space changes (data swap summary from Step 3, new version and history entry),
 the smoke-test result, and the exact push command if it is still to be run.

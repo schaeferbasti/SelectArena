@@ -119,33 +119,34 @@ paper's plotting code.
 **Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
 (`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
-has a family, regenerates the artifacts, swaps them into the Space's `data/`, adds a version history
-entry, runs the Space's smoke test and a local preview, and leaves the commit and `git push`
-(which deploys) to you. The
+has a subgroup of the paper's taxonomy, regenerates the artifacts, swaps them into the Space's
+`data/`, adds a version history entry, runs the Space's smoke test and a local preview, and leaves
+the commit and `git push` (which deploys) to you. The
 manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`.
 
 ## Feature selection methods
 
-| Class | Paper name | Proxy model |
-|---|---|---|
-| `RandomFeatureSelector` | Random | |
-| `FTestFeatureSelector` | F-Test | |
-| `MIFeatureSelector` | MI | |
-| `GainRatioFeatureSelector` | GainRatio | |
-| `mRMRFeatureSelector` | mRMR | |
-| `ReliefFFeatureSelector` | (R)ReliefF | |
-| `LaplacianScoreFeatureSelector` | LaplacianScore | |
-| `MarkovBlanketFeatureSelector` | MarkovBlanket | |
-| `LassoFeatureSelector` | Lasso | |
-| `ElasticNetFeatureSelector` | ElasticNet | |
-| `CARTFeatureSelector` | CART | |
-| `RFImportanceFeatureSelector` | RFImportance | |
-| `LOCOFeatureSelector` | LOCO | yes |
-| `SequentialForwardSelectionFeatureSelector` | SFS | yes |
-| `SequentialBackwardEliminationFeatureSelector` | SBE | yes |
+| Class | Paper name | Subgroup (paper, Table 2) | Proxy model |
+|---|---|---|---|
+| `RandomFeatureSelector` | Random | Baseline | |
+| `FTestFeatureSelector` | F-Test | Correlation | |
+| `MIFeatureSelector` | MI | Information theory | |
+| `GainRatioFeatureSelector` | GainRatio | Information theory | |
+| `mRMRFeatureSelector` | mRMR | Information theory | |
+| `ReliefFFeatureSelector` | (R)ReliefF | Distance | |
+| `LaplacianScoreFeatureSelector` | LaplacianScore | Distance | |
+| `MarkovBlanketFeatureSelector` | MarkovBlanket | Backward search | |
+| `LassoFeatureSelector` | Lasso | Regularization | |
+| `ElasticNetFeatureSelector` | ElasticNet | Regularization | |
+| `CARTFeatureSelector` | CART | Tree | |
+| `RFImportanceFeatureSelector` | RFImportance | Tree | |
+| `LOCOFeatureSelector` | LOCO | Leave-one-out | yes |
+| `SequentialForwardSelectionFeatureSelector` | SFS | Forward search | yes |
+| `SequentialBackwardEliminationFeatureSelector` | SBE | Backward search | yes |
 
-Methods with a proxy model fit a LightGBM model (configurable through `ProxyModelConfig`) inside
-the selection.
+Search methods (forward, backward, leave-one-out) evaluate many feature subsets; non-search methods
+use a proxy instead (Appendix A of the paper). Methods with a proxy model fit a LightGBM model
+(configurable through `ProxyModelConfig`) inside the selection.
 
 The budget: for `d` features and total budget `b`, budget index `i` (0-based) keeps
 `ceil(d * (i+1) / (b+1))` features when `d <= 100` and `ceil(d ** ((i+1) / (b+1)))` otherwise.

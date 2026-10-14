@@ -10,11 +10,11 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from selectarena.methods.registry import FEATURE_SELECTION_METHODS, METHOD_FAMILIES, PAPER_NAMES
+from selectarena.methods.registry import FEATURE_SELECTION_METHODS, METHOD_SUBGROUPS, PAPER_NAMES, SUBGROUP_CATEGORIES
 from selectarena.website import Subset, generate_website_artifacts
 from selectarena.website.generate import SUBSET_FILES
 from selectarena.website.html import elo_figure_svg
-from selectarena.website.website_format import LEADERBOARD_COLUMNS, method_family
+from selectarena.website.website_format import LEADERBOARD_COLUMNS, method_category, method_subgroup
 
 METHODS = {
     "MIFeatureSelector": 0.6,
@@ -104,11 +104,13 @@ def artifacts(tmp_path_factory):
     )
 
 
-def test_every_registered_method_has_a_family():
-    assert set(METHOD_FAMILIES) == set(FEATURE_SELECTION_METHODS)
-    assert all(method_family(PAPER_NAMES[m]) != "other" for m in FEATURE_SELECTION_METHODS)
-    assert method_family("MI [nofallback]") == "filter"
-    assert method_family("NewMethod") == "other"
+def test_every_registered_method_has_a_subgroup():
+    assert set(METHOD_SUBGROUPS) == set(FEATURE_SELECTION_METHODS)
+    assert set(METHOD_SUBGROUPS.values()) <= set(SUBGROUP_CATEGORIES)
+    assert all(method_category(PAPER_NAMES[m]) != "Other" for m in FEATURE_SELECTION_METHODS)
+    assert method_subgroup("MI [nofallback]") == "Information theory"
+    assert method_category("SBE") == "Search" and method_category("CART") == "Non-search"
+    assert method_category("NewMethod") == "Other"
 
 
 def test_layout(artifacts):
@@ -130,9 +132,15 @@ def test_layout(artifacts):
         "stability.csv",
         "validity.csv",
         "stability_table.html",
-        "validity_table.html",
+        "validity_noise_0.5_table.html",
+        "validity_noise_1_table.html",
     ]:
         assert (data / name).is_file()
+    assert meta["validity_tables"] == [
+        {"noise": 0.5, "path": "validity_noise_0.5_table.html"},
+        {"noise": 1.0, "path": "validity_noise_1_table.html"},
+    ]
+    assert "Noise level" not in (data / "validity_noise_1_table.html").read_text()
     assert not list(data.rglob("*.png"))
     assert (artifacts.raw_dir / "main_figure.pdf").is_file()
     with zipfile.ZipFile(artifacts.zip_path) as z:
@@ -146,7 +154,8 @@ def test_leaderboards(artifacts):
     assert list(overall["Method"]) == ["CART", "MI", "Lasso", "Random"]
     assert overall.set_index("Method").loc["Random", "Elo"] == 1000
     assert overall["Stability"].notna().all() and overall["Validity"].between(0, 1).all()
-    assert set(overall["TypeName"]) == {"Embedded", "Filter", "Baseline"}
+    assert set(overall["Subgroup"]) == {"Tree", "Information theory", "Regularization", "Baseline"}
+    assert set(overall["Category"]) == {"Non-search", "Baseline"}
     assert (overall["#Datasets"] == 4).all()
 
     regression = pd.read_csv(
@@ -163,14 +172,15 @@ def test_html_is_self_contained(artifacts):
         assert "<script src" not in text and "http" not in text.replace("http://www.w3.org", "")
         assert "${" not in text and "{{" not in text  # Gradio's gr.HTML templates
     table = (data / "subsets" / Subset().rel_path / "leaderboard_table.html").read_text()
-    assert "CART" in table and "🌳 Embedded" in table
+    assert "CART" in table and ">Tree<" in table
 
 
 def test_figure_handles_missing_scores():
     leaderboard = pd.DataFrame(
         {
             "Method": ["A", "B"],
-            "TypeName": ["Filter", "Wrapper"],
+            "Category": ["Non-search", "Search"],
+            "Subgroup": ["Tree", "Forward search"],
             "Elo": [1000.0, 1100.0],
             "Elo CI low": [990.0, 1080.0],
             "Elo CI high": [1010.0, 1120.0],
@@ -265,3 +275,36 @@ def test_fork_era_selected_feature_entries(tmp_path):
     entries = leaderboard(as_entries, validity_entries, "entries")
     assert names.notna().all().all()
     pd.testing.assert_frame_equal(names, entries)
+
+
+def test_task_ids_are_named():
+    from selectarena.datasets import (
+        BENCHMARK_DATA_FOUNDRY_TASKS,
+        EARLIER_DATA_FOUNDRY_TASKS,
+        dataset_name,
+        user_task_id,
+    )
+
+    assert user_task_id("anneal/019d3f7b-494a-71fa-8eb2-25d01dfb7792") == 1386903908  # as in a fork-era task_id_str
+    for path in [BENCHMARK_DATA_FOUNDRY_TASKS[0], EARLIER_DATA_FOUNDRY_TASKS[0]]:
+        name = path.split("/")[0]
+        assert dataset_name(user_task_id(path)) == name
+        assert dataset_name(str(user_task_id(path))) == name
+        assert dataset_name(float(user_task_id(path))) == name
+        assert dataset_name(path) == name
+        assert dataset_name(f"UserTask|{user_task_id(path)}|{path}") == name
+    assert dataset_name("anneal") == "anneal"
+    assert dataset_name("123") == "123"
+
+
+def test_results_with_task_ids(tmp_path):
+    from selectarena.datasets import BENCHMARK_DATA_FOUNDRY_TASKS, EARLIER_DATA_FOUNDRY_TASKS, user_task_id
+
+    anneal = next(p for p in BENCHMARK_DATA_FOUNDRY_TASKS if p.startswith("anneal/"))
+    credit = next(p for p in EARLIER_DATA_FOUNDRY_TASKS if p.startswith("credit_approval/"))
+    df = results().replace(
+        {"name": {"anneal/0199-uuid": user_task_id(anneal), "credit/0199-uuid": user_task_id(credit)}}
+    )
+    artifacts = generate_website_artifacts(df, out_dir=tmp_path, n_bootstrap=2, paper_figures=False, log=lambda _: None)
+    per_dataset = pd.read_csv(artifacts.website_data / "per_dataset.csv")
+    assert sorted(per_dataset["dataset"]) == ["abalone", "anneal", "credit_approval", "diabetes"]

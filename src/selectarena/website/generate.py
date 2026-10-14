@@ -11,8 +11,8 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``subsets/tasks_<t>/models_<m>/budgets_<b>/``: per subset ``website_leaderboard.csv``,
     ``leaderboard_table.html`` and ``elo_explorer.html`` (see :mod:`selectarena.website.subsets`);
   - ``per_dataset.csv`` and ``per_dataset_table.html``: mean rank per dataset and method;
-  - ``stability.csv`` / ``validity.csv`` and ``stability_table.html`` / ``validity_table.html``:
-    the full stability / validity tables, if available.
+  - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
+    ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
 * ``clean_website_artifacts.zip``: the same folder zipped.
 
@@ -32,6 +32,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from selectarena.datasets import dataset_name
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
     VALIDITY_NOISE_MAIN_FIGURE,
@@ -65,8 +66,8 @@ class WebsiteArtifacts:
 
 
 def _dataset_key(name) -> str:
-    """Datasets are matched across results by name (``anneal`` and ``anneal/<uuid>`` are the same)."""
-    return str(name).split("/")[0]
+    """Datasets are matched across result files by name (task ids and ``<dataset>/<uuid>`` paths are mapped)."""
+    return dataset_name(name)
 
 
 def _total_budget(df: pd.DataFrame) -> int | None:
@@ -145,10 +146,16 @@ def generate_website_artifacts(
             df = df[~ablations]
     scores = per_group_scores(df)
     scores["dataset_key"] = scores["dataset"].map(_dataset_key)
+    unnamed = sorted({d for d in scores["dataset_key"] if str(d).isdigit()})
+    if unnamed:
+        log(
+            f"WARNING: {len(unnamed)} task ids could not be mapped to dataset names (e.g. {unnamed[:3]}); "
+            "their containers are not in selectarena.datasets."
+        )
     scores.to_csv(raw_dir / "per_group_scores.csv", index=False)
     unclassified = unclassified_methods(scores["method"].dropna().unique().tolist())
     if unclassified:
-        log(f"WARNING: no family for {unclassified}; add them to METHOD_FAMILIES (they show as 'Other').")
+        log(f"WARNING: no subgroup for {unclassified}; add them to METHOD_SUBGROUPS (they show as 'Other').")
 
     problem_types = df.assign(key=df["dataset"].map(_dataset_key)).groupby("key")["problem_type"].first()
     stab_rows = stability_per_task(stability) if stability is not None and not stability.empty else None
@@ -222,12 +229,26 @@ def generate_website_artifacts(
     stab_table = stab_table[stab_table["method"].isin(ranked)] if stab_table is not None else None
     val_table = val_table[val_table["method"].isin(ranked)] if val_table is not None else None
     total_budget = _total_budget(df)
-    for name, table in (("stability", stab_table), ("validity", val_table)):
-        if table is not None:
-            table.to_csv(website_data / f"{name}.csv", index=False)
-            (website_data / f"{name}_table.html").write_text(
-                extra_table_html(table, name, title=f"SelectArena: {name}", total_budget=total_budget)
+    if stab_table is not None:
+        stab_table.to_csv(website_data / "stability.csv", index=False)
+        (website_data / "stability_table.html").write_text(
+            extra_table_html(stab_table, "stability", title="SelectArena: stability", total_budget=total_budget)
+        )
+    validity_tables = []
+    if val_table is not None:
+        val_table.to_csv(website_data / "validity.csv", index=False)
+        # One table per noise level (the noise column would be constant within each).
+        for noise in sorted(val_table["noise"].dropna().unique()):
+            name = f"validity_noise_{float(noise):g}_table.html"
+            table = (
+                val_table[val_table["noise"] == noise].drop(columns="noise").sort_values("validity", ascending=False)
             )
+            (website_data / name).write_text(
+                extra_table_html(
+                    table, "validity", title=f"SelectArena: validity at noise {noise:g}", total_budget=total_budget
+                )
+            )
+            validity_tables.append({"noise": float(noise), "path": name})
 
     meta = {
         "benchmark_name": benchmark_name,
@@ -245,6 +266,7 @@ def generate_website_artifacts(
         "validity_noise": validity_noise,
         "has_stability": stab_table is not None,
         "has_validity": val_table is not None,
+        "validity_tables": validity_tables,
         "subsets": published,
     }
     (website_data / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")
