@@ -1,0 +1,24 @@
+#!/bin/bash
+# Run one SelectArena Python command on a compute node instead of the front end.
+# Submit from the repository root (the job starts in the submission directory):
+#
+#   oarsub -S "./scripts/oar/run.oar scripts/run_benchmark.py setup"
+#   oarsub -S "./scripts/oar/run.oar scripts/run_benchmark.py eval"
+#   oarsub -S "./scripts/oar/run.oar scripts/prepare_datasets.py"
+#   oarsub -S "./scripts/oar/run.oar -m pytest"
+#
+# Edit the #OAR -l line for more cores or time. The venv is $SELECTARENA_PYTHON or
+# ~/venvs/selectarena/bin/python (scripts/oar/install_env.sh). Logs: logs/oar/.
+#OAR -n selectarena
+#OAR -l /nodes=1/core=8,walltime=4:00:00
+#OAR -O logs/oar/run.%jobid%.out
+#OAR -E logs/oar/run.%jobid%.err
+
+set -eo pipefail
+. /nfs/opt/env/env.sh
+set -u
+
+PYTHON=${SELECTARENA_PYTHON:-$HOME/venvs/selectarena/bin/python}
+export TABPFN_DISABLE_TELEMETRY=1 HF_HUB_DISABLE_PROGRESS_BARS=1
+echo "OAR job $OAR_JOB_ID on $(hostname), $(nproc) cores: $PYTHON $*"
+"$PYTHON" "$@"

@@ -82,6 +82,14 @@ python scripts/run_extra_benchmark.py collect   # stability_results.csv, validit
 Both config files can be passed explicitly with `--config` and `--cluster-config`; the cluster
 config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
 
+## Running the benchmark on an OAR cluster
+
+With `scheduler: oar` in the cluster config, the same scripts write OAR parametric array jobs
+and print `oarsub` commands instead of `sbatch` ones (`--submit` submits them). The jobs, their
+bundling and the results are the same as on SLURM. `configs/cluster.calculco.example.yaml` is a
+config for the calculco cluster, and `scripts/oar/` holds the environment installer, a wrapper
+that runs any script on a compute node, and the workflow (`scripts/oar/README.md`).
+
 ## Leaderboard
 
 The public leaderboard is the Hugging Face Space

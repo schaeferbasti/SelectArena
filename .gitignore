@@ -22,3 +22,6 @@ generated_website_artifacts/
 
 # Result files copied off the cluster (e.g. results/performance_results.csv)
 results/
+
+# OAR logs of scripts/oar/run.oar
+logs/

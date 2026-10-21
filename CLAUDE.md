@@ -14,6 +14,10 @@ overview.
   TabArena subclasses (`experiment.py`, `wrapper.py`, `runner.py`). TabArena is never patched.
   Anything SelectArena needs from TabArena's internals goes through a subclass here.
 - `src/selectarena/config.py`: YAML configs to a `tabflow_slurm.TabArenaBenchmarkPlan`.
+- `src/selectarena/oar.py`, `benchmark/oar.py`, `extra_benchmark/oar.py`: OAR support
+  (`scheduler: oar` in the cluster config). `OarSetup` is a `tabflow_slurm` scheduler that writes
+  the same job JSON as SLURM plus OAR array scripts; each subjob runs `python -m selectarena.benchmark.oar`
+  in place of TabArena's SLURM `submit_template.sh`. Workflow in `scripts/oar/README.md`.
 - `src/selectarena/extra_benchmark/`: stability/validity runs, plain SLURM arrays.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`).
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`).

@@ -1,0 +1,52 @@
+# Cluster config for calculco (Université du Littoral, OAR scheduler).
+# Copy to configs/cluster.yaml (git-ignored) and edit the paths:
+#   cp configs/cluster.calculco.example.yaml configs/cluster.yaml
+# See scripts/oar/README.md for the whole workflow.
+
+scheduler: oar
+
+# Results, logs and job files: large and reachable from every node, so not $HOME (100 GB quota)
+# and not /scratch or /workdir (auto-cleaned). Results land in <workspace>/output/<benchmark_name>/.
+workspace: /nfs/data/unprotected/lisic/bschafer/selectarena_workspace
+# Python of the venv made by scripts/oar/install_env.sh, as seen from the compute nodes.
+python_path: /nfs/home/lisic/bschafer/venvs/selectarena/bin/python
+
+# tabarena.caching.CacheConfig fields. null keeps the library default.
+caches:
+  openml: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/openml
+  data_foundry: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/data_foundry
+  huggingface: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/huggingface
+  tabarena: null
+
+# Directory holding the suite's Data Foundry containers as <dataset>/<container uuid>.
+data_foundry_warehouse: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/data_foundry
+
+# selectarena.benchmark.oar.OarSetup fields (main benchmark).
+oar:
+  cpu_resources: "/nodes=1/core={num_cpus}"
+  gpu_resources: "/nodes=1/gpu={num_gpus}"
+  # GH200 nodes (orval43) are ARM: an x86 venv does not run there. visu1/visu2 are visualisation nodes.
+  gpu_properties: "gpumodel IN ('A100','H100')"
+  cpu_properties: null
+  queue: null            # default queue; set besteffort: true (and queue: besteffort) for preemptible jobs
+  besteffort: false
+  env_script: /nfs/opt/env/env.sh
+  modules: []            # e.g. [cuda/cuda-12.1] if the GPU models need a system CUDA
+  time_limit_overhead: 1 # hours added to each subjob's walltime
+  scratch_root: null     # node-local scratch; null uses $TMPDIR or /tmp
+
+# tabflow_slurm.ResourcesSetup fields (defaults: 8 CPUs, 32 GB, no GPU). OAR does not reserve
+# memory: memory_limit is the budget AutoGluon / Ray are told to stay within.
+resources:
+  num_cpus: 8
+  memory_limit: 32
+
+# OAR settings for the stability/validity array jobs (selection only, CPU).
+extra_benchmark_oar:
+  resources: "/nodes=1/core=8"
+  walltime: "10:00:00"
+  queue: null
+  properties: null
+  besteffort: false
+  env_script: /nfs/opt/env/env.sh
+  modules: []

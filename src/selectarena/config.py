@@ -5,8 +5,8 @@ Two files keep what is benchmarked apart from where it runs:
 * a **benchmark config** (``configs/benchmark.yaml``, committed): feature selection methods,
   budgets, downstream models, splits;
 * a **cluster config** (``configs/cluster.yaml``, git-ignored; start from
-  ``configs/cluster.example.yaml``): workspace, Python environment, cache locations, SLURM
-  partitions and resources.
+  ``configs/cluster.example.yaml`` for SLURM or ``configs/cluster.calculco.example.yaml`` for OAR):
+  workspace, Python environment, cache locations, scheduler settings and resources.
 
 ``load_config`` reads both. The ``build_*`` functions turn them into the TabArena / tabflow_slurm
 objects the scripts use.
@@ -126,6 +126,16 @@ class ClusterConfig:
     """``tabflow_slurm.ResourcesSetup`` fields overriding the TabArena-v0.1 defaults."""
     extra_benchmark_slurm: dict[str, Any] = field(default_factory=dict)
     """``ExtraBenchmarkSlurmSettings`` fields for the stability/validity array jobs."""
+    scheduler: str = "slurm"
+    """``"slurm"`` (``slurm`` and ``extra_benchmark_slurm`` apply) or ``"oar"`` (``oar`` and ``extra_benchmark_oar``)."""
+    oar: dict[str, Any] = field(default_factory=dict)
+    """``selectarena.benchmark.oar.OarSetup`` fields (resources, queue, properties, modules, ...)."""
+    extra_benchmark_oar: dict[str, Any] = field(default_factory=dict)
+    """``ExtraBenchmarkOarSettings`` fields for the stability/validity array jobs."""
+
+    def __post_init__(self) -> None:
+        if self.scheduler not in ("slurm", "oar"):
+            raise ValueError(f"Unknown scheduler {self.scheduler!r}; options are 'slurm' and 'oar'.")
 
     @property
     def output_dir(self) -> Path:
@@ -192,7 +202,7 @@ def _preprocessing_time_overhead(benchmark: BenchmarkConfig) -> int | None:
 
 
 def build_plan(benchmark: BenchmarkConfig, cluster: ClusterConfig) -> TabArenaBenchmarkPlan:
-    """The ``tabflow_slurm`` plan running ``benchmark`` on the SLURM cluster in ``cluster``."""
+    """The ``tabflow_slurm`` plan running ``benchmark`` on the SLURM or OAR cluster in ``cluster``."""
     from tabarena.benchmark.experiment import ModelConstraints
     from tabarena.benchmark.task.metadata import TaskSubset
     from tabflow_slurm import ModelJob, PathSetup, SlurmSetup, TabArenaBenchmarkPlan, TabArenaV0pt1ResourcesSetup
@@ -207,7 +217,13 @@ def build_plan(benchmark: BenchmarkConfig, cluster: ClusterConfig) -> TabArenaBe
         job["models"] = [tuple(entry) for entry in job["models"]]
         model_jobs.append(ModelJob(**job))
 
-    slurm = {"gpu_partition": None, "cpu_partition": None, "extra_gres": None, **cluster.slurm}
+    if cluster.scheduler == "oar":
+        from selectarena.benchmark.oar import OarSetup
+
+        scheduler_setup = OarSetup(**cluster.oar)
+    else:
+        slurm = {"gpu_partition": None, "cpu_partition": None, "extra_gres": None, **cluster.slurm}
+        scheduler_setup = SlurmSetup(**slurm)
     resources = {
         "time_limit": benchmark.time_limit,
         "time_limit_for_model_agnostic_preprocessing": _preprocessing_time_overhead(benchmark),
@@ -227,7 +243,7 @@ def build_plan(benchmark: BenchmarkConfig, cluster: ClusterConfig) -> TabArenaBe
             **experiment,
         ),
         path_setup=PathSetup(workspace=cluster.workspace, python_path=cluster.python_path),
-        scheduler_setup=SlurmSetup(**slurm),
+        scheduler_setup=scheduler_setup,
         resources_setup=TabArenaV0pt1ResourcesSetup(**resources),
         task_subset=TaskSubset(**benchmark.task_subset) if benchmark.task_subset else None,
     )
