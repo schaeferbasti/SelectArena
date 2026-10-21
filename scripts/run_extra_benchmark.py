@@ -1,10 +1,11 @@
-"""Stability / validity benchmark on SLURM: ``setup`` the array jobs, then ``collect`` the results.
+"""Stability / validity benchmark on SLURM or OAR: ``setup`` the array jobs, then ``collect`` the results.
 
     python scripts/run_extra_benchmark.py setup   --config configs/benchmark.yaml [--submit]
     python scripts/run_extra_benchmark.py collect --config configs/benchmark.yaml
 
 ``setup`` writes one array job per chunk of (mode x FSBench pipeline x task) jobs and prints the
-``sbatch`` commands (``--submit`` submits them). ``collect`` merges the per-job CSVs into
+``sbatch`` (or, with ``scheduler: oar`` in the cluster config, ``oarsub``) commands (``--submit``
+submits them). ``collect`` merges the per-job CSVs into
 ``stability_results.csv`` and ``validity_results.csv``. A single job can also be run directly with
 ``python -m selectarena.extra_benchmark.runner``.
 """
@@ -22,12 +23,7 @@ def _results_dir(benchmark, cluster) -> Path:
 
 
 def setup(args: argparse.Namespace) -> None:
-    from selectarena.extra_benchmark.slurm import (
-        ExtraBenchmarkSlurmSettings,
-        build_job_commands,
-        submit,
-        write_slurm_arrays,
-    )
+    from selectarena.extra_benchmark.slurm import build_job_commands
 
     benchmark = load_benchmark_config(args.config)
     cluster = load_cluster_config(args.cluster_config)
@@ -41,9 +37,27 @@ def setup(args: argparse.Namespace) -> None:
         openml_cache=cluster.caches.get("openml"),
         noise_type=benchmark.extra_benchmark.noise_type,
     )
+    out_dir = Path(cluster.workspace) / "setup_out" / f"{benchmark.benchmark_name}_extra"
+    if cluster.scheduler == "oar":
+        from selectarena.extra_benchmark.oar import ExtraBenchmarkOarSettings, write_oar_arrays
+        from selectarena.oar import submit as submit_oar
+
+        oarsub_commands = write_oar_arrays(
+            commands,
+            out_dir=out_dir,
+            python_path=cluster.python_path,
+            settings=ExtraBenchmarkOarSettings(**cluster.extra_benchmark_oar),
+        )
+        print(f"{len(commands)} jobs in {len(oarsub_commands)} OAR array job(s).")
+        for line in submit_oar(oarsub_commands) if args.submit else oarsub_commands:
+            print(line)
+        return
+
+    from selectarena.extra_benchmark.slurm import ExtraBenchmarkSlurmSettings, submit, write_slurm_arrays
+
     scripts = write_slurm_arrays(
         commands,
-        out_dir=Path(cluster.workspace) / "setup_out" / f"{benchmark.benchmark_name}_extra",
+        out_dir=out_dir,
         python_path=cluster.python_path,
         settings=ExtraBenchmarkSlurmSettings(**cluster.extra_benchmark_slurm),
     )
@@ -73,7 +87,7 @@ def main() -> None:
     parser.add_argument("mode", choices=["setup", "collect"])
     parser.add_argument("--config", default="configs/benchmark.yaml")
     parser.add_argument("--cluster-config", default=None)
-    parser.add_argument("--submit", action="store_true", help="setup: submit the array jobs with sbatch.")
+    parser.add_argument("--submit", action="store_true", help="setup: submit the array jobs (sbatch / oarsub).")
     args = parser.parse_args()
     {"setup": setup, "collect": collect}[args.mode](args)
 

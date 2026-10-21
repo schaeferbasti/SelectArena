@@ -1,10 +1,11 @@
-"""Run the SelectArena benchmark on SLURM: ``setup`` the jobs, then ``eval`` the results.
+"""Run the SelectArena benchmark on SLURM or OAR: ``setup`` the jobs, then ``eval`` the results.
 
     python scripts/run_benchmark.py setup --config configs/benchmark.yaml
     python scripts/run_benchmark.py eval  --config configs/benchmark.yaml
 
 ``setup`` runs on the head node: it builds every (model config x FSBench pipeline x split) job,
-skips the ones with cached results, writes the job batch and prints the ``sbatch`` command(s).
+skips the ones with cached results, writes the job batch and prints the ``sbatch`` command(s), or
+the ``oarsub`` command(s) with ``scheduler: oar`` in the cluster config (``--submit`` submits those).
 ``eval`` collects all ``results.pkl`` of the run into ``<output>/<benchmark_name>/results.csv``.
 The cluster config is read from ``--cluster-config``, ``$SELECTARENA_CLUSTER_CONFIG`` or
 ``configs/cluster.yaml``.
@@ -22,7 +23,14 @@ def setup(args: argparse.Namespace) -> None:
     benchmark = load_benchmark_config(args.config)
     cluster = load_cluster_config(args.cluster_config)
     print(f"{len(benchmark.feature_selection.pipelines())} preprocessing pipelines")
-    build_plan(benchmark, cluster).setup_jobs()
+    commands = build_plan(benchmark, cluster).setup_jobs()
+    if args.submit:
+        if cluster.scheduler != "oar":
+            raise SystemExit("--submit is only supported with `scheduler: oar`; run the printed sbatch commands.")
+        from selectarena.oar import submit
+
+        for line in submit(commands):
+            print(line)
 
 
 def evaluate(args: argparse.Namespace) -> None:
@@ -45,6 +53,7 @@ def main() -> None:
     parser.add_argument("mode", choices=["setup", "eval"])
     parser.add_argument("--config", default="configs/benchmark.yaml", help="Benchmark config (YAML).")
     parser.add_argument("--cluster-config", default=None, help="Cluster config (YAML).")
+    parser.add_argument("--submit", action="store_true", help="setup: submit the OAR array jobs with oarsub.")
     parser.add_argument("--only-default", action="store_true", help="eval: only default configs (_c1_).")
     parser.add_argument("--num-cpus", type=int, default=8, help="eval: Ray workers for parsing results.")
     parser.add_argument("--no-ray", action="store_true", help="eval: parse results sequentially.")
