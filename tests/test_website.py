@@ -278,6 +278,8 @@ def test_fork_era_selected_feature_entries(tmp_path):
 
 
 def test_task_ids_are_named():
+    from tabarena.benchmark.task import UserTask
+
     from selectarena.datasets import (
         BENCHMARK_DATA_FOUNDRY_TASKS,
         EARLIER_DATA_FOUNDRY_TASKS,
@@ -286,14 +288,16 @@ def test_task_ids_are_named():
     )
 
     assert user_task_id("anneal/019d3f7b-494a-71fa-8eb2-25d01dfb7792") == 1386903908  # as in a fork-era task_id_str
-    for path in [BENCHMARK_DATA_FOUNDRY_TASKS[0], EARLIER_DATA_FOUNDRY_TASKS[0]]:
+    long_name = next(p for p in BENCHMARK_DATA_FOUNDRY_TASKS if p.startswith("predict_students"))  # slug is cut
+    for path in [BENCHMARK_DATA_FOUNDRY_TASKS[0], EARLIER_DATA_FOUNDRY_TASKS[0], long_name]:
         name = path.split("/")[0]
         assert dataset_name(user_task_id(path)) == name
         assert dataset_name(str(user_task_id(path))) == name
         assert dataset_name(float(user_task_id(path))) == name
         assert dataset_name(path) == name
         assert dataset_name(f"UserTask|{user_task_id(path)}|{path}") == name
-        assert dataset_name(f"Task-{user_task_id(path)}") == name  # TabArena's tabarena_task_name
+        assert dataset_name(f"Task-{user_task_id(path)}") == name  # the fork's tabarena_task_name
+        assert dataset_name(UserTask(task_name=path).slug) == name  # TabArena's tabarena_task_name
     assert dataset_name("anneal") == "anneal"
     assert dataset_name("123") == "123"
 

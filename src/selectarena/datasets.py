@@ -188,8 +188,17 @@ TASK_ID_TO_DATASET: dict[int, str] = {
     user_task_id(path): path.split("/")[0] for path in [*EARLIER_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
 }
 
+#: Hash part of TabArena's task slug (``UserTask.slug``, ``<dataset>-<first 12 hex chars of the
+#: task name's SHA-256>``) of every known container -> dataset name. The slug is the task name in
+#: the results; its dataset part is cut to 40 characters, so the hash identifies the dataset.
+TASK_SLUG_HASH_TO_DATASET: dict[str, str] = {
+    hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]: path.split("/")[0]
+    for path in [*EARLIER_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
+}
+
 
 _TASK_ID = re.compile(r"(?:Task-)?(\d+)(?:\.0)?")
+_TASK_SLUG = re.compile(r".+-([0-9a-f]{12})")
 
 
 def task_names_from_ids(task_id_strs) -> dict[int, str]:
@@ -208,8 +217,10 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
 
     Accepts a dataset name (``anneal``), a container path (``anneal/<uuid>``), a TabArena
     ``task_id_str`` (``UserTask|<id>|anneal/<uuid>``), a task name as TabArena writes it into the
-    results (``Task-1386903908``) or a bare task id (``1386903908``). Ids are looked up in ``known``
-    and in :data:`TASK_ID_TO_DATASET`; an unknown id is returned unchanged, as a string.
+    results (the slug ``anneal-3f2a9c41d0b7``, or ``Task-1386903908`` in the fork's TabArena) or a
+    bare task id (``1386903908``). Ids are looked up in ``known`` and in :data:`TASK_ID_TO_DATASET`,
+    slugs in :data:`TASK_SLUG_HASH_TO_DATASET`; an unknown id or slug is returned unchanged, as a
+    string.
     """
     text = str(task).strip()
     if text.startswith("UserTask|"):
@@ -221,6 +232,9 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
     if match:
         task_id = int(match.group(1))
         return (known or {}).get(task_id) or TASK_ID_TO_DATASET.get(task_id, text)
+    slug = _TASK_SLUG.fullmatch(text)
+    if slug:
+        return TASK_SLUG_HASH_TO_DATASET.get(slug.group(1), text)
     return text
 
 
