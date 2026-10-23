@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "SelectArena: a benchmark for feature selection on tabular data, built on TabArena"
 readme = "README.md"
 license = "Apache-2.0"
-authors = [{ name = "Bastian Schäfer" }]
+authors = [{ name = "Bastian Schäfer" }, { name = "Dominika Matus" }]
 requires-python = ">=3.11,<3.14"
 keywords = ["feature-selection", "tabular", "benchmark", "automl", "autogluon", "tabarena"]
 classifiers = [

@@ -5,7 +5,7 @@
 #   python scripts/run_benchmark.py setup  --config configs/benchmark.yaml
 #   python scripts/run_benchmark.py eval   --config configs/benchmark.yaml
 
-benchmark_name: selectarena_2026
+benchmark_name: feature_selection_benchmark_2026_all
 
 feature_selection:
   # Registry names (selectarena.methods.FEATURE_SELECTION_METHODS) or "all".

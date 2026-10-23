@@ -78,7 +78,7 @@ def main() -> None:
     benchmark = load_benchmark_config(args.config)
     if args.results is None:
         run_dir = load_cluster_config(args.cluster_config).output_dir / benchmark.benchmark_name
-        results_path = run_dir / "results.csv"
+        results_path = "results/performance_results.csv"
     else:
         # A results.csv copied off the cluster: look for the extra results next to it.
         results_path = Path(args.results)
@@ -96,8 +96,8 @@ def main() -> None:
     artifacts = generate_website_artifacts(
         pd.read_csv(results_path),
         out_dir=args.out,
-        stability=_read_optional(extra_dir / "stability_results.csv"),
-        validity=_read_optional(extra_dir / "validity_results.csv"),
+        stability=_read_optional(Path("results/stability_results.csv")),
+        validity=_read_optional(Path("results/validity_results.csv")),
         benchmark_name=benchmark.benchmark_name,
         n_bootstrap=args.elo_bootstrap_rounds,
         validity_noise=args.validity_noise if args.validity_noise >= 0 else None,
