@@ -119,7 +119,8 @@ class ClusterConfig:
     caches: dict[str, str | None] = field(default_factory=dict)
     """``tabarena.caching.CacheConfig`` fields (``openml``, ``huggingface``, ``data_foundry``, ``tabarena``)."""
     data_foundry_warehouse: str | None = None
-    """Directory holding the suite's Data Foundry containers (``<dataset>/<uuid>``)."""
+    """Local directory holding the suite's Data Foundry containers (``<dataset>/<uuid>``); ``None``
+    downloads them from the suite's Hugging Face repository into the ``data_foundry`` cache."""
     slurm: dict[str, Any] = field(default_factory=dict)
     """``tabflow_slurm.SlurmSetup`` fields (``cpu_partition``, ``gpu_partition``, ``extra_gres``, ...)."""
     resources: dict[str, Any] = field(default_factory=dict)

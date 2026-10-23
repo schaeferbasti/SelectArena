@@ -14,8 +14,9 @@ caches:
   huggingface: null
   tabarena: null
 
-# Directory holding the suite's Data Foundry containers as <dataset>/<container uuid>.
-data_foundry_warehouse: /work/dlclarge1/purucker-fs_benchmark/.data_foundry_cache
+# Local directory with the suite's Data Foundry containers as <dataset>/<container uuid>. null
+# downloads them from Hugging Face (selectarena.datasets.HF_REPO_ID) into caches.data_foundry.
+data_foundry_warehouse: null
 
 # tabflow_slurm.SlurmSetup fields.
 slurm:

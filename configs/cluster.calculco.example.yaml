@@ -18,8 +18,9 @@ caches:
   huggingface: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/huggingface
   tabarena: null
 
-# Directory holding the suite's Data Foundry containers as <dataset>/<container uuid>.
-data_foundry_warehouse: /nfs/data/unprotected/lisic/bschafer/selectarena_cache/data_foundry
+# Local directory with the suite's Data Foundry containers as <dataset>/<container uuid>. null
+# downloads them from Hugging Face (selectarena.datasets.HF_REPO_ID) into caches.data_foundry.
+data_foundry_warehouse: null
 
 # selectarena.benchmark.oar.OarSetup fields (main benchmark).
 oar:

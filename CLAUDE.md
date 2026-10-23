@@ -14,6 +14,9 @@ overview.
   TabArena subclasses (`experiment.py`, `wrapper.py`, `runner.py`). TabArena is never patched.
   Anything SelectArena needs from TabArena's internals goes through a subclass here.
 - `src/selectarena/config.py`: YAML configs to a `tabflow_slurm.TabArenaBenchmarkPlan`.
+- `src/selectarena/datasets.py`: the suite's Data Foundry containers, downloaded from the Hugging
+  Face dataset repo `HF_REPO_ID` at the pinned commit `HF_REVISION` (or read from a local
+  `data_foundry_warehouse`). New containers are uploaded there before they are added to the list.
 - `src/selectarena/oar.py`, `benchmark/oar.py`, `extra_benchmark/oar.py`: OAR support
   (`scheduler: oar` in the cluster config). `OarSetup` is a `tabflow_slurm` scheduler that writes
   the same job JSON as SLURM plus OAR array scripts; each subjob runs `python -m selectarena.benchmark.oar`

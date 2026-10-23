@@ -2,8 +2,10 @@
 
     python scripts/prepare_datasets.py [--cluster-config configs/cluster.yaml]
 
-Reads the containers from ``data_foundry_warehouse``, writes the ``UserTask`` pickles and the
-suite's metadata CSV into the configured OpenML cache. Needs ``tabarena[data-foundry]``.
+Downloads the containers from the suite's Hugging Face repository (``selectarena.datasets.HF_REPO_ID``)
+into the ``data_foundry`` cache, or reads them from ``data_foundry_warehouse`` when the cluster config
+sets one, and writes the ``UserTask`` pickles and the suite's metadata CSV into the configured OpenML
+cache. Needs ``tabarena[data-foundry]``.
 """
 
 from __future__ import annotations
@@ -20,12 +22,14 @@ def main() -> None:
     args = parser.parse_args()
 
     cluster = load_cluster_config(args.cluster_config)
-    if cluster.data_foundry_warehouse is None:
-        raise SystemExit("Set `data_foundry_warehouse` in the cluster config.")
     cache_config = build_cache_config(cluster)
     if cache_config is not None:
         cache_config.apply()
-    path = prepare_datasets(warehouse_dir=cluster.data_foundry_warehouse, openml_cache=cluster.caches.get("openml"))
+    path = prepare_datasets(
+        warehouse_dir=cluster.data_foundry_warehouse,
+        cache_dir=cluster.caches.get("data_foundry"),
+        openml_cache=cluster.caches.get("openml"),
+    )
     print(f"Wrote task metadata to {path}")
 
 

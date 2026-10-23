@@ -18,9 +18,12 @@ which runs one Python command on a compute node.
 ```bash
 bash scripts/oar/install_env.sh                    # venv in ~/venvs/selectarena (front end, a few minutes)
 cp configs/cluster.calculco.example.yaml configs/cluster.yaml
-# edit configs/cluster.yaml: workspace, caches, data_foundry_warehouse, python_path
+# edit configs/cluster.yaml: workspace, caches, python_path
 oarsub -S "./scripts/oar/run.oar scripts/prepare_datasets.py"
 ```
+
+`prepare_datasets.py` downloads the dataset containers from Hugging Face. If the compute nodes
+cannot reach the internet, run it on the front end instead (`python scripts/prepare_datasets.py`).
 
 Submit from the repository root (OAR jobs start in the submission directory). `install_env.sh`
 creates `logs/oar/`, where `run.oar` writes its logs.

@@ -61,10 +61,10 @@ and the selection time.
 ## Running the benchmark on a SLURM cluster
 
 1. Describe your machine: `cp configs/cluster.example.yaml configs/cluster.yaml` and set the
-   workspace, the Python of your environment, the cache directories, the Data Foundry warehouse
-   and the SLURM partitions. `configs/cluster.yaml` is git-ignored.
-2. Convert the dataset suite into TabArena tasks (once per cluster):
-   `python scripts/prepare_datasets.py`
+   workspace, the Python of your environment, the cache directories and the SLURM partitions.
+   `configs/cluster.yaml` is git-ignored.
+2. Download the dataset suite and convert it into TabArena tasks (once per cluster):
+   `python scripts/prepare_datasets.py` (see [Datasets](#datasets))
 3. Choose what to run in `configs/benchmark.yaml` (methods, budgets, time limits, models, splits).
 4. On the head node: `python scripts/run_benchmark.py setup`, then launch the printed `sbatch`
    command(s). Rerunning `setup` skips jobs whose results exist.
@@ -89,6 +89,20 @@ and print `oarsub` commands instead of `sbatch` ones (`--submit` submits them). 
 bundling and the results are the same as on SLURM. `configs/cluster.calculco.example.yaml` is a
 config for the calculco cluster, and `scripts/oar/` holds the environment installer, a wrapper
 that runs any script on a compute node, and the workflow (`scripts/oar/README.md`).
+
+## Datasets
+
+The suite is 71 curated [Data Foundry](https://github.com/TabArena/data-foundry) containers
+(`selectarena.datasets.BENCHMARK_DATA_FOUNDRY_TASKS`), published in the Hugging Face dataset
+repository [SelectArena/SelectArena](https://huggingface.co/datasets/SelectArena/SelectArena) the way
+TabArena publishes BeyondArena. `scripts/prepare_datasets.py` downloads them into the
+`data_foundry` cache of the cluster config, pinned to the commit `HF_REVISION` in
+`selectarena/datasets.py`, and converts them into TabArena tasks. To read them from a local copy
+instead (e.g. a Data Foundry warehouse), set `data_foundry_warehouse` in the cluster config to the
+directory that holds them as `<dataset>/<container uuid>/`.
+
+New containers go into the Hugging Face repository first, in the same layout; then add their paths
+to `BENCHMARK_DATA_FOUNDRY_TASKS` and update `HF_REVISION` to the repository's new commit.
 
 ## Leaderboard
 
