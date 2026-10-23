@@ -21,18 +21,19 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from tabarena.benchmark.experiment import (
-    TABARENA_V0PT1_VALIDATION_PROTOCOL,
     AGModelBagExperiment,
     Experiment,
     TabArenaV0pt1ExperimentBundle,
+    ValidationProtocol,
 )
 
 from selectarena.benchmark.fs_config import FSBenchConfig, apply_fs_bench_preprocessing
 from selectarena.benchmark.runner import SelectArenaExperimentRunner
 from selectarena.benchmark.wrapper import SelectArenaBagWrapper
 
-#: The inner validation protocol SelectArena runs under (TabArena-v0.1: 8 bagging folds x 1 set).
-SELECTARENA_VALIDATION_PROTOCOL = TABARENA_V0PT1_VALIDATION_PROTOCOL
+#: The inner validation protocol SelectArena runs under: TabArena-v0.1's 8 bagging folds x 1 set,
+#: with AutoGluon lowering the fold count to the minority-class count (as the paper's runs did).
+SELECTARENA_VALIDATION_PROTOCOL = ValidationProtocol(name="SelectArena", adapt_num_folds_to_n_classes=True)
 
 
 def is_fs_pipeline(name: str | None) -> bool:
@@ -73,9 +74,9 @@ def to_selectarena_experiments(experiments: list[Experiment]) -> list[Experiment
 class SelectArenaExperimentBundle(TabArenaV0pt1ExperimentBundle):
     """TabArena-v0.1's experiment bundle with SelectArena's defaults and experiment class.
 
-    Inherits the TabArena-v0.1 settings the feature selection benchmark ran with (AutoGluon's
-    default preprocessing, no feature shuffling, no text-embedding cache) and lowers the number
-    of random configurations to 25.
+    Keeps TabArena-v0.1's AutoGluon default preprocessing and no text-embedding cache, and sets
+    what the paper's runs used on top: the feature columns are shuffled with the split's seed
+    before the fit (``shuffle_features``) and 25 random configurations per model.
 
     ``preprocessing_pipelines`` takes the ``FSBench__*`` names from
     :func:`~selectarena.benchmark.fs_config.get_fs_benchmark_preprocessing_pipelines`
@@ -85,6 +86,7 @@ class SelectArenaExperimentBundle(TabArenaV0pt1ExperimentBundle):
     """
 
     n_random_configs: int = 25
+    shuffle_features: bool = True
     preprocessing_pipelines: list[str] = field(default_factory=lambda: ["default"])
 
     def build_experiments(self, **kwargs) -> list[Experiment]:

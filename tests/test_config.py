@@ -62,6 +62,9 @@ def test_example_configs_build_a_plan(tmp_path):
     assert len(experiments) == 2 * len(pipelines)  # TabICLv2 + RealMLP, default configs
     assert all(isinstance(exp, SelectArenaBagExperiment) for exp in experiments)
     assert {exp.preprocessing_pipeline for exp in experiments} == set(pipelines)
+    # The settings of the paper's runs (tabarena_fork_fs): seeded feature shuffling, class-adaptive folds.
+    assert all(exp.method_kwargs["shuffle_features"] for exp in experiments)
+    assert plan.context.validation_protocol.adapt_num_folds_to_n_classes
 
     jobs = plan.context.build_jobs(experiments, task_subset=setup.task_subset)
     assert len(jobs) == len(experiments) * 3  # splits r0f0, r0f1, r0f2
