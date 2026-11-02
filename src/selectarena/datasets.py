@@ -241,10 +241,11 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
 
 #: Hugging Face dataset repository holding the suite's containers, in the warehouse layout
 #: ``<dataset>/<container uuid>/`` (as ``TabArena/BeyondArena`` holds BeyondArena's).
-HF_REPO_ID = "SelectArena/SelectArena"
-#: Commit of :data:`HF_REPO_ID` the containers are read from. Pinned so the files behind a container
-#: path cannot change; update it whenever the repository gets new containers. ``None`` reads ``main``.
-HF_REVISION: str | None = None
+HF_REPO_ID = "SelectArena/SelectArena_Datasets"
+#: Commit of :data:`HF_REPO_ID` the containers are read from (2026-11-02). Pinned so the files behind a
+#: container path cannot change, as ``data_foundry.collections`` pins BeyondArena's; update it whenever
+#: the repository gets new containers. ``None`` reads ``main``.
+HF_REVISION: str | None = "ef7615ba75f5ca9536987e09539f6075b8cadb61"
 
 
 def make_collection(warehouse_dir: str | Path | None = None) -> DatasetCollection:

@@ -27,7 +27,8 @@ def setup(args: argparse.Namespace) -> None:
 
     benchmark = load_benchmark_config(args.config)
     cluster = load_cluster_config(args.cluster_config)
-    collection = build_context(cluster).task_metadata_collection
+    # Download and convert the tasks that are not local yet, as tabflow_slurm's setup does.
+    collection = build_context(cluster).task_metadata_collection.materialize()
     task_ids = sorted({task.task_id_str for task in collection.tasks})
     commands = build_job_commands(
         modes=benchmark.extra_benchmark.modes,

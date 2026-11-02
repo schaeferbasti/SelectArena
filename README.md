@@ -63,8 +63,8 @@ and the selection time.
 1. Describe your machine: `cp configs/cluster.example.yaml configs/cluster.yaml` and set the
    workspace, the Python of your environment, the cache directories and the SLURM partitions.
    `configs/cluster.yaml` is git-ignored.
-2. Download the dataset suite and convert it into TabArena tasks (once per cluster):
-   `python scripts/prepare_datasets.py` (see [Datasets](#datasets))
+2. Optional: download the dataset suite and convert it into TabArena tasks in advance with
+   `python scripts/prepare_datasets.py`; otherwise `setup` does it (see [Datasets](#datasets)).
 3. Choose what to run in `configs/benchmark.yaml` (methods, budgets, time limits, models, splits).
 4. On the head node: `python scripts/run_benchmark.py setup`, then launch the printed `sbatch`
    command(s). Rerunning `setup` skips jobs whose results exist.
@@ -94,12 +94,16 @@ that runs any script on a compute node, and the workflow (`scripts/oar/README.md
 
 The suite is 71 curated [Data Foundry](https://github.com/TabArena/data-foundry) containers
 (`selectarena.datasets.BENCHMARK_DATA_FOUNDRY_TASKS`), published in the Hugging Face dataset
-repository [SelectArena/SelectArena](https://huggingface.co/datasets/SelectArena/SelectArena) the way
-TabArena publishes BeyondArena. `scripts/prepare_datasets.py` downloads them into the
-`data_foundry` cache of the cluster config, pinned to the commit `HF_REVISION` in
-`selectarena/datasets.py`, and converts them into TabArena tasks. To read them from a local copy
-instead (e.g. a Data Foundry warehouse), set `data_foundry_warehouse` in the cluster config to the
-directory that holds them as `<dataset>/<container uuid>/`.
+repository [SelectArena/SelectArena_Datasets](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets)
+the way TabArena publishes [BeyondArena](https://huggingface.co/datasets/TabArena/BeyondArena),
+pinned to the commit `HF_REVISION` in `selectarena/datasets.py`. They are downloaded on first use,
+as TabArena does for BeyondArena: `run_benchmark.py setup` and `run_extra_benchmark.py setup` fetch
+the containers into the `data_foundry` cache of the cluster config and convert the ones the run
+needs into TabArena tasks in the `openml` cache. `scripts/prepare_datasets.py` does the same for the
+whole suite in advance, e.g. on a front end when the compute nodes have no internet access. To read
+the containers from a local copy instead (e.g. a Data Foundry warehouse), set
+`data_foundry_warehouse` in the cluster config to the directory that holds them as
+`<dataset>/<container uuid>/`.
 
 New containers go into the Hugging Face repository first, in the same layout; then add their paths
 to `BENCHMARK_DATA_FOUNDRY_TASKS` and update `HF_REVISION` to the repository's new commit.
