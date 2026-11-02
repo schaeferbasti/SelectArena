@@ -20,7 +20,7 @@ overview.
 - `src/selectarena/oar.py`, `benchmark/oar.py`, `extra_benchmark/oar.py`: OAR support
   (`scheduler: oar` in the cluster config). `OarSetup` is a `tabflow_slurm` scheduler that writes
   the same job JSON as SLURM plus OAR array scripts; each subjob runs `python -m selectarena.benchmark.oar`
-  in place of TabArena's SLURM `submit_template.sh`. Workflow in `scripts/oar/README.md`.
+  in place of TabArena's SLURM `submit_template.sh`.
 - `src/selectarena/extra_benchmark/`: stability/validity runs, plain SLURM arrays.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`).
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`).

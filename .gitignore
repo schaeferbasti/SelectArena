@@ -23,6 +23,9 @@ generated_website_artifacts/
 # Result files copied off the cluster (e.g. results/performance_results.csv)
 results/
 
-# OAR logs of scripts/oar/run.oar
+# Logs of local job wrappers
 logs/
 .data_foundry_cache/
+
+# Cluster-specific configs, scripts and runs (kept locally, not published)
+private/
