@@ -25,3 +25,4 @@ results/
 
 # OAR logs of scripts/oar/run.oar
 logs/
+.data_foundry_cache/
