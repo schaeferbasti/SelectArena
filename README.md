@@ -9,28 +9,6 @@ SelectArena depends on [TabArena](https://github.com/autogluon/tabarena) for dat
 the experiment runner, the validation protocol and the SLURM tooling. This repository only
 contains what is specific to feature selection.
 
-## How SelectArena plugs into TabArena
-
-Feature selectors are AutoGluon feature generators (`selectarena.methods.AbstractFeatureSelector`)
-that run as the last post generator of AutoGluon's preprocessing, before the model is fitted. A
-run is named by a preprocessing pipeline string,
-`FSBench__<method>__<total_budget>__<budget_index>__<proxy_model>__<fs_time>`, optionally with the
-`__nofallback` and `__permenc<seed>` ablation tokens.
-
-TabArena is used unmodified. The integration lives in `selectarena.benchmark` as subclasses:
-
-| TabArena class | SelectArena subclass | What it adds |
-|---|---|---|
-| `AGModelBagExperiment` | `SelectArenaBagExperiment` | Resolves `FSBench__*` pipelines (attaches the selector, sets `time_limit_preprocessing`) |
-| `AGSingleBagWrapper` | `SelectArenaBagWrapper` | Passes the per-split seed to the selector; collects the selector's metadata after the fit |
-| `OOFExperimentRunner` | `SelectArenaExperimentRunner` | Stores that metadata in `results["preprocessing_artifacts"]["feature_selection"]` |
-| `TabArenaV0pt1ExperimentBundle` | `SelectArenaExperimentBundle` | Builds the experiments above; 25 random configs by default |
-
-The classes are referenced by import path in TabArena's YAML job files, so jobs shipped to
-cluster nodes run them as long as `selectarena` is installed in the node's environment. This
-follows the pattern of [RamanBench](https://github.com/ml-lab-htw/RamanBench), which layers its
-domain preprocessing onto TabArena's model wrappers instead of forking TabArena.
-
 ## Installation
 
 Python 3.11 to 3.13. TabArena is pinned to one upstream commit (see `pyproject.toml`), and
@@ -43,10 +21,6 @@ uv pip install --prerelease=allow -e ".[models,dev]"
 
 With pip, use `pip install --pre -e ".[models,dev]"`. The `models` extra adds the downstream
 models of the default benchmark config (TabICLv2, RealMLP).
-
-Because the TabArena pin is a git URL, this package cannot be uploaded to PyPI as is. To publish
-it, move the TabArena lines into a separate `requirements-tabarena-git.txt` the way RamanBench
-does.
 
 ## Quickstart
 
@@ -86,9 +60,7 @@ config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
 
 With `scheduler: oar` in the cluster config, the same scripts write OAR parametric array jobs
 and print `oarsub` commands instead of `sbatch` ones (`--submit` submits them). The jobs, their
-bundling and the results are the same as on SLURM. `configs/cluster.calculco.example.yaml` is a
-config for the calculco cluster, and `scripts/oar/` holds the environment installer, a wrapper
-that runs any script on a compute node, and the workflow (`scripts/oar/README.md`).
+bundling and the results are the same as on SLURM. Start from `configs/cluster.oar.example.yaml`.
 
 ## Datasets
 
@@ -128,11 +100,6 @@ explicitly; no cluster config is needed then:
 python scripts/run_generate_website_artifacts.py \
     --results results/performance_results.csv --extra-dir results   # stability_results.csv, validity_results.csv
 ```
-
-Results written by `tabarena_fork_fs` work too: the old class names (`AccuracyFeatureSelector`,
-`ANOVAFeatureSelector`) are mapped to LOCO and F-Test, methods that are no longer in the registry
-(e.g. `AccuracyLinearFeatureSelector`) are left out, and duplicated stability/validity rows are
-counted once.
 
 `generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
 folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
@@ -194,7 +161,7 @@ src/selectarena/
   website/          the leaderboard Space's data (subsets, tables, interactive figure)
   datasets.py       the dataset suite (Data Foundry containers)
   config.py         YAML configs and the tabflow_slurm plan built from them
-configs/            benchmark.yaml, cluster.example.yaml
+configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.example.yaml (OAR)
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
                     run_generate_website_artifacts.py, check_method.py
 .claude/skills/     add-method: add a feature selection method;
@@ -202,40 +169,6 @@ scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.p
 examples/           quickstart.py, run_local.py
 tests/
 ```
-
-## Coming from tabarena_fork_fs
-
-The code was moved out of the fork; method implementations are unchanged apart from import paths
-and formatting, with one exception listed below.
-
-| Fork | SelectArena |
-|---|---|
-| `tabarena/tabarena/benchmark/feature_selection_methods/abstract/abstract_feature_selector.py` | `selectarena/methods/abstract.py` |
-| `.../feature_selection_methods/ag/<method>/<method>.py` (15 registered methods) | `selectarena/methods/<method>.py` (`random` became `random_baseline`) |
-| `.../feature_selection_methods_register.py` | `selectarena/methods/registry.py` |
-| `.../feature_selection_benchmark_utils.py` | `selectarena/benchmark/fs_config.py` |
-| edits to `experiment_runner.py`, `AutoGluon_class.py`, `abstract_class.py` | subclasses in `selectarena/benchmark/` |
-| `experimental/feature_selection_benchmark/data_integration/fs_data_constants.py` | `selectarena/datasets.py` |
-| `experimental/.../tabarena_setup/*` (per-user setups and launchers) | `configs/*.yaml`, `scripts/run_benchmark.py` |
-| `experimental/.../extra_benchmark/*` | `selectarena/extra_benchmark/`, `scripts/run_extra_benchmark.py` |
-| `tabflow_slurm/simple_evaluation/minimal_read_benchmark_results.py` | `selectarena/evaluation/read_results.py` |
-| `tst/benchmark/feature_selection_methods/fs_test.py` | `tests/test_selectors.py` |
-
-Not carried over: the legacy method tree `tabarena/benchmark/feature_selection_methods/`, the
-unregistered methods (CFS, CMIM, Consistency, DISR, Information Gain, INTERACT) and `ag_old/`,
-`experimental/.../!old/`, `examples/running_tabarena_feature_selection_methods/`, the custom-model
-example, the tests that depended on the legacy tree, and the local workarounds in
-`model_registry.py` and `metrics/_roc_auc_cpp`.
-
-Behavior changes:
-
-- `LassoFeatureSelector` wraps its L1 logistic regression in `OneVsRestClassifier` for multiclass
-  tasks. scikit-learn before 1.8 did this implicitly for the `liblinear` solver; newer versions
-  raise instead.
-- The stability/validity runner no longer writes every result twice to its CSV, and its results
-  directory is configurable.
-- `read_benchmark_results` reads gzipped `results.pkl` files (the format current TabArena writes)
-  and results written by the fork.
 
 ## Tests
 

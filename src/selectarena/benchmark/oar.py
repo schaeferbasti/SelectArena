@@ -1,4 +1,4 @@
-"""Run the TabArena job batch on an OAR cluster (e.g. calculco) instead of SLURM.
+"""Run the TabArena job batch on an OAR cluster instead of SLURM.
 
 ``OarSetup`` is a ``tabflow_slurm`` scheduler: ``TabArenaBenchmarkPlan`` builds and bundles the
 jobs exactly as for SLURM, and ``OarSetup.get_run_commands`` writes, per bundle size,

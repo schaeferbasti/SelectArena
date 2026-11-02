@@ -5,7 +5,7 @@ Two files keep what is benchmarked apart from where it runs:
 * a **benchmark config** (``configs/benchmark.yaml``, committed): feature selection methods,
   budgets, downstream models, splits;
 * a **cluster config** (``configs/cluster.yaml``, git-ignored; start from
-  ``configs/cluster.example.yaml`` for SLURM or ``configs/cluster.calculco.example.yaml`` for OAR):
+  ``configs/cluster.example.yaml`` for SLURM or ``configs/cluster.oar.example.yaml`` for OAR):
   workspace, Python environment, cache locations, scheduler settings and resources.
 
 ``load_config`` reads both. The ``build_*`` functions turn them into the TabArena / tabflow_slurm

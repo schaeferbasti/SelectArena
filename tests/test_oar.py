@@ -120,8 +120,8 @@ def test_extra_benchmark_oar_arrays(tmp_path):
     assert "-m selectarena.extra_benchmark.runner" in text
 
 
-def test_calculco_example_config_selects_oar():
-    cluster = ClusterConfig(**yaml.safe_load(open(REPO_ROOT / "configs" / "cluster.calculco.example.yaml")))
+def test_oar_example_config_selects_oar():
+    cluster = ClusterConfig(**yaml.safe_load(open(REPO_ROOT / "configs" / "cluster.oar.example.yaml")))
     assert cluster.scheduler == "oar"
     OarSetup(**cluster.oar)
     ExtraBenchmarkOarSettings(**cluster.extra_benchmark_oar)

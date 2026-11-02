@@ -13,8 +13,9 @@ import shlex
 import subprocess
 from pathlib import Path
 
-#: Sourced before ``module load`` in batch jobs (calculco: ``/nfs/opt/env/env.sh``).
-DEFAULT_ENV_SCRIPT = "/nfs/opt/env/env.sh"
+#: Sourced before ``module load`` in batch jobs; ``None`` sources nothing. Set ``env_script`` in the
+#: cluster config if the cluster needs one (e.g. to make ``module`` available).
+DEFAULT_ENV_SCRIPT: str | None = None
 
 
 def format_walltime(seconds: float) -> str:
