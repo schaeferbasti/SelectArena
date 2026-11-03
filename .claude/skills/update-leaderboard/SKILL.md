@@ -142,8 +142,8 @@ In the Space repo, read then edit `index.html`:
 
 Bump `<meta name="selectarena-version" content="X.Y.Z">`: the **patch** component for a data
 refresh (`0.1.0` → `0.1.1`), the **minor** one for site changes or a new benchmark release. The
-header shows it next to the update date. The site has no version history: describe what changed
-in the commit message instead (e.g. "Leaderboard v0.4.2: add Boruta; 71 datasets, 5 models").
+page does not display it and has no version history: describe what changed in the commit message
+instead (e.g. "Leaderboard v0.4.2: add Boruta; 71 datasets, 5 models").
 
 ## Step 5: Smoke test and preview
 
