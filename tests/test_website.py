@@ -37,7 +37,7 @@ def results() -> pd.DataFrame:
     rows = []
     for dataset, problem_type in DATASETS.items():
         for split in range(2):
-            for model in ["LightGBM", "TabICLv2"]:
+            for model in ["LightGBM", "TA-TabICLv2"]:  # TabArena's prefix is dropped on the leaderboard
                 for budget in range(3):
                     for method, quality in METHODS.items():
                         rows.append(
@@ -49,7 +49,8 @@ def results() -> pd.DataFrame:
                                 "metric_error": 1 - 0.1 * quality + rng.normal(0, 0.03),
                                 "feature_selection_budget_index": budget,
                                 "feature_selection_fit_time": 2.0,
-                                "random_feature_names": "[]",
+                                # Random fills its budget with random features by design.
+                                "random_feature_names": "['f0']" if method == "RandomFeatureSelector" else "[]",
                             }
                         )
                 rows.append(
@@ -368,7 +369,8 @@ def test_results_table(artifacts):
     assert set(table["method"]) == {"CART", "MI", "Lasso", "Random", "All features"}
     assert (table["n_splits"] == 2).all()
     assert table.loc[table["method"] == "All features", "fallback_pct"].isna().all()
-    assert (table.loc[table["method"] == "Random", "fallback_pct"] == 0).all()
+    assert (table.loc[table["method"] == "Random", "fallback_pct"] == 0).all()  # by definition
+    assert set(table["model"]) == {"LightGBM", "TabICLv2"}
     html = (artifacts.website_data / "results_explorer.html").read_text()
     assert "id='sa-data'" in html and "Lasso" in html
 
@@ -426,3 +428,38 @@ def test_lasagna_masks_and_ticks():
     assert top_k_mask(matrix, k=1).to_numpy().tolist() == [[0, 1], [1, 0], [0, 0]]
     assert threshold_mask(matrix).to_numpy().tolist() == [[1, 1], [1, 0], [0, 0]]
     assert list(_spread_ticks(np.array([0.0, 0.5, 0.55, 1.0, 9.95, 10.0]))) == [0.0, 1.0, 10.0]
+
+
+def test_leaderboard_table_medals_and_shading(artifacts):
+    data = artifacts.website_data
+    overall = pd.read_csv(data / "subsets" / Subset().rel_path / "website_leaderboard.csv")
+    assert (overall["Fallback rate (%)"] == 0).all()  # Random included
+    table = (data / "subsets" / Subset().rel_path / "leaderboard_table.html").read_text()
+    body = table.split("<tbody>", 1)[1]
+    assert body.index("gold medal") < body.index("silver medal") < body.index("bronze medal")
+    assert body.count("class='medal' role='img'") == 3
+    assert "background:rgba(0,114,178," in body and "background:rgba(213,94,0," in body
+
+
+def test_per_model_tables(artifacts):
+    data = artifacts.website_data
+    meta = json.loads((data / "meta.json").read_text())
+    for subset in meta["subsets"]:
+        assert subset.get("per_model", False) == (subset["model"] == "all")
+        assert (data / subset["path"] / "per_model_table.html").is_file() == (subset["model"] == "all")
+    per_model = pd.read_csv(data / "subsets" / Subset().rel_path / "per_model.csv").set_index("Method")
+    assert list(per_model.columns) == [
+        "Rank", "Category", "Subgroup", "Elo", "Elo LightGBM", "Rank LightGBM", "Elo TabICLv2", "Rank TabICLv2",
+    ]  # fmt: skip
+    lightgbm = pd.read_csv(data / "subsets" / Subset(model="lightgbm").rel_path / "website_leaderboard.csv")
+    assert per_model["Elo LightGBM"].to_dict() == lightgbm.set_index("Method")["Elo"].to_dict()
+    html = (data / "subsets" / Subset().rel_path / "per_model_table.html").read_text()
+    assert ">TabICLv2 ↑<" in html and html.count("gold medal") == 3  # overall + one per model
+
+
+def test_clean_model_names():
+    from selectarena.evaluation.leaderboard import clean_model_names
+
+    models = pd.Series(["TA-RealMLP", "TA-TabICLv2", "TabICLv2", "LightGBM", None])
+    cleaned = clean_model_names(models)
+    assert cleaned[:4].tolist() == ["RealMLP", "TA-TabICLv2", "TabICLv2", "LightGBM"] and pd.isna(cleaned[4])
