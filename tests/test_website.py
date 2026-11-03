@@ -190,6 +190,21 @@ def test_html_is_self_contained(artifacts):
         assert "${" not in text and "{{" not in text  # Gradio's gr.HTML templates
     table = (data / "subsets" / Subset().rel_path / "leaderboard_table.html").read_text()
     assert "CART" in table and ">Tree<" in table
+    header = table.split("<thead", 1)[1].split("</thead>", 1)[0]
+    assert ">Improvability" in header
+    for hidden in ("Win rate", "Error vs. all", "#Datasets"):  # kept in the CSV, not shown
+        assert hidden not in header
+
+
+def test_figure_tooltip(artifacts):
+    """The Elo figure shows its own tooltip at once (a native SVG <title> waits 1-3 s)."""
+    page = (artifacts.website_data / "subsets" / Subset().rel_path / "elo_explorer.html").read_text()
+    assert page.count("class='sa-hit'") == 4 and "data-tip='CART (Tree, non-search)&#10;Elo" in page
+    assert "<title>" not in page.split("<svg", 1)[1].split("</svg>", 1)[0]
+    script = page.rsplit("<script>", 1)[1]
+    for line in script.splitlines():  # a raw line break inside a JS string literal is a syntax error
+        code = line.split("//", 1)[0] if line.lstrip().startswith("//") else line
+        assert code.count("'") % 2 == 0, line
 
 
 def test_figure_handles_missing_scores():

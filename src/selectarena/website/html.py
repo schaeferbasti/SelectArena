@@ -223,22 +223,10 @@ LEADERBOARD_TABLE_COLUMNS = [
     },
     {"key": "Avg. rank", "label": "Avg. rank ↓", "digits": 2, "help": "Mean rank of the downstream error."},
     {
-        "key": "Win rate (%)",
-        "label": "Win rate ↑",
-        "digits": 1,
-        "help": "Share of pairwise comparisons won, in %. Ties count half.",
-    },
-    {
         "key": "Improvability (%)",
         "label": "Improvability ↓",
         "digits": 1,
         "help": "Mean relative gap (error − best error) / error to the best method, in %.",
-    },
-    {
-        "key": "Error vs. all features",
-        "label": "Error vs. all ↓",
-        "digits": 3,
-        "help": "Mean ratio of the error to the same model trained on all features. Below 1: the selection helped.",
     },
     {
         "key": "Stability",
@@ -264,7 +252,6 @@ LEADERBOARD_TABLE_COLUMNS = [
         "digits": 1,
         "help": "Share of runs where the method ran out of time and random features filled the budget.",
     },
-    {"key": "#Datasets", "label": "#Datasets", "digits": 0},
 ]
 
 
@@ -338,11 +325,59 @@ svg { display:block; width:100%; height:auto; }
 .sa-muted { fill:var(--muted); }
 .sa-grid { stroke:var(--line); }
 .sa-ink { stroke:var(--fg); }
-.sa-hit { fill:transparent; }
-.sa-hit:hover { fill:var(--fg); fill-opacity:0.06; }
+.sa-hit { fill:transparent; cursor:default; }
+.sa-hit:hover, .sa-hit.sa-on { fill:var(--fg); fill-opacity:0.06; }
+"""
+
+_TIP_CSS = """
+#sa-tip { position:fixed; z-index:10; pointer-events:none; display:none; max-width:280px;
+  padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  font-size:12px; line-height:1.45; white-space:pre-line; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#sa-tip b { font-weight:600; }
 """
 
 _FIGURE_JS = """
+// Instant tooltip: a native SVG <title> only shows after a browser delay of 1-3 s.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'sa-tip';
+  document.body.appendChild(tip);
+  var current = null;
+  function show(hit, x, y) {
+    if (current !== hit) {
+      if (current) current.classList.remove('sa-on');
+      current = hit;
+      hit.classList.add('sa-on');
+      var lines = hit.getAttribute('data-tip').split('\\n');
+      tip.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = lines[0];
+      tip.appendChild(head);
+      tip.appendChild(document.createTextNode('\\n' + lines.slice(1).join('\\n')));
+      tip.style.display = 'block';
+    }
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 14;
+    if (left + w > window.innerWidth - 4) left = Math.max(4, x - w - 14);
+    if (top + h > window.innerHeight - 4) top = Math.max(4, y - h - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    if (current) current.classList.remove('sa-on');
+    current = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('pointermove', function (e) {
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else if (e.pointerType === 'mouse') hide();
+  });
+  document.addEventListener('pointerdown', function (e) {  // touch: tap a bar to show, elsewhere to hide
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else hide();
+  });
+  document.addEventListener('mouseleave', hide);
+})();
 function saSvgString() {
   var svg = document.getElementById('sa-figure').cloneNode(true);
   var style = getComputedStyle(document.documentElement);
@@ -472,9 +507,10 @@ def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
             "Stability " + ("n/a" if _is_missing(row.get("Stability")) else f"{row['Stability']:.3f}"),
             "Validity " + ("n/a" if _is_missing(row.get("Validity")) else f"{row['Validity']:.3f}"),
         ]
+        text = html.escape(chr(10).join(tip), quote=True).replace(chr(10), "&#10;")
         parts.append(
-            f"<rect class='sa-hit' x='{cx - slot / 2:.1f}' y='{top}' width='{slot}' height='{plot_h + bottom - 8}'>"
-            f"<title>{html.escape(chr(10).join(tip))}</title></rect>"
+            f"<rect class='sa-hit' x='{cx - slot / 2:.1f}' y='{top}' width='{slot}' height='{plot_h + bottom - 8}' "
+            f"data-tip='{text}' aria-label='{text}'/>"
         )
     parts.append(
         f"<line class='sa-ink' x1='{left}' x2='{left + plot_w}' y1='{base:.1f}' y2='{base:.1f}' stroke-width='1' opacity='0.4'/>"
@@ -513,13 +549,13 @@ def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
 def elo_explorer_html(leaderboard: pd.DataFrame, *, title: str) -> str:
     """``elo_explorer.html``: the main figure of one subset with SVG / PNG / CSV export."""
     toolbar = (
-        "<div class='toolbar'><span class='hint'>Hover a method for its values.</span>"
+        "<div class='toolbar'><span class='hint'>Hover or tap a method for its values.</span>"
         "<button onclick='saSvg()'>SVG</button><button onclick='saPng()'>PNG</button>"
         "<button onclick=\"saCsv('selectarena_elo.csv')\">CSV</button></div>"
     )
     columns = ["Method", "Category", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
     csv = leaderboard[[c for c in columns if c in leaderboard]]
-    return _page(title, toolbar + elo_figure_svg(leaderboard) + _csv_block(csv), "", _FIGURE_JS)
+    return _page(title, toolbar + elo_figure_svg(leaderboard) + _csv_block(csv), _TIP_CSS, _FIGURE_JS)
 
 
 # --------------------------------------------------------------------------------------------------
