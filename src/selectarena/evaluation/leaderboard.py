@@ -232,8 +232,20 @@ def _drop_duplicate_runs(df: pd.DataFrame) -> pd.DataFrame:
     return df.drop_duplicates(subset=[c for c in _EXTRA_RUN_KEYS if c in df.columns], keep="last")
 
 
+#: Columns of the extra results that :func:`events_per_variable` needs (missing ones are NaN).
+_EPV_COLUMNS = ["num_features", "num_samples", "min_samples_per_class"]
+
+
+def _first(group: pd.DataFrame, column: str):
+    return group[column].iloc[0] if column in group else np.nan
+
+
 def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
-    """Nogueira stability of each (method, task) over its bootstrap repeats."""
+    """Nogueira stability of each (method, task) over its bootstrap repeats.
+
+    Also returns what the lasagna plots need for the events per variable of the setting: the
+    number of original features and the samples (overall and of the smallest class).
+    """
     rows = []
     stability = _drop_duplicate_runs(stability)
     for (method_name, task), group in stability.groupby(["method", "data_foundry_task_id"]):
@@ -247,9 +259,12 @@ def stability_per_task(stability: pd.DataFrame) -> pd.DataFrame:
                 "task": task,
                 "dataset": task_dataset(task),
                 "stability": nogueira_stability(selections, features),
+                "num_features": len(features),
+                "num_samples": _first(group, "num_samples"),
+                "min_samples_per_class": _first(group, "min_samples_per_class"),
             }
         )
-    return pd.DataFrame(rows, columns=["method", "budget_index", "task", "dataset", "stability"])
+    return pd.DataFrame(rows, columns=["method", "budget_index", "task", "dataset", "stability", *_EPV_COLUMNS])
 
 
 def validity_per_run(validity: pd.DataFrame) -> pd.DataFrame:
@@ -268,7 +283,27 @@ def validity_per_run(validity: pd.DataFrame) -> pd.DataFrame:
 
     df["validity"] = df.apply(_validity, axis=1)
     df["method"] = df["method"].map(method_label)
-    return df[["method", "budget_index", "noise", "dataset", "validity"]]
+    # Original features of each task (parsed once per distinct list).
+    counts = {text: len(feature_names(text)) for text in df["original_features"].dropna().unique()}
+    df["num_features"] = df["original_features"].map(counts)
+    for column in ("num_samples", "min_samples_per_class"):
+        if column not in df:
+            df[column] = np.nan
+    return df[["method", "budget_index", "noise", "dataset", "validity", *_EPV_COLUMNS]]
+
+
+def events_per_variable(rows: pd.DataFrame, problem_types: pd.Series | None = None) -> pd.Series:
+    """Events per variable of each row: samples of the smallest class (classification) or all
+    samples (regression) per original feature, as in the paper's stability and validity figures.
+
+    ``problem_types`` maps ``dataset`` to its problem type; rows of regression datasets use all
+    samples even when the results store a per-class count for them.
+    """
+    events = rows["min_samples_per_class"].where(rows["min_samples_per_class"].notna(), rows["num_samples"])
+    if problem_types is not None:
+        regression = rows["dataset"].map(problem_types).eq("regression")
+        events = events.where(~regression, rows["num_samples"])
+    return events / rows["num_features"]
 
 
 def stability_table(stability: pd.DataFrame) -> pd.DataFrame:
