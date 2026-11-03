@@ -9,7 +9,15 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
 
   - ``meta.json``: counts, axis values and the list of published subsets;
   - ``subsets/tasks_<t>/models_<m>/budgets_<b>/``: per subset ``website_leaderboard.csv``,
-    ``leaderboard_table.html`` and ``elo_explorer.html`` (see :mod:`selectarena.website.subsets`);
+    ``leaderboard_table.html``, ``elo_explorer.html`` and, when the number of features of the
+    datasets is known (from the stability or validity results), the Pareto front of improvement
+    over Random vs. selection time, ``pareto.svg`` and ``pareto.csv`` (see
+    :mod:`selectarena.website.subsets` and :mod:`selectarena.evaluation.pareto`);
+  - ``lasagna/stability/tasks_<t>/`` and ``lasagna/validity/noise_<level>/tasks_<t>/``: the
+    paper's lasagna plots per task type, one ``<variant>.svg`` per variant plus ``per_epv.csv``
+    (see :mod:`selectarena.evaluation.lasagna`);
+  - ``results.csv`` and ``results_explorer.html``: the results per dataset, method, downstream
+    model and budget, averaged over splits;
   - ``per_dataset.csv`` and ``per_dataset_table.html``: mean rank per dataset and method;
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
@@ -31,13 +39,16 @@ from datetime import UTC, datetime
 from importlib import metadata
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from selectarena.datasets import dataset_name, task_names_from_ids
+from selectarena.evaluation import lasagna
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
     VALIDITY_NOISE_MAIN_FIGURE,
     aggregate,
+    events_per_variable,
     main_figure_table,
     per_group_scores,
     prepare_results,
@@ -46,9 +57,16 @@ from selectarena.evaluation.leaderboard import (
     validity_per_run,
     validity_table,
 )
+from selectarena.evaluation.pareto import improvement_and_runtime, pareto_figure
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
-from selectarena.website.html import elo_explorer_html, extra_table_html, leaderboard_table_html, per_dataset_table_html
-from selectarena.website.subsets import ALL, Subset, enumerate_subsets, model_key
+from selectarena.website.html import (
+    elo_explorer_html,
+    extra_table_html,
+    leaderboard_table_html,
+    per_dataset_table_html,
+    results_explorer_html,
+)
+from selectarena.website.subsets import ALL, TASK_TYPES, Subset, enumerate_subsets, model_key
 from selectarena.website.website_format import format_leaderboard, unclassified_methods
 
 RAW_DIR = "raw_website_artifacts"
@@ -81,6 +99,74 @@ def _version() -> str:
         return metadata.version("selectarena")
     except metadata.PackageNotFoundError:
         return "dev"
+
+
+def _save_svg(fig, path: Path) -> None:
+    """Write a matplotlib figure as SVG without a date, so unchanged data gives an unchanged file."""
+    import matplotlib.pyplot as plt
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with plt.rc_context({"svg.hashsalt": "selectarena", "svg.fonttype": "none"}):
+        fig.savefig(path, format="svg", bbox_inches="tight", metadata={"Date": None})
+    plt.close(fig)
+
+
+def _noise_label(noise: float) -> str:
+    return f"{float(noise):g}"
+
+
+def _lasagna_plots(
+    rows: pd.DataFrame, value: str, folder: Path, problem_types: pd.Series, log: Callable[[str], None]
+) -> list[str]:
+    """Write one folder per task type with ``per_epv.csv`` and one SVG per variant; return the task types."""
+    written = []
+    for tasks, allowed in TASK_TYPES.items():
+        sub = rows if allowed is None else rows[rows["dataset"].map(problem_types).isin(allowed)]
+        long = lasagna.per_epv(sub, value)
+        if long["method"].nunique() < 2 or long["epv"].nunique() < 2:
+            continue
+        target = folder / f"tasks_{tasks}"
+        target.mkdir(parents=True, exist_ok=True)
+        long.round(4).to_csv(target / "per_epv.csv", index=False)
+        matrix = lasagna.epv_matrix(long, value)
+        for variant in lasagna.VARIANTS:
+            _save_svg(lasagna.lasagna_figure(matrix, value, variant), target / f"{variant}.svg")
+        written.append(tasks)
+    log(f"{value} lasagna plots ({folder.name}): {', '.join(written) or 'none'}")
+    return written
+
+
+def _results_table(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per dataset, method, downstream model and budget, averaged over the splits."""
+    rows = df.assign(
+        method=df["method"].fillna("All features"),
+        fs_time_s=df["feature_selection_fit_time"],
+        fallback=df["used_fallback"].astype(float),
+        # Not written by every TabArena version (nor by the tests' minimal results).
+        max_features=df["max_features"] if "max_features" in df else np.nan,
+        metric=df["metric"] if "metric" in df else "",
+    )
+    rows["budget"] = rows["budget_index"].map(lambda b: "–" if pd.isna(b) else str(int(b) + 1))
+    keys = ["dataset_key", "problem_type", "method", "model", "budget"]
+    table = (
+        rows.groupby(keys, dropna=False)
+        .agg(
+            max_features=("max_features", "mean"),
+            metric=("metric", "first"),
+            error=("metric_error", "mean"),
+            error_std=("metric_error", "std"),
+            n_splits=("metric_error", "size"),
+            fs_time_s=("fs_time_s", "mean"),
+            fallback_pct=("fallback", "mean"),
+        )
+        .reset_index()
+        .rename(columns={"dataset_key": "dataset", "problem_type": "task_type"})
+    )
+    table["fallback_pct"] = (table["fallback_pct"] * 100).where(table["method"] != "All features")
+    table = table.sort_values(["dataset", "model", "budget", "error"]).reset_index(drop=True)
+    for column, digits in (("error", 6), ("error_std", 6), ("fs_time_s", 3), ("fallback_pct", 1), ("max_features", 1)):
+        table[column] = table[column].round(digits)
+    return table
 
 
 def _subset_title(subset: Subset, model_names: dict[str, str]) -> str:
@@ -164,17 +250,27 @@ def generate_website_artifacts(
     if unclassified:
         log(f"WARNING: no subgroup for {unclassified}; add them to METHOD_SUBGROUPS (they show as 'Other').")
 
-    problem_types = df.assign(key=df["dataset"].map(_dataset_key)).groupby("key")["problem_type"].first()
+    df["dataset_key"] = df["dataset"].map(_dataset_key)
+    problem_types = df.groupby("dataset_key")["problem_type"].first()
     stab_rows = stability_per_task(stability) if stability is not None and not stability.empty else None
-    val_rows = validity_per_run(validity) if validity is not None and not validity.empty else None
-    if val_rows is not None and validity_noise is not None:
-        val_rows = val_rows[val_rows["noise"] == validity_noise]
+    val_all = validity_per_run(validity) if validity is not None and not validity.empty else None
     ranked = set(scores["method"].dropna())
     stab_rows = stab_rows[stab_rows["method"].isin(ranked)].copy() if stab_rows is not None else None
-    val_rows = val_rows[val_rows["method"].isin(ranked)].copy() if val_rows is not None else None
-    for rows in (stab_rows, val_rows):
+    val_all = val_all[val_all["method"].isin(ranked)].copy() if val_all is not None else None
+    for rows in (stab_rows, val_all):
         if rows is not None:
             rows["dataset"] = rows["dataset"].map(_dataset_key)
+    val_rows = val_all
+    if val_rows is not None and validity_noise is not None:
+        val_rows = val_rows[val_rows["noise"] == validity_noise]
+
+    # Number of original features per dataset (for the Pareto front's time per 1k features).
+    feature_counts = [r[["dataset", "num_features"]] for r in (val_all, stab_rows) if r is not None]
+    num_features = (
+        pd.concat(feature_counts).dropna().groupby("dataset")["num_features"].max() if feature_counts else pd.Series()
+    )
+    if num_features.empty:
+        log("No stability or validity results: the number of features is unknown, so no Pareto fronts.")
 
     model_names = {model_key(m): m for m in sorted(df["model"].dropna().unique())}
     published: list[dict] = []
@@ -206,6 +302,13 @@ def generate_website_artifacts(
         leaderboard.to_csv(target / "website_leaderboard.csv", index=False)
         (target / "leaderboard_table.html").write_text(leaderboard_table_html(leaderboard, title=title))
         (target / "elo_explorer.html").write_text(elo_explorer_html(leaderboard, title=title))
+        has_pareto = False
+        if not num_features.empty:
+            front = improvement_and_runtime(subset.filter(df).assign(dataset=lambda d: d["dataset_key"]), num_features)
+            if len(front) >= 2 and "Random" in set(front["method"]):
+                front.round(4).to_csv(target / "pareto.csv", index=False)
+                _save_svg(pareto_figure(front), target / "pareto.svg")
+                has_pareto = True
         published.append(
             {
                 "tasks": subset.tasks,
@@ -215,6 +318,7 @@ def generate_website_artifacts(
                 "n_datasets": int(sub["dataset_key"].nunique()),
                 "n_methods": int(sub["method"].nunique()),
                 "n_comparisons": len(sub),
+                "pareto": has_pareto,
             }
         )
         log(f"[{k}/{len(candidates)}] {subset.rel_path}: {sub['method'].nunique()} methods")
@@ -231,11 +335,46 @@ def generate_website_artifacts(
         per_dataset_table_html(per_dataset, title="SelectArena: mean rank per dataset")
     )
 
+    # Lasagna plots. The stability results store unreliable per-class counts; as in the paper, take
+    # them from the validity results of the same dataset.
+    lasagna_meta: dict = {"variants": list(lasagna.VARIANTS), "variant_labels": lasagna.VARIANT_LABELS}
+    if stab_rows is not None:
+        rows = stab_rows.copy()
+        if val_all is not None:
+            per_class = val_all.groupby("dataset")["min_samples_per_class"].first()
+            rows["min_samples_per_class"] = rows["dataset"].map(per_class).fillna(rows["min_samples_per_class"])
+        rows["epv"] = events_per_variable(rows, problem_types)
+        task_types = _lasagna_plots(rows, "stability", website_data / "lasagna" / "stability", problem_types, log)
+        if task_types:
+            lasagna_meta["stability"] = {"path": "lasagna/stability", "task_types": task_types}
+    if val_all is not None:
+        val_all["epv"] = events_per_variable(val_all, problem_types)
+        levels = []
+        for noise, rows in val_all.dropna(subset=["noise"]).groupby("noise"):
+            folder = website_data / "lasagna" / "validity" / f"noise_{_noise_label(noise)}"
+            task_types = _lasagna_plots(rows, "validity", folder, problem_types, log)
+            if task_types:
+                levels.append(
+                    {
+                        "noise": float(noise),
+                        "path": f"lasagna/validity/noise_{_noise_label(noise)}",
+                        "task_types": task_types,
+                    }
+                )
+        if levels:
+            lasagna_meta["validity"] = levels
+
+    total_budget = _total_budget(df)
+    results_table = _results_table(df)
+    results_table.to_csv(website_data / "results.csv", index=False)
+    (website_data / "results_explorer.html").write_text(
+        results_explorer_html(results_table, title="SelectArena: results per dataset, method, model and budget")
+    )
+
     stab_table = stability_table(stability) if stab_rows is not None else None
     val_table = validity_table(validity) if validity is not None and not validity.empty else None
     stab_table = stab_table[stab_table["method"].isin(ranked)] if stab_table is not None else None
     val_table = val_table[val_table["method"].isin(ranked)] if val_table is not None else None
-    total_budget = _total_budget(df)
     if stab_table is not None:
         stab_table.to_csv(website_data / "stability.csv", index=False)
         (website_data / "stability_table.html").write_text(
@@ -274,6 +413,8 @@ def generate_website_artifacts(
         "has_stability": stab_table is not None,
         "has_validity": val_table is not None,
         "validity_tables": validity_tables,
+        "lasagna": lasagna_meta,
+        "has_results_explorer": True,
         "subsets": published,
     }
     (website_data / "meta.json").write_text(json.dumps(meta, indent=2) + "\n")

@@ -23,6 +23,8 @@ METHODS = {
     "CARTFeatureSelector": 0.8,
 }
 DATASETS = {"anneal": "multiclass", "credit": "binary", "diabetes": "binary", "abalone": "regression"}
+SAMPLES = {"anneal": (800, 40), "credit": (600, 250), "diabetes": (700, 200), "abalone": (4000, 1)}
+"""(samples, samples of the smallest class) of each dataset, as stored in the extra results."""
 FEATURES = [f"f{i}" for i in range(10)]
 
 
@@ -86,6 +88,8 @@ def extra_results(mode: str) -> pd.DataFrame:
                                 "original_features": str(FEATURES),
                                 "max_features": 4,
                                 "selected_features": str(selected),
+                                "num_samples": SAMPLES[dataset][0],
+                                "min_samples_per_class": SAMPLES[dataset][1],
                             }
                         )
     return pd.DataFrame(rows)
@@ -141,6 +145,19 @@ def test_layout(artifacts):
         {"noise": 1.0, "path": "validity_noise_1_table.html"},
     ]
     assert "Noise level" not in (data / "validity_noise_1_table.html").read_text()
+    assert meta["has_results_explorer"] and (data / "results_explorer.html").is_file()
+    assert meta["subsets"][0]["pareto"]
+    for subset in meta["subsets"]:
+        assert (data / subset["path"] / "pareto.svg").is_file() == subset["pareto"]
+    lasagna = meta["lasagna"]
+    assert lasagna["variants"] == ["plain", "overlay_top_3", "binary_thr_003"]
+    # Regression has a single dataset, i.e. a single EPV: no plot.
+    assert lasagna["stability"]["task_types"] == ["all", "classification", "binary"]
+    assert [level["noise"] for level in lasagna["validity"]] == [0.5, 1.0]
+    for folder in [lasagna["stability"], *lasagna["validity"]]:
+        for tasks in folder["task_types"]:
+            for variant in lasagna["variants"]:
+                assert (data / folder["path"] / f"tasks_{tasks}" / f"{variant}.svg").is_file()
     assert not list(data.rglob("*.png"))
     assert (artifacts.raw_dir / "main_figure.pdf").is_file()
     with zipfile.ZipFile(artifacts.zip_path) as z:
@@ -327,3 +344,70 @@ def test_task_ids_named_from_extra_results(tmp_path):
     )
     per_dataset = pd.read_csv(artifacts.website_data / "per_dataset.csv")
     assert "anneal" in set(per_dataset["dataset"]) and "Task-1234567890" not in set(per_dataset["dataset"])
+
+
+def test_results_table(artifacts):
+    table = pd.read_csv(artifacts.website_data / "results.csv")
+    # 4 datasets x 2 models x (4 methods x 3 budgets + all features)
+    assert len(table) == 4 * 2 * (4 * 3 + 1)
+    assert set(table["method"]) == {"CART", "MI", "Lasso", "Random", "All features"}
+    assert (table["n_splits"] == 2).all()
+    assert table.loc[table["method"] == "All features", "fallback_pct"].isna().all()
+    assert (table.loc[table["method"] == "Random", "fallback_pct"] == 0).all()
+    html = (artifacts.website_data / "results_explorer.html").read_text()
+    assert "id='sa-data'" in html and "Lasso" in html
+
+
+def test_events_per_variable():
+    from selectarena.evaluation.leaderboard import events_per_variable
+
+    rows = pd.DataFrame(
+        {
+            "dataset": ["a", "b", "c"],
+            "num_features": [10, 4, 5],
+            "num_samples": [100, 40, 50],
+            "min_samples_per_class": [20, np.nan, 1],
+        }
+    )
+    assert list(events_per_variable(rows)) == [2.0, 10.0, 0.2]
+    # Regression datasets count all samples, whatever their per-class count says.
+    assert list(events_per_variable(rows, {"a": "binary", "b": "binary", "c": "regression"})) == [2.0, 10.0, 10.0]
+
+
+def test_pareto():
+    from selectarena.evaluation.pareto import improvement_and_runtime, pareto_front
+
+    rows = pd.DataFrame(
+        [
+            {"dataset": d, "method": m, "metric_error": e, "feature_selection_fit_time": t}
+            for d in ["a", "b"]
+            for m, e, t in [("Random", 0.5, 0.01), ("Fast", 0.4, 0.1), ("Good", 0.25, 10.0), ("Bad", 0.45, 20.0)]
+        ]
+        + [{"dataset": "a", "method": None, "metric_error": 0.3, "feature_selection_fit_time": np.nan}]
+    )
+    summary = improvement_and_runtime(rows, {"a": 100, "b": 1000}).set_index("method")
+    assert summary.loc["Random", "improvement"] == 0
+    assert summary.loc["Good", "improvement"] == pytest.approx(50)
+    assert summary.loc["Fast", "time_per_1k"] == pytest.approx((1.0 + 0.1) / 2)
+    assert (summary["n_datasets"] == 2).all()
+    assert summary["pareto_optimal"].to_dict() == {"Good": True, "Fast": True, "Bad": False, "Random": True}
+    tie = pd.DataFrame({"time_per_1k": [1.0, 1.0], "improvement": [5.0, 5.0]})
+    assert pareto_front(tie).all()  # neither strictly dominates the other
+
+
+def test_lasagna_masks_and_ticks():
+    from selectarena.evaluation.lasagna import _spread_ticks, epv_matrix, per_epv, threshold_mask, top_k_mask
+
+    rows = pd.DataFrame(
+        {
+            "method": ["A", "A", "B", "B", "C", "C", "C"],
+            "epv": [1.0, 10.0, 1.0, 10.0, 1.0, 10.0, -1.0],
+            "stability": [0.9, 0.5, 0.88, 0.8, 0.1, 0.2, 0.99],
+        }
+    )
+    matrix = epv_matrix(per_epv(rows, "stability"), "stability")
+    assert list(matrix.index) == ["B", "A", "C"]  # best mean on top; the negative EPV is dropped
+    assert list(matrix.columns) == [1.0, 10.0]
+    assert top_k_mask(matrix, k=1).to_numpy().tolist() == [[0, 1], [1, 0], [0, 0]]
+    assert threshold_mask(matrix).to_numpy().tolist() == [[1, 1], [1, 0], [0, 0]]
+    assert list(_spread_ticks(np.array([0.0, 0.5, 0.55, 1.0, 9.95, 10.0]))) == [0.0, 1.0, 10.0]

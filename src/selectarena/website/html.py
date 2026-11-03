@@ -520,3 +520,180 @@ def elo_explorer_html(leaderboard: pd.DataFrame, *, title: str) -> str:
     columns = ["Method", "Category", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
     csv = leaderboard[[c for c in columns if c in leaderboard]]
     return _page(title, toolbar + elo_figure_svg(leaderboard) + _csv_block(csv), "", _FIGURE_JS)
+
+
+# --------------------------------------------------------------------------------------------------
+# Results explorer
+
+_EXPLORER_CSS = """
+.filters { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:2px 2px 10px; }
+.filters input, .filters select { font:inherit; font-size:13px; color:var(--fg); background:var(--bg);
+  border:1px solid var(--line); border-radius:6px; padding:4px 8px; }
+.filters input { min-width:200px; }
+.filters label { font-size:12px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+.pager { display:flex; gap:8px; align-items:center; justify-content:flex-end; padding:8px 2px; font-size:13px;
+  color:var(--muted); }
+.pager button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.pager button:disabled { opacity:0.4; cursor:default; }
+"""
+
+_EXPLORER_JS = """
+(function () {
+  var data = JSON.parse(document.getElementById('sa-data').textContent);
+  var cols = data.columns, rows = data.rows, PAGE = 50;
+  var state = { page: 0, sort: null, asc: true };
+  var filters = {};
+  var table = document.getElementById('sa-table');
+
+  function cell(row, key) { return row[cols.indexOf(key)]; }
+  function fmt(value, digits) {
+    if (value === null || value === undefined || value === '') return '–';
+    if (digits === null || digits === undefined) return String(value);
+    return Number(value).toLocaleString('en-US', {minimumFractionDigits: digits, maximumFractionDigits: digits});
+  }
+  function matches(row) {
+    var text = (filters.dataset || '').toLowerCase();
+    if (text && String(cell(row, 'dataset')).toLowerCase().indexOf(text) < 0) return false;
+    for (var key in filters) {
+      if (key === 'dataset' || !filters[key]) continue;
+      if (String(cell(row, key)) !== filters[key]) return false;
+    }
+    return true;
+  }
+  function current() {
+    var out = rows.filter(matches);
+    if (state.sort !== null) {
+      var i = state.sort, dir = state.asc ? 1 : -1;
+      out.sort(function (a, b) {
+        var x = a[i], y = b[i];
+        if (x === null) return 1;
+        if (y === null) return -1;
+        if (typeof x === 'number' && typeof y === 'number') return (x - y) * dir;
+        return String(x).localeCompare(String(y)) * dir;
+      });
+    }
+    return out;
+  }
+  function render() {
+    var list = current();
+    var pages = Math.max(1, Math.ceil(list.length / PAGE));
+    if (state.page >= pages) state.page = pages - 1;
+    var body = table.tBodies[0];
+    body.textContent = '';
+    list.slice(state.page * PAGE, (state.page + 1) * PAGE).forEach(function (row) {
+      var tr = document.createElement('tr');
+      data.spec.forEach(function (spec) {
+        var td = document.createElement('td');
+        var value = cell(row, spec.key);
+        td.textContent = fmt(value, spec.digits);
+        if (spec.digits !== null && spec.digits !== undefined) td.className = 'num';
+        if (td.textContent === '–') td.className += ' na';
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    document.getElementById('sa-count').textContent = list.length.toLocaleString('en-US') + ' rows · page ' +
+      (state.page + 1) + ' of ' + pages;
+    document.getElementById('sa-prev').disabled = state.page === 0;
+    document.getElementById('sa-next').disabled = state.page >= pages - 1;
+  }
+  data.spec.forEach(function (spec, k) {
+    var th = table.tHead.rows[0].cells[k];
+    th.addEventListener('click', function () {
+      var i = cols.indexOf(spec.key);
+      state.asc = state.sort === i ? !state.asc : true;
+      state.sort = i;
+      Array.prototype.forEach.call(table.tHead.rows[0].cells, function (h) { h.removeAttribute('aria-sort'); });
+      th.setAttribute('aria-sort', state.asc ? 'ascending' : 'descending');
+      render();
+    });
+  });
+  document.querySelectorAll('[data-filter]').forEach(function (input) {
+    input.addEventListener('input', function () {
+      filters[input.getAttribute('data-filter')] = input.value;
+      state.page = 0;
+      render();
+    });
+  });
+  document.getElementById('sa-prev').addEventListener('click', function () { state.page -= 1; render(); });
+  document.getElementById('sa-next').addEventListener('click', function () { state.page += 1; render(); });
+  window.saExplorerCsv = function () {
+    function quote(v) {
+      if (v === null || v === undefined) return '';
+      var s = String(v);
+      return /[",\\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    var lines = [cols.join(',')].concat(current().map(function (r) { return r.map(quote).join(','); }));
+    saDownload('selectarena_results.csv', new Blob([lines.join('\\n') + '\\n'], {type: 'text/csv'}));
+  };
+  render();
+})();
+"""
+
+#: Columns of the results explorer: ``key`` (column of the results table), ``label``, ``digits``
+#: (``None`` for text), ``help`` (header tooltip), ``filter`` (a select box over its values).
+RESULTS_EXPLORER_COLUMNS = [
+    {"key": "dataset", "label": "Dataset", "digits": None},
+    {"key": "task_type", "label": "Task", "digits": None, "filter": True},
+    {"key": "method", "label": "Method", "digits": None, "filter": True},
+    {"key": "model", "label": "Model", "digits": None, "filter": True},
+    {"key": "budget", "label": "Budget", "digits": None, "filter": True, "help": "1 is the smallest budget"},
+    {"key": "max_features", "label": "#Features", "digits": 0, "help": "Number of features kept"},
+    {"key": "metric", "label": "Metric", "digits": None},
+    {"key": "error", "label": "Error", "digits": 4, "help": "Mean test error over the splits (lower is better)"},
+    {"key": "error_std", "label": "Error std.", "digits": 4},
+    {"key": "n_splits", "label": "Splits", "digits": 0},
+    {"key": "fs_time_s", "label": "Selection time (s)", "digits": 2, "help": "Mean wall-clock time of the selection"},
+    {
+        "key": "fallback_pct",
+        "label": "Fallback (%)",
+        "digits": 0,
+        "help": "Share of splits whose budget was filled at random",
+    },
+]
+
+
+def results_explorer_html(results: pd.DataFrame, *, title: str) -> str:
+    """``results_explorer.html``: the results per dataset, method, model and budget, with filters,
+    sorting, pages of 50 rows and CSV export of the filtered rows. The data is embedded as JSON."""
+    import json
+
+    spec = [c for c in RESULTS_EXPLORER_COLUMNS if c["key"] in results]
+    columns = [c["key"] for c in spec]
+    frame = results[columns].astype(object).where(results[columns].notna(), None)
+    payload = {
+        "columns": columns,
+        "spec": [{"key": c["key"], "digits": c["digits"]} for c in spec],
+        "rows": frame.to_numpy().tolist(),
+    }
+    data = json.dumps(payload, separators=(",", ":"), default=float).replace("</", "<\\/")
+
+    controls = [
+        "<label>Dataset <input type='search' data-filter='dataset' placeholder='e.g. credit' aria-label='Filter datasets'></label>"
+    ]
+    for c in spec:
+        if not c.get("filter"):
+            continue
+        values = sorted({str(v) for v in results[c["key"]].dropna()}, key=lambda v: (len(v) > 3, v))
+        options = "".join(f"<option value='{html.escape(v, quote=True)}'>{html.escape(v)}</option>" for v in values)
+        controls.append(
+            f"<label>{html.escape(c['label'])} <select data-filter='{c['key']}'>"
+            f"<option value=''>All</option>{options}</select></label>"
+        )
+    head = "".join(
+        f"<th class='{'num' if c['digits'] is not None else ''}'"
+        + (f" title='{html.escape(c['help'], quote=True)}'" if c.get("help") else "")
+        + f">{html.escape(c['label'])}</th>"
+        for c in spec
+    )
+    body = (
+        f"<div class='filters'>{''.join(controls)}</div>"
+        "<div class='toolbar'><span class='hint'>Click a column to sort; the CSV holds the filtered rows.</span>"
+        "<button onclick='saExplorerCsv()'>CSV</button></div>"
+        f"<div class='wrap'><table id='sa-table'><thead><tr>{head}</tr></thead><tbody></tbody></table></div>"
+        "<div class='pager'><span id='sa-count'></span><button id='sa-prev'>Previous</button>"
+        "<button id='sa-next'>Next</button></div>"
+        f"<script type='application/json' id='sa-data'>{data}</script>"
+    )
+    return _page(title, body, _TABLE_CSS + _EXPLORER_CSS, _EXPLORER_JS)

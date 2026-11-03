@@ -36,24 +36,24 @@ from pathlib import Path
 
 import pandas as pd
 
-from selectarena.config import load_benchmark_config, load_cluster_config
+from selectarena.config import load_benchmark_config
 from selectarena.evaluation.leaderboard import VALIDITY_NOISE_MAIN_FIGURE
 from selectarena.website import generate_website_artifacts
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_RESULTS_DIR = "results"
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", default=str(REPO_ROOT / "configs" / "benchmark.yaml"), help="Benchmark config.")
     parser.add_argument(
-        "--cluster-config", default=None, help="Cluster config, to find the run directory when --results is not given."
+        "--results", default=None, help=f"Performance results (default: {DEFAULT_RESULTS_DIR}/performance_results.csv)."
     )
-    parser.add_argument("--results", default=None, help="results.csv (default: <run dir>/results.csv).")
     parser.add_argument(
         "--extra-dir",
         default=None,
-        help="Folder with stability_results.csv / validity_results.csv (default: <run dir>/<results_subdir>).",
+        help="Folder with stability_results.csv / validity_results.csv (default: the folder of --results).",
     )
     parser.add_argument("--out", default=str(REPO_ROOT / "generated_website_artifacts"), help="Output folder.")
     parser.add_argument("--elo-bootstrap-rounds", type=int, default=1000, help="Bootstrap resamples per Elo interval.")
@@ -77,13 +77,14 @@ def main() -> None:
 
     benchmark = load_benchmark_config(args.config)
     if args.results is None:
-        run_dir = load_cluster_config(args.cluster_config).output_dir / benchmark.benchmark_name
-        results_path = "results/performance_results.csv"
+        # The result files copied off the cluster, in results/ (git-ignored).
+        results_path = Path(DEFAULT_RESULTS_DIR) / "performance_results.csv"
+        default_extra_dir = Path(DEFAULT_RESULTS_DIR)
     else:
         # A results.csv copied off the cluster: look for the extra results next to it.
         results_path = Path(args.results)
-        run_dir = results_path.parent
-    extra_dir = Path(args.extra_dir) if args.extra_dir else run_dir / benchmark.extra_benchmark.results_subdir
+        default_extra_dir = results_path.parent
+    extra_dir = Path(args.extra_dir) if args.extra_dir else default_extra_dir
 
     def _read_optional(path: Path) -> pd.DataFrame | None:
         if path.exists():
@@ -96,8 +97,8 @@ def main() -> None:
     artifacts = generate_website_artifacts(
         pd.read_csv(results_path),
         out_dir=args.out,
-        stability=_read_optional(Path("results/stability_results.csv")),
-        validity=_read_optional(Path("results/validity_results.csv")),
+        stability=_read_optional(extra_dir / "stability_results.csv"),
+        validity=_read_optional(extra_dir / "validity_results.csv"),
         benchmark_name=benchmark.benchmark_name,
         n_bootstrap=args.elo_bootstrap_rounds,
         validity_noise=args.validity_noise if args.validity_noise >= 0 else None,

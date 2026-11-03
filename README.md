@@ -98,10 +98,15 @@ python scripts/run_generate_website_artifacts.py \
 `generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
 folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
 sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figure as an interactive
-SVG), the per-dataset ranks and the stability / validity tables, all as text. `raw_website_artifacts/`
-keeps the main figure as PNG/PDF for the paper. The generator lives in `selectarena/website/`; the
-Elo computation (`selectarena/evaluation/elo.py`) ports `performance/baseline/elo_v4.py` from the
-paper's plotting code.
+SVG, and the Pareto front of improvement over Random vs. selection time as `pareto.svg`), the
+paper's lasagna plots of stability and validity per task type (`lasagna/`), the per-dataset ranks,
+the stability / validity tables and a filterable results explorer (`results.csv`), all as text. The
+Space shows them in five tabs: Performance, Stability, Validity, Data overview and About.
+`raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
+`selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
+(`pareto.py`) and the lasagna plots (`lasagna.py`) port `elo_v4.py`, `scripts/pareto.py` and
+`fsplots/lasagna.py` from the paper's plotting code. The lasagna plots place datasets by events per
+variable, which needs the `num_samples` / `min_samples_per_class` columns of the validity results.
 
 **Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space

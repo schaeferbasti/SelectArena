@@ -28,9 +28,9 @@ Parse `$ARGUMENTS`. Ask only for what is missing or ambiguous.
 |---|---|---|
 | `space_dir` | none, **required** | A clone of the Space repo (has `index.html`, `assets/`, `data/`, `smoke_test.py`). If the maintainer has none, offer `git clone https://huggingface.co/spaces/<org>/<space> <dir>` (needs `hf auth login --add-to-git-credential` once). |
 | `results` | `<output_dir>/<benchmark_name>/results.csv` | From `configs/benchmark.yaml` + the cluster config (`configs/cluster.yaml` or `$SELECTARENA_CLUSTER_CONFIG`). Pass `--results` when the CSV is elsewhere (e.g. copied from the cluster). |
-| `extra_dir` | `<run dir>/<extra_benchmark.results_subdir>` | Folder with `stability_results.csv` / `validity_results.csv`. Optional: without them the Stability / Validity columns are empty and the figure's bars are hatched. |
+| `extra_dir` | the folder of `--results` | Folder with `stability_results.csv` / `validity_results.csv`. Optional: without them the Stability / Validity columns are empty, the figure's bars are hatched and the Stability / Validity tabs have no lasagna plots. |
 | what changed | infer | New method(s), a rerun, more datasets? Needed for the version-history entry (Step 4). Infer from `git log`, the results, or the diff of `meta.json` (Step 3); ask if unclear. |
-| Python env | current env | Generation needs SelectArena installed (`pip install --pre -e .` in this repo). The Space needs nothing: its smoke test uses the standard library. |
+| Python env | current env | Generation needs SelectArena installed (`pip install --pre -e .` in this repo; `adjustText` places the Pareto labels, `scipy` smooths the lasagna plots). The full stability results are several GB: generate on a machine with enough memory. The Space needs nothing: its smoke test uses the standard library. |
 
 Run every command from the SelectArena repo root unless noted.
 
@@ -90,7 +90,8 @@ import json, pandas as pd
 W = "generated_website_artifacts/clean_website_artifacts/website_data"
 meta = json.load(open(f"{W}/meta.json"))
 print({k: meta[k] for k in ["n_results", "n_datasets", "n_methods", "models", "budgets", "has_stability", "has_validity"]})
-print(len(meta["subsets"]), "subsets")
+print(len(meta["subsets"]), "subsets,", sum(s["pareto"] for s in meta["subsets"]), "with a Pareto front")
+print("lasagna:", meta["lasagna"].get("stability"), [v["noise"] for v in meta["lasagna"].get("validity", [])])
 lb = pd.read_csv(f"{W}/subsets/tasks_all/models_all/budgets_all/website_leaderboard.csv")
 print(lb[["Rank", "Method", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]].to_string(index=False))
 assert (lb.loc[lb.Method == "Random", "Elo"] == 1000).all(), "Random must be anchored at 1000"
@@ -100,7 +101,9 @@ find "$W" -name '*.png' | wc -l                          # must be 0: the Space 
 ```
 
 Also look at the main figure: `generated_website_artifacts/raw_website_artifacts/main_figure.png`
-(the paper version) or open `$W/subsets/tasks_all/models_all/budgets_all/elo_explorer.html`.
+(the paper version) or open `$W/subsets/tasks_all/models_all/budgets_all/elo_explorer.html`, and
+at `$W/subsets/tasks_all/models_all/budgets_all/pareto.svg` and `$W/lasagna/stability/tasks_all/plain.svg`.
+No lasagna plots usually means the validity results lack `num_samples` / `min_samples_per_class`.
 
 ## Step 3: Refresh the Space's `data/`
 
@@ -113,7 +116,7 @@ DST=<space_dir>/data
 
 # 1. Only generated files may live in data/ (so the delete is safe). Expect no output:
 find "$DST" -mindepth 1 -maxdepth 1 ! -name subsets ! -name meta.json ! -name 'per_dataset*' \
-     ! -name 'stability*' ! -name 'validity*' ! -name .gitkeep
+     ! -name 'stability*' ! -name 'validity*' ! -name lasagna ! -name 'results*' ! -name .gitkeep
 
 # 2. What changes for the version-history entry (before the swap):
 diff <(python -c "import json;m=json.load(open('$DST/meta.json'));print({k:m[k] for k in ['n_datasets','n_methods','methods','models']})" 2>/dev/null) \
@@ -160,8 +163,9 @@ nohup python -m http.server 8000 > <scratch>/lb_serve.log 2>&1 &
 curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/data/meta.json   # 200
 ```
 
-Ask the maintainer to open http://localhost:8000 and look at the four tabs, a few selections and
-dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
+Ask the maintainer to open http://localhost:8000 and look at the five tabs (Performance with the
+Elo figure and Pareto front, Stability and Validity with the lasagna plots, Data overview, About), a
+few selections and dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
 files). Stop the server afterwards.
 
 ## Step 6: Hand off (the maintainer commits and pushes)
