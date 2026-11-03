@@ -36,6 +36,10 @@ from selectarena.methods.registry import LEGACY_NAMES, PAPER_NAMES
 
 _CONFIG_NAME = re.compile(r"^(?P<model>.+?)_(?P<config>[cr]\d+)(?:_(?P<pipeline>.+))?_BAG_L1$")
 GROUP_COLUMNS = ["dataset", "split_idx", "model", "config", "budget_index"]
+#: Prefix TabArena gives its own model implementations (``TA-RealMLP``), left out of the displayed names.
+_TABARENA_PREFIX = "TA-"
+#: The Random baseline fills the whole budget with random features by design: that is not a fallback.
+RANDOM_METHOD_CLASS = "RandomFeatureSelector"
 #: Noise level whose validity shades the main figure (the paper's Figure 1 values match 100% noise).
 VALIDITY_NOISE_MAIN_FIGURE = 1.0
 
@@ -52,6 +56,24 @@ def parse_method_name(name: str) -> dict:
     parsed = match.groupdict()
     parsed["pipeline"] = parsed["pipeline"] or "default"
     return parsed
+
+
+def clean_model_names(models: pd.Series) -> pd.Series:
+    """Downstream model names without TabArena's ``TA-`` prefix (``TA-RealMLP`` -> ``RealMLP``).
+
+    A name keeps its prefix when the results also hold the unprefixed model (e.g. AutoGluon's own
+    ``RealMLP`` next to ``TA-RealMLP``), so two different models are never merged.
+    """
+    present = set(models.dropna().unique())
+
+    def clean(model):
+        if isinstance(model, str) and model.startswith(_TABARENA_PREFIX):
+            short = model[len(_TABARENA_PREFIX) :]
+            if short and short not in present:
+                return short
+        return model
+
+    return models.map(clean)
 
 
 def method_class(pipeline: str | None) -> str | None:
@@ -76,12 +98,16 @@ def method_label(pipeline: str) -> str | None:
 def prepare_results(results: pd.DataFrame, *, task_names: Mapping[int, str] | None = None) -> pd.DataFrame:
     """Add ``model``, ``config``, ``pipeline``, ``method``, ``budget_index`` and ``dataset`` columns.
 
+    Model names lose TabArena's ``TA-`` prefix (:func:`clean_model_names`), and Random never counts
+    as a fallback (``used_fallback``): filling the budget with random features is the method itself.
+
     ``task_names`` maps task ids to dataset names beyond the containers listed in
     :mod:`selectarena.datasets` (see :func:`~selectarena.datasets.task_names_from_ids`).
     """
     df = results.copy()
     parsed = pd.DataFrame([parse_method_name(n) for n in df["experiment_method_name_string"]], index=df.index)
     df = df.drop(columns=[c for c in parsed.columns if c in df.columns]).join(parsed)
+    df["model"] = clean_model_names(df["model"])
     df["method"] = df["pipeline"].map(method_label)
     df["method_class"] = df["pipeline"].map(method_class)
     if "feature_selection_method" in df.columns:
@@ -100,6 +126,7 @@ def prepare_results(results: pd.DataFrame, *, task_names: Mapping[int, str] | No
     df["used_fallback"] = df.get("random_feature_names", pd.Series(index=df.index, dtype=object)).map(
         lambda v: bool(_as_list(v))
     )
+    df.loc[df["method_class"] == RANDOM_METHOD_CLASS, "used_fallback"] = False
     return df
 
 

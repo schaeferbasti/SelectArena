@@ -163,9 +163,9 @@ nohup python -m http.server 8000 > <scratch>/lb_serve.log 2>&1 &
 curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/data/meta.json   # 200
 ```
 
-Ask the maintainer to open http://localhost:8000 and look at the three tabs (Performance with the
-Elo figure, Pareto front, leaderboard and results per dataset; Stability and Validity with the lasagna
-plots), a few selections and dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
+Ask the maintainer to open http://localhost:8000 and look at the four tabs (Performance with the
+Elo figure, Pareto front and results per dataset; Leaderboard, overall and per downstream model;
+Stability and Validity with the lasagna plots), a few selections and dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
 files). Stop the server afterwards.
 
 ## Step 6: Hand off (the maintainer commits and pushes)

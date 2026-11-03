@@ -111,6 +111,8 @@ td.na { color:var(--muted); }
   font-size:12px; color:var(--fg); }
 .pill.cat-search { border-color:var(--accent); }
 .pill.cat-baseline { color:var(--muted); }
+.medal { display:inline-block; width:1.4em; text-align:center; font-size:15px; line-height:1; }
+td.shaded { font-weight:600; }
 """
 
 _TABLE_JS = """
@@ -153,8 +155,9 @@ def table_html(
     """A sortable table.
 
     Each column spec has ``key`` (column of ``df``), ``label``, optional ``digits`` (numeric
-    column, ``None`` for text), ``help`` (header tooltip), ``cls`` (cell class) and ``render``
-    (``row -> inner HTML``, overriding the default cell text).
+    column, ``None`` for text), ``help`` (header tooltip), ``cls`` (cell class), ``render``
+    (``row -> inner HTML``, overriding the default cell text) and ``style`` (``row -> inline CSS``
+    of the cell, e.g. a background colour).
     """
     head = []
     for c in columns:
@@ -172,7 +175,9 @@ def table_html(
             classes = " ".join(
                 x for x in ["num" if numeric else "", c.get("cls", ""), "na" if inner == "–" else ""] if x
             )
-            cells.append(f"<td class='{classes}' data-sort='{sort}'>{inner}</td>")
+            style = c["style"](row) if "style" in c else ""
+            style = f" style='{html.escape(style, quote=True)}'" if style else ""
+            cells.append(f"<td class='{classes}' data-sort='{sort}'{style}>{inner}</td>")
         body.append("<tr>" + "".join(cells) + "</tr>")
     toolbar = (
         f"<div class='toolbar'><span class='hint'>{html.escape(hint)}</span>"
@@ -185,6 +190,36 @@ def table_html(
     return _page(title, content, _TABLE_CSS, _TABLE_JS)
 
 
+MEDALS = {1: "\U0001f947", 2: "\U0001f948", 3: "\U0001f949"}
+"""Gold, silver and bronze for the three best Elo ratings."""
+_MEDAL_NAMES = {1: "gold", 2: "silver", 3: "bronze"}
+
+
+def _medal(rank) -> str:
+    if _is_missing(rank) or int(rank) not in MEDALS:
+        return "<span class='medal'></span>"
+    r = int(rank)
+    return f"<span class='medal' role='img' aria-label='{_MEDAL_NAMES[r]} medal'>{MEDALS[r]}</span>"
+
+
+def _rank_cell(row) -> str:
+    return f"{_medal(row['Rank'])}{_fmt(row['Rank'], 0)}"
+
+
+def _shade_style(color: str):
+    """Cell background in ``color``, stronger for higher values (0 to 1), as the bars of the Elo
+    figure. Semi-transparent, so it works on light and dark backgrounds."""
+    rgb = ",".join(str(int(color[i : i + 2], 16)) for i in (1, 3, 5))
+
+    def style(row, key: str) -> str:
+        value = row.get(key)
+        if _is_missing(value):
+            return ""
+        return f"background:rgba({rgb},{0.08 + 0.67 * float(np.clip(value, 0, 1)):.2f})"
+
+    return style
+
+
 def _elo_cell(row) -> str:
     if _is_missing(row["Elo"]):
         return "–"
@@ -195,7 +230,7 @@ def _elo_cell(row) -> str:
 
 
 LEADERBOARD_TABLE_COLUMNS = [
-    {"key": "Rank", "label": "#", "digits": 0},
+    {"key": "Rank", "label": "#", "digits": 0, "render": _rank_cell, "help": "Rank by Elo."},
     {"key": "Method", "label": "Method", "cls": "method"},
     {
         "key": "Subgroup",
@@ -232,12 +267,16 @@ LEADERBOARD_TABLE_COLUMNS = [
         "key": "Stability",
         "label": "Stability ↑",
         "digits": 3,
+        "cls": "shaded",
+        "style": lambda r: _shade_style(STABILITY_COLOR)(r, "Stability"),
         "help": "Agreement of the selected features across bootstrap resamples (Nogueira et al., 2018).",
     },
     {
         "key": "Validity",
         "label": "Validity ↑",
         "digits": 3,
+        "cls": "shaded",
+        "style": lambda r: _shade_style(VALIDITY_COLOR)(r, "Validity"),
         "help": "Share of the budget filled with original features when as many noise features are added.",
     },
     {
@@ -262,7 +301,63 @@ def leaderboard_table_html(leaderboard: pd.DataFrame, *, title: str) -> str:
         LEADERBOARD_TABLE_COLUMNS,
         title=title,
         csv_name="selectarena_leaderboard.csv",
-        hint="Click a column to sort. Hover a header for its definition.",
+        hint="Click a column to sort. Hover a header for its definition. Stability and validity are shaded "
+        "as in the Elo figure: darker is better.",
+    )
+
+
+def per_model_table(leaderboards: dict[str, pd.DataFrame], overall: pd.DataFrame) -> pd.DataFrame:
+    """One row per method: its Elo over all downstream models and per model, with its rank per model.
+
+    ``leaderboards`` maps a model name to the ``website_leaderboard.csv`` table of that model
+    (same task type and budget); ``overall`` is the table over all models.
+    """
+    out = overall[["Rank", "Method", "Category", "Subgroup", "Elo"]].copy()
+    for model, board in leaderboards.items():
+        values = board.set_index("Method")
+        out[f"Elo {model}"] = out["Method"].map(values["Elo"])
+        out[f"Rank {model}"] = out["Method"].map(values["Rank"]).astype("Int64")
+    return out
+
+
+def per_model_table_html(table: pd.DataFrame, models: list[str], *, title: str) -> str:
+    """``per_model_table.html``: the Elo of each method per downstream model, medals per model."""
+
+    def model_cell(model: str):
+        def render(row) -> str:
+            if _is_missing(row[f"Elo {model}"]):
+                return "–"
+            return f"{_medal(row[f'Rank {model}'])}{row[f'Elo {model}']:.0f}"
+
+        return render
+
+    columns = [
+        {"key": "Rank", "label": "#", "digits": 0, "render": _rank_cell, "help": "Rank by Elo over all models."},
+        {"key": "Method", "label": "Method", "cls": "method"},
+        {
+            "key": "Elo",
+            "label": "All models ↑",
+            "digits": 0,
+            "render": lambda r: "–" if _is_missing(r["Elo"]) else f"{r['Elo']:.0f}",
+            "help": "Elo over all downstream models (as in the main leaderboard).",
+        },
+    ]
+    columns += [
+        {
+            "key": f"Elo {m}",
+            "label": f"{m} ↑",
+            "digits": 0,
+            "render": model_cell(m),
+            "help": f"Elo when the selected features are used to train {m}; medals for the three best.",
+        }
+        for m in models
+    ]
+    return table_html(
+        table,
+        columns,
+        title=title,
+        csv_name="selectarena_per_model.csv",
+        hint="Elo per downstream model; medals mark the three best methods of each model. Click a column to sort.",
     )
 
 

@@ -12,7 +12,9 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
     ``leaderboard_table.html``, ``elo_explorer.html`` and, when the number of features of the
     datasets is known (from the stability or validity results), the Pareto front of improvement
     over Random vs. selection time, ``pareto.svg`` and ``pareto.csv`` (see
-    :mod:`selectarena.website.subsets` and :mod:`selectarena.evaluation.pareto`);
+    :mod:`selectarena.website.subsets` and :mod:`selectarena.evaluation.pareto`); the all-models
+    folder of each task type and budget also holds ``per_model.csv`` and ``per_model_table.html``,
+    the Elo of each method per downstream model (``"per_model": true`` in ``meta.json``);
   - ``lasagna/stability/tasks_<t>/`` and ``lasagna/validity/noise_<level>/tasks_<t>/``: the
     paper's lasagna plots per task type, one ``<variant>.svg`` per variant plus ``per_epv.csv``
     (see :mod:`selectarena.evaluation.lasagna`);
@@ -64,6 +66,8 @@ from selectarena.website.html import (
     extra_table_html,
     leaderboard_table_html,
     per_dataset_table_html,
+    per_model_table,
+    per_model_table_html,
     results_explorer_html,
 )
 from selectarena.website.subsets import ALL, TASK_TYPES, Subset, enumerate_subsets, model_key
@@ -274,6 +278,7 @@ def generate_website_artifacts(
 
     model_names = {model_key(m): m for m in sorted(df["model"].dropna().unique())}
     published: list[dict] = []
+    leaderboards: dict[tuple[str, str, str], pd.DataFrame] = {}
     default_elo = None
     candidates = enumerate_subsets(scores)
     for k, subset in enumerate(candidates, start=1):
@@ -300,6 +305,7 @@ def generate_website_artifacts(
         target.mkdir(parents=True)
         title = _subset_title(subset, model_names)
         leaderboard.to_csv(target / "website_leaderboard.csv", index=False)
+        leaderboards[(subset.tasks, subset.model, subset.budget)] = leaderboard
         (target / "leaderboard_table.html").write_text(leaderboard_table_html(leaderboard, title=title))
         (target / "elo_explorer.html").write_text(elo_explorer_html(leaderboard, title=title))
         has_pareto = False
@@ -322,6 +328,24 @@ def generate_website_artifacts(
             }
         )
         log(f"[{k}/{len(candidates)}] {subset.rel_path}: {sub['method'].nunique()} methods")
+
+    # Per downstream model view: the Elo of every method per model, in the all-models folder of
+    # each task type and budget.
+    for info in published:
+        if info["model"] != ALL:
+            continue
+        per_model = {
+            name: leaderboards[(info["tasks"], key, info["budget"])]
+            for key, name in model_names.items()
+            if (info["tasks"], key, info["budget"]) in leaderboards
+        }
+        info["per_model"] = len(per_model) >= 2
+        if info["per_model"]:
+            table = per_model_table(per_model, leaderboards[(info["tasks"], ALL, info["budget"])])
+            target = website_data / info["path"]
+            table.to_csv(target / "per_model.csv", index=False)
+            title = _subset_title(Subset(info["tasks"], ALL, info["budget"]), model_names) + " · per model"
+            (target / "per_model_table.html").write_text(per_model_table_html(table, list(per_model), title=title))
 
     per_dataset = (
         scores.pivot_table(index="dataset_key", columns="method", values="rank", aggfunc="mean")
