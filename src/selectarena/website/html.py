@@ -4,8 +4,8 @@ Like TabArena's interactive explorers, each artifact is a single HTML file with 
 JavaScript and no external requests, which the Space embeds in an iframe. Everything is text, so
 the Space repo needs no Git LFS:
 
-* :func:`leaderboard_table_html`: a sortable table (``leaderboard_table.html``,
-  ``per_dataset_table.html``);
+* :func:`leaderboard_table_html` and :func:`per_model_table_html`: sortable tables
+  (``leaderboard_table.html``, ``per_model_table.html``);
 * :func:`elo_explorer_html`: the paper's main figure as SVG (``elo_explorer.html``): Elo per method
   with its 95% interval, the two bars of each method shaded by stability and validity, a tooltip
   per method and SVG / PNG / CSV export.
@@ -358,23 +358,6 @@ def per_model_table_html(table: pd.DataFrame, models: list[str], *, title: str) 
         title=title,
         csv_name="selectarena_per_model.csv",
         hint="Elo per downstream model; medals mark the three best methods of each model. Click a column to sort.",
-    )
-
-
-def per_dataset_table_html(per_dataset: pd.DataFrame, *, title: str) -> str:
-    """``per_dataset_table.html``: one row per dataset, the mean rank of each method."""
-    columns = [{"key": "dataset", "label": "Dataset", "cls": "method"}]
-    columns += [
-        {"key": c, "label": c, "digits": 2} for c in per_dataset.columns if c not in ("dataset", "problem_type")
-    ]
-    if "problem_type" in per_dataset:
-        columns.insert(1, {"key": "problem_type", "label": "Problem type"})
-    return table_html(
-        per_dataset,
-        columns,
-        title=title,
-        csv_name="selectarena_per_dataset_ranks.csv",
-        hint="Mean rank of each method per dataset (lower is better). Click a column to sort.",
     )
 
 
@@ -786,7 +769,7 @@ RESULTS_EXPLORER_COLUMNS = [
 
 
 def results_explorer_html(results: pd.DataFrame, *, title: str) -> str:
-    """``results_explorer.html``: the results per dataset, method, model and budget, with filters,
+    """``results_explorer.html``: the complete results (per dataset, method, model and budget), with filters,
     sorting, pages of 50 rows and CSV export of the filtered rows. The data is embedded as JSON."""
     import json
 

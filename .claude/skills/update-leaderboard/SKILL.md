@@ -1,6 +1,6 @@
 ---
 name: update-leaderboard
-description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a subgroup in the paper's taxonomy (not "Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the (static) Space repo (delete-then-copy), bumps the version and history in its `index.html`, runs its smoke test and a local preview, and hands the commit + push (which deploys) back to the maintainer.
+description: Regenerate the SelectArena leaderboard website artifacts and refresh the leaderboard Space's `data/` with them. Use whenever a maintainer wants to publish benchmark results to the leaderboard, e.g. "update the leaderboard", "publish the new results", "refresh the Space with the latest run", "add <method> to the leaderboard". Pre-checks that every method has a subgroup in the paper's taxonomy (not "Other"), runs `scripts/run_generate_website_artifacts.py`, swaps the artifacts into a clone of the (static) Space repo (delete-then-copy), bumps the version in its `index.html`, runs its smoke test and a local preview, and hands the commit + push (which deploys) back to the maintainer.
 argument-hint: <space-checkout-dir> [<results.csv>] [<extra-results-dir>]
 user-invocable: true
 ---
@@ -29,7 +29,7 @@ Parse `$ARGUMENTS`. Ask only for what is missing or ambiguous.
 | `space_dir` | none, **required** | A clone of the Space repo (has `index.html`, `assets/`, `data/`, `smoke_test.py`). If the maintainer has none, offer `git clone https://huggingface.co/spaces/<org>/<space> <dir>` (needs `hf auth login --add-to-git-credential` once). |
 | `results` | `<output_dir>/<benchmark_name>/results.csv` | From `configs/benchmark.yaml` + the cluster config (`configs/cluster.yaml` or `$SELECTARENA_CLUSTER_CONFIG`). Pass `--results` when the CSV is elsewhere (e.g. copied from the cluster). |
 | `extra_dir` | the folder of `--results` | Folder with `stability_results.csv` / `validity_results.csv`. Optional: without them the Stability / Validity columns are empty, the figure's bars are hatched and the Stability / Validity tabs have no lasagna plots. |
-| what changed | infer | New method(s), a rerun, more datasets? Needed for the version-history entry (Step 4). Infer from `git log`, the results, or the diff of `meta.json` (Step 3); ask if unclear. |
+| what changed | infer | New method(s), a rerun, more datasets? Needed for the version bump (Step 4) and the commit message. Infer from `git log`, the results, or the diff of `meta.json` (Step 3); ask if unclear. |
 | Python env | current env | Generation needs SelectArena installed (`pip install --pre -e .` in this repo; `adjustText` places the Pareto labels, `scipy` smooths the lasagna plots). The full stability results are several GB: generate on a machine with enough memory. The Space needs nothing: its smoke test uses the standard library. |
 
 Run every command from the SelectArena repo root unless noted.
@@ -118,7 +118,7 @@ DST=<space_dir>/data
 find "$DST" -mindepth 1 -maxdepth 1 ! -name subsets ! -name meta.json ! -name 'per_dataset*' \
      ! -name 'stability*' ! -name 'validity*' ! -name lasagna ! -name 'results*' ! -name .gitkeep
 
-# 2. What changes for the version-history entry (before the swap):
+# 2. What changes (for the version bump and the commit message), before the swap:
 diff <(python -c "import json;m=json.load(open('$DST/meta.json'));print({k:m[k] for k in ['n_datasets','n_methods','methods','models']})" 2>/dev/null) \
      <(python -c "import json;m=json.load(open('$SRC/meta.json'));print({k:m[k] for k in ['n_datasets','n_methods','methods','models']})")
 diff <(cd "$SRC" && find subsets -type f | sort) <(cd "$DST" && find subsets -type f 2>/dev/null | sort) | head
@@ -140,18 +140,10 @@ accordingly; mention it in the report.
 
 In the Space repo, read then edit `index.html`:
 
-1. Bump `<meta name="selectarena-version" content="X.Y.Z">`: the **patch** component for a data
-   refresh (`0.1.0` → `0.1.1`), the **minor** one for site changes or a new benchmark release.
-2. Add an entry at the **top** of `<ul id="version-history">` (newest first, today's date) with
-   the same version, matching the existing format and describing what changed, e.g.:
-
-```html
-<li><strong>2026/11/02 · v0.1.1</strong>: Add new method: Boruta. Results for 71 datasets and
-  3 downstream models (LightGBM, RealMLP, TabICLv2).</li>
-```
-
-The footer's "current version" renders from the meta tag; `smoke_test.py` fails if the meta tag
-and the newest entry differ.
+Bump `<meta name="selectarena-version" content="X.Y.Z">`: the **patch** component for a data
+refresh (`0.1.0` → `0.1.1`), the **minor** one for site changes or a new benchmark release. The
+header shows it next to the update date. The site has no version history: describe what changed
+in the commit message instead (e.g. "Leaderboard v0.4.2: add Boruta; 71 datasets, 5 models").
 
 ## Step 5: Smoke test and preview
 
@@ -164,7 +156,7 @@ curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/data/meta.js
 ```
 
 Ask the maintainer to open http://localhost:8000 and look at the four tabs (Performance with the
-Elo figure, Pareto front and results per dataset; Leaderboard, overall and per downstream model;
+Elo figure, Pareto front and complete results; Leaderboard, overall and per downstream model;
 Stability and Validity with the lasagna plots), a few selections and dark mode. Opening `index.html` from disk does not work (browsers block `fetch()` of local
 files). Stop the server afterwards.
 
@@ -191,5 +183,5 @@ Caveats to mention:
 
 Tell the maintainer: what was generated (methods, datasets, models, number of subsets), anything
 left out (ablations, missing stability / validity), the code edits made (`METHOD_SUBGROUPS`,
-`PAPER_NAMES`), the Space changes (data swap summary from Step 3, new version and history entry),
+`PAPER_NAMES`), the Space changes (data swap summary from Step 3, new version),
 the smoke-test result, and the exact push command if it is still to be run.
