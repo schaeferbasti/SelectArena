@@ -101,7 +101,8 @@ sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figu
 SVG, and the Pareto front of improvement over Random vs. selection time as `pareto.svg`), the
 paper's lasagna plots of stability and validity per task type (`lasagna/`), the per-dataset ranks,
 the stability / validity tables and a filterable results explorer (`results.csv`), all as text. The
-Space shows them in five tabs: Performance, Stability, Validity, Data overview and About.
+Space shows them in three tabs: Performance (Elo figure, Pareto front, leaderboard and the
+results per dataset), Stability and Validity.
 `raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
 `selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
 (`pareto.py`) and the lasagna plots (`lasagna.py`) port `elo_v4.py`, `scripts/pareto.py` and
