@@ -99,11 +99,11 @@ python scripts/run_generate_website_artifacts.py \
 folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
 sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figure as an interactive
 SVG, and the Pareto front of improvement over Random vs. selection time as `pareto.svg`), the
-paper's lasagna plots of stability and validity per task type (`lasagna/`), the per-dataset ranks,
-the stability / validity tables and a filterable results explorer (`results.csv`), all as text. The
-Space shows them in four tabs: Performance (Elo figure, Pareto front and the results per
-dataset), Leaderboard (the table, overall or as the Elo per downstream model: `per_model_table.html`
-in the all-models folders), Stability and Validity.
+paper's lasagna plots of stability and validity per task type (`lasagna/`), the per-dataset ranks
+(`per_dataset.csv`), the stability / validity tables and a filterable explorer of the complete results
+(`results.csv`), all as text. The Space shows them in four tabs: Leaderboard (the table, overall or as
+the Elo per downstream model: `per_model_table.html` in the all-models folders), Performance (Elo
+figure, Pareto front and complete results), Stability and Validity.
 `raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
 `selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
 (`pareto.py`) and the lasagna plots (`lasagna.py`) port `elo_v4.py`, `scripts/pareto.py` and
@@ -114,7 +114,7 @@ variable, which needs the `num_samples` / `min_samples_per_class` columns of the
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
 (`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
 has a subgroup of the paper's taxonomy, regenerates the artifacts, swaps them into the Space's
-`data/`, adds a version history entry, runs the Space's smoke test and a local preview, and leaves
+`data/`, bumps the site's version, runs the Space's smoke test and a local preview, and leaves
 the commit and `git push` (which deploys) to you. The
 manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`.
 

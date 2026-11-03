@@ -18,9 +18,9 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``lasagna/stability/tasks_<t>/`` and ``lasagna/validity/noise_<level>/tasks_<t>/``: the
     paper's lasagna plots per task type, one ``<variant>.svg`` per variant plus ``per_epv.csv``
     (see :mod:`selectarena.evaluation.lasagna`);
-  - ``results.csv`` and ``results_explorer.html``: the results per dataset, method, downstream
+  - ``results.csv`` and ``results_explorer.html``: the complete results, per dataset, method, downstream
     model and budget, averaged over splits;
-  - ``per_dataset.csv`` and ``per_dataset_table.html``: mean rank per dataset and method;
+  - ``per_dataset.csv``: mean rank per dataset and method (data only; the site does not show it);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -65,7 +65,6 @@ from selectarena.website.html import (
     elo_explorer_html,
     extra_table_html,
     leaderboard_table_html,
-    per_dataset_table_html,
     per_model_table,
     per_model_table_html,
     results_explorer_html,
@@ -355,9 +354,6 @@ def generate_website_artifacts(
     )
     per_dataset.insert(1, "problem_type", per_dataset["dataset"].map(problem_types))
     per_dataset.to_csv(website_data / "per_dataset.csv", index=False)
-    (website_data / "per_dataset_table.html").write_text(
-        per_dataset_table_html(per_dataset, title="SelectArena: mean rank per dataset")
-    )
 
     # Lasagna plots. The stability results store unreliable per-class counts; as in the paper, take
     # them from the validity results of the same dataset.
@@ -392,7 +388,7 @@ def generate_website_artifacts(
     results_table = _results_table(df)
     results_table.to_csv(website_data / "results.csv", index=False)
     (website_data / "results_explorer.html").write_text(
-        results_explorer_html(results_table, title="SelectArena: results per dataset, method, model and budget")
+        results_explorer_html(results_table, title="SelectArena: complete results")
     )
 
     stab_table = stability_table(stability) if stab_rows is not None else None

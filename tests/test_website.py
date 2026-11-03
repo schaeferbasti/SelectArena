@@ -133,7 +133,6 @@ def test_layout(artifacts):
             assert (data / subset["path"] / name).is_file()
     for name in [
         "per_dataset.csv",
-        "per_dataset_table.html",
         "stability.csv",
         "validity.csv",
         "stability_table.html",
@@ -159,6 +158,7 @@ def test_layout(artifacts):
         for tasks in folder["task_types"]:
             for variant in lasagna["variants"]:
                 assert (data / folder["path"] / f"tasks_{tasks}" / f"{variant}.svg").is_file()
+    assert not (data / "per_dataset_table.html").exists()  # the site no longer shows the per-dataset ranks
     assert not list(data.rglob("*.png"))
     assert (artifacts.raw_dir / "main_figure.pdf").is_file()
     with zipfile.ZipFile(artifacts.zip_path) as z:
