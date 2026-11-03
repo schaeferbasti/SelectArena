@@ -3,14 +3,13 @@
 SelectArena is a benchmark for feature selection on tabular data. Each feature selection method
 selects a budgeted number of features, and the selection is judged by the downstream performance of
 strong tabular models trained on the selected features, plus a selection-only stability and
-validity benchmark. Paper: [arXiv:2610.13644](https://arxiv.org/abs/2610.13644).
+validity benchmark. The paper is available at [arXiv:2610.13644](https://arxiv.org/abs/2610.13644). We provide a public leaderboard: [SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard).
 
-SelectArena depends on [TabArena](https://github.com/autogluon/tabarena) for datasets, models,
-the experiment runner, the validation protocol and the SLURM tooling. This repository only
-contains what is specific to feature selection.
 
 ## Installation
 
+SelectArena depends on [TabArena](https://github.com/autogluon/tabarena) for datasets, models,
+the experiment runner, the validation protocol and the SLURM tooling.
 Python 3.11 to 3.13. TabArena is pinned to one upstream commit (see `pyproject.toml`), and
 AutoGluon comes from its pre-release builds, so allow pre-releases:
 
@@ -66,10 +65,8 @@ bundling and the results are the same as on SLURM. Start from `configs/cluster.o
 
 The suite is 71 curated [Data Foundry](https://github.com/TabArena/data-foundry) containers
 (`selectarena.datasets.BENCHMARK_DATA_FOUNDRY_TASKS`), published in the Hugging Face dataset
-repository [SelectArena/SelectArena_Datasets](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets)
-the way TabArena publishes [BeyondArena](https://huggingface.co/datasets/TabArena/BeyondArena),
-pinned to the commit `HF_REVISION` in `selectarena/datasets.py`. They are downloaded on first use,
-as TabArena does for BeyondArena: `run_benchmark.py setup` and `run_extra_benchmark.py setup` fetch
+repository [SelectArena/SelectArena_Datasets](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets). 
+They are downloaded on first use: `run_benchmark.py setup` and `run_extra_benchmark.py setup` fetch
 the containers into the `data_foundry` cache of the cluster config and convert the ones the run
 needs into TabArena tasks in the `openml` cache. `scripts/prepare_datasets.py` does the same for the
 whole suite in advance, e.g. on a front end when the compute nodes have no internet access. To read
@@ -83,9 +80,7 @@ to `BENCHMARK_DATA_FOUNDRY_TASKS` and update `HF_REVISION` to the repository's n
 ## Leaderboard
 
 The public leaderboard is the Hugging Face Space
-[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard), a **static** Space
-(HTML + JavaScript, no compute, free; Gradio and Docker Spaces need a paid Hugging Face plan). As for
-TabArena, the Space repo holds the site and this repo generates the data it serves:
+[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). The Space repo holds the site and this repo generates the data it serves:
 
 ```bash
 python scripts/run_benchmark.py eval                # results.csv
@@ -93,8 +88,7 @@ python scripts/run_extra_benchmark.py collect       # optional: stability / vali
 python scripts/run_generate_website_artifacts.py    # generated_website_artifacts/
 ```
 
-With result files copied off the cluster, put them in `results/` (git-ignored) and pass them
-explicitly; no cluster config is needed then:
+Put the result files in `results/` and pass them explicitly; no cluster config is needed then:
 
 ```bash
 python scripts/run_generate_website_artifacts.py \
