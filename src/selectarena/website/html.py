@@ -126,6 +126,8 @@ th[aria-sort] { color:var(--accent); }
 tbody tr:hover { background:var(--soft); }
 tbody tr:last-child td { border-bottom:none; }
 td.method { font-weight:600; }
+td.method a.paper { color:inherit; text-decoration:none; border-bottom:1px dotted var(--muted); }
+td.method a.paper:hover { color:var(--accent); border-bottom-color:var(--accent); }
 td .sub { color:var(--muted); font-size:12px; font-weight:400; margin-left:6px; }
 td.na { color:var(--muted); }
 .pill { display:inline-block; padding:0 8px; border:1px solid var(--line); border-radius:999px;
@@ -250,9 +252,30 @@ def _elo_cell(row) -> str:
     return f"{row['Elo']:.0f}{ci}"
 
 
+def _method_link(method: str) -> str:
+    """The method's name, linked to its paper (``METHOD_PAPERS``) when it has one."""
+    from selectarena.website.website_format import method_paper
+
+    name = html.escape(method)
+    url = method_paper(method)
+    if not url:
+        return name
+    return f"<a class='paper' href='{html.escape(url, quote=True)}' target='_blank' rel='noopener'>{name}</a>"
+
+
+def _method_cell(row) -> str:
+    return _method_link(str(row["Method"]))
+
+
 LEADERBOARD_TABLE_COLUMNS = [
     {"key": "Rank", "label": "#", "digits": 0, "render": _rank_cell, "help": "Rank by Elo."},
-    {"key": "Method", "label": "Method", "cls": "method"},
+    {
+        "key": "Method",
+        "label": "Method",
+        "cls": "method",
+        "render": _method_cell,
+        "help": "Click a method to open its paper (the one cited in Table 2 of the SelectArena paper).",
+    },
     {
         "key": "Subgroup",
         "label": "Type",
@@ -341,8 +364,8 @@ def leaderboard_table_html(leaderboard: pd.DataFrame, *, title: str) -> str:
         csv=leaderboard[[c for c in LEADERBOARD_DOWNLOAD_COLUMNS if c in leaderboard]],
         title=title,
         csv_name="selectarena_leaderboard.csv",
-        hint="Click a column to sort. Hover a header for its definition. Stability and validity are shaded "
-        "as in the Elo figure: darker is better.",
+        hint="Click a column to sort and a method to open its paper. Hover a header for its definition. "
+        "Stability and validity are shaded as in the Elo figure: darker is better.",
     )
 
 
@@ -412,7 +435,11 @@ def _budget_label(index: int, total_budget: int | None) -> str:
 
 def extra_table_html(table: pd.DataFrame, metric: str, *, title: str, total_budget: int | None = None) -> str:
     """``stability_table.html`` / ``validity_table.html``: the mean ``metric`` per method, overall
-    and per budget (and per noise level for validity)."""
+    and per budget (and per noise level for validity). Medals for the three best methods (of each
+    noise level), method names linked to their papers."""
+    csv = table
+    scores = table.groupby("noise")[metric] if "noise" in table else table[metric]
+    table = table.assign(_rank=scores.rank(ascending=False, method="min"))
     budget_columns = sorted(
         (c for c in table.columns if c.startswith(f"{metric}_budget_")), key=lambda c: int(c.rsplit("_", 1)[1])
     )
@@ -422,13 +449,26 @@ def extra_table_html(table: pd.DataFrame, metric: str, *, title: str, total_budg
             {"key": "noise", "label": "Noise level", "digits": 1, "help": "Noise features per original feature."}
         )
     columns += [
-        {"key": "method", "label": "Method", "cls": "method"},
+        {
+            "key": "method",
+            "label": "Method",
+            "cls": "method",
+            "render": lambda r: _medal(r["_rank"]) + _method_link(str(r["method"])),
+            "help": f"Medals for the three highest {metric} values. Click a method to open its paper.",
+        },
         {"key": metric, "label": f"{metric.capitalize()} ↑", "digits": 3, "help": "Mean over datasets and budgets."},
     ]
     columns += [
         {"key": c, "label": _budget_label(int(c.rsplit("_", 1)[1]), total_budget), "digits": 3} for c in budget_columns
     ]
-    return table_html(table, columns, title=title, csv_name=f"selectarena_{metric}.csv")
+    return table_html(
+        table,
+        columns,
+        title=title,
+        csv=csv,
+        csv_name=f"selectarena_{metric}.csv",
+        hint="Click a column to sort and a method to open its paper. Medals mark the three best methods.",
+    )
 
 
 # --------------------------------------------------------------------------------------------------

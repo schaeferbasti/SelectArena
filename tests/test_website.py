@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+import re
 import zipfile
 
 import numpy as np
@@ -14,7 +15,7 @@ from selectarena.methods.registry import FEATURE_SELECTION_METHODS, METHOD_SUBGR
 from selectarena.website import Subset, generate_website_artifacts
 from selectarena.website.generate import SUBSET_FILES
 from selectarena.website.html import elo_figure_svg
-from selectarena.website.website_format import LEADERBOARD_COLUMNS, method_category, method_subgroup
+from selectarena.website.website_format import LEADERBOARD_COLUMNS, method_category, method_paper, method_subgroup
 
 METHODS = {
     "MIFeatureSelector": 0.6,
@@ -118,6 +119,16 @@ def test_every_registered_method_has_a_subgroup():
     assert method_category("NewMethod") == "Other"
 
 
+def test_method_papers():
+    from selectarena.methods.registry import METHOD_PAPERS
+
+    assert set(METHOD_PAPERS) <= set(FEATURE_SELECTION_METHODS)
+    assert all(url.startswith(("https://", "http://")) for url in METHOD_PAPERS.values())
+    assert method_paper("Lasso") == METHOD_PAPERS["LassoFeatureSelector"]
+    assert method_paper("MI [nofallback]") == METHOD_PAPERS["MIFeatureSelector"]
+    assert method_paper("Random") is None and method_paper("NewMethod") is None
+
+
 def test_layout(artifacts):
     data = artifacts.website_data
     meta = json.loads((data / "meta.json").read_text())
@@ -186,7 +197,8 @@ def test_leaderboards(artifacts):
 def test_html_is_self_contained(artifacts):
     data = artifacts.website_data
     for path in [*data.rglob("*.html")]:
-        text = path.read_text()
+        # Links to method papers are clicked, not loaded: the page stays self-contained.
+        text = re.sub(r"<a class='paper' href='[^']*'", "", path.read_text())
         assert "<script src" not in text and "http" not in text.replace("http://www.w3.org", "")
         assert "${" not in text and "{{" not in text  # Gradio's gr.HTML templates
     table = (data / "subsets" / Subset().rel_path / "leaderboard_table.html").read_text()
@@ -450,6 +462,22 @@ def test_leaderboard_table_medals_and_shading(artifacts):
     assert body.index("gold medal") < body.index("silver medal") < body.index("bronze medal")
     assert body.count("class='medal' role='img'") == 3
     assert "background:rgba(0,114,178," in body and "background:rgba(213,94,0," in body
+
+
+def test_extra_tables_medals_and_paper_links(artifacts):
+    from selectarena.methods.registry import METHOD_PAPERS
+
+    data = artifacts.website_data
+    for name in [
+        "stability_table.html",
+        *(t["path"] for t in json.loads((data / "meta.json").read_text())["validity_tables"]),
+    ]:
+        text = (data / name).read_text()
+        body = text.split("<tbody>", 1)[1]
+        assert body.count("class='medal' role='img'") == 3, name
+        assert "gold medal" in body.split("<tr>")[1]  # sorted best first; ties share a medal
+        assert f"href='{METHOD_PAPERS['LassoFeatureSelector']}'" in body
+        assert "_rank" not in text  # helper column: not shown, not in the CSV
 
 
 def test_per_model_tables(artifacts):
