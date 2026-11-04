@@ -25,7 +25,11 @@ overview.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`),
   Pareto front (`pareto.py`) and lasagna plots (`lasagna.py`), ported from the paper's plotting code;
   their interactive website versions are in `website/figures.py`.
-- `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`).
+- `src/selectarena/published_results.py`: the published raw results (`RESULTS_REPO_ID` on Hugging Face,
+  pin `RESULTS_REVISION` to a commit), downloaded into `results/` by
+  `run_generate_website_artifacts.py --with-published-results` and merged with a user's own results.
+- `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`)
+  and its local preview (`website/preview.py`, `scripts/preview_leaderboard.py`).
   The Space's app lives in its own repo (`huggingface.co/spaces/SelectArena/Leaderboard`), as for
   TabArena. It is a static site (keep it static: Gradio Spaces need a paid plan); the folder names
   in `website/subsets.py` and the columns in `website/website_format.py` are the contract with its

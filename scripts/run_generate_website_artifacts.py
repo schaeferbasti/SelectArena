@@ -1,4 +1,4 @@
-"""Maintainer-only: regenerate the SelectArena leaderboard website artifacts.
+"""Regenerate the SelectArena leaderboard website artifacts.
 
 The publishing pipeline behind the leaderboard Space (https://huggingface.co/spaces/SelectArena/Leaderboard),
 mirroring TabArena's ``scripts/run_generate_website_artifacts.py``. The Space's code lives in the
@@ -16,7 +16,18 @@ Output (``--out``, default ``generated_website_artifacts/``, git-ignored):
 - ``clean_website_artifacts/website_data/``: the Space's ``data/`` folder (CSV + self-contained
   HTML, no binaries), and ``clean_website_artifacts.zip`` with the same content.
 
-Publishing procedure (or run the ``update-leaderboard`` skill):
+Your method on the leaderboard, locally (no access to the published results needed):
+
+    python scripts/run_generate_website_artifacts.py --with-published-results \
+        --results <run dir>/results.csv [--extra-dir <dir with stability/validity_results.csv>]
+    python scripts/preview_leaderboard.py                 # http://localhost:8000
+
+``--with-published-results`` downloads the published results of all methods
+(``selectarena.published_results``, several GB, once) into ``results/`` if they are not there yet,
+and adds your own results (``--results`` / ``--extra-dir``), which replace the published results of
+the same method on the same task.
+
+Publishing procedure (maintainers; or run the ``update-leaderboard`` skill):
 
 1. Run this script (the Elo intervals take most of the time; ``--elo-bootstrap-rounds 1`` for a
    quick check whose intervals are meaningless).
@@ -38,22 +49,42 @@ import pandas as pd
 
 from selectarena.config import load_benchmark_config
 from selectarena.evaluation.leaderboard import VALIDITY_NOISE_MAIN_FIGURE
+from selectarena.published_results import RESULT_FILES, ensure_published_results, merge_results
 from selectarena.website import generate_website_artifacts
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_RESULTS_DIR = "results"
+#: The result files copied off the cluster or downloaded with --with-published-results (git-ignored).
+DEFAULT_RESULTS_DIR = REPO_ROOT / "results"
+
+
+def _read_optional(path: Path | None) -> pd.DataFrame | None:
+    if path is not None and path.exists():
+        print(f"Reading {path}")
+        return pd.read_csv(path)
+    if path is not None:
+        print(f"Not found (skipped): {path}")
+    return None
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", default=str(REPO_ROOT / "configs" / "benchmark.yaml"), help="Benchmark config.")
     parser.add_argument(
-        "--results", default=None, help=f"Performance results (default: {DEFAULT_RESULTS_DIR}/performance_results.csv)."
+        "--results",
+        default=None,
+        help="Performance results (default: results/performance_results.csv). With --with-published-results: "
+        "your own results, added to the published ones.",
     )
     parser.add_argument(
         "--extra-dir",
         default=None,
         help="Folder with stability_results.csv / validity_results.csv (default: the folder of --results).",
+    )
+    parser.add_argument(
+        "--with-published-results",
+        action="store_true",
+        help="Rank against the published results of all methods: downloads them into results/ if missing "
+        "(several GB, once) and adds --results / --extra-dir to them.",
     )
     parser.add_argument("--out", default=str(REPO_ROOT / "generated_website_artifacts"), help="Output folder.")
     parser.add_argument("--elo-bootstrap-rounds", type=int, default=1000, help="Bootstrap resamples per Elo interval.")
@@ -76,29 +107,44 @@ def main() -> None:
     args = parser.parse_args()
 
     benchmark = load_benchmark_config(args.config)
-    if args.results is None:
-        # The result files copied off the cluster, in results/ (git-ignored).
-        results_path = Path(DEFAULT_RESULTS_DIR) / "performance_results.csv"
-        default_extra_dir = Path(DEFAULT_RESULTS_DIR)
+    if args.with_published_results:
+        published = ensure_published_results(DEFAULT_RESULTS_DIR)
+        # Your own results: --results, and the extra results in --extra-dir (default: next to --results).
+        own = dict.fromkeys(RESULT_FILES)
+        if args.results:
+            own["performance"] = Path(args.results)
+        own_extra_dir = Path(args.extra_dir) if args.extra_dir else (own["performance"] or Path()).parent
+        if args.results or args.extra_dir:
+            own["stability"] = own_extra_dir / RESULT_FILES["stability"]
+            own["validity"] = own_extra_dir / RESULT_FILES["validity"]
+        frames = {}
+        for kind in RESULT_FILES:
+            mine = own[kind] if own[kind] is not None and own[kind].resolve() != published[kind].resolve() else None
+            frames[kind] = merge_results(_read_optional(published[kind]), _read_optional(mine), kind)
+        if frames["performance"] is None:
+            parser.error(f"no performance results in {published['performance']}")
     else:
-        # A results.csv copied off the cluster: look for the extra results next to it.
-        results_path = Path(args.results)
-        default_extra_dir = results_path.parent
-    extra_dir = Path(args.extra_dir) if args.extra_dir else default_extra_dir
+        if args.results is None:
+            # The result files copied off the cluster, in results/.
+            results_path = DEFAULT_RESULTS_DIR / RESULT_FILES["performance"]
+            default_extra_dir = DEFAULT_RESULTS_DIR
+        else:
+            # A results.csv copied off the cluster: look for the extra results next to it.
+            results_path = Path(args.results)
+            default_extra_dir = results_path.parent
+        extra_dir = Path(args.extra_dir) if args.extra_dir else default_extra_dir
+        print(f"Reading {results_path}")
+        frames = {
+            "performance": pd.read_csv(results_path),
+            "stability": _read_optional(extra_dir / RESULT_FILES["stability"]),
+            "validity": _read_optional(extra_dir / RESULT_FILES["validity"]),
+        }
 
-    def _read_optional(path: Path) -> pd.DataFrame | None:
-        if path.exists():
-            print(f"Reading {path}")
-            return pd.read_csv(path)
-        print(f"Not found (skipped): {path}")
-        return None
-
-    print(f"Reading {results_path}")
     artifacts = generate_website_artifacts(
-        pd.read_csv(results_path),
+        frames["performance"],
         out_dir=args.out,
-        stability=_read_optional(extra_dir / "stability_results.csv"),
-        validity=_read_optional(extra_dir / "validity_results.csv"),
+        stability=frames["stability"],
+        validity=frames["validity"],
         benchmark_name=benchmark.benchmark_name,
         n_bootstrap=args.elo_bootstrap_rounds,
         validity_noise=args.validity_noise if args.validity_noise >= 0 else None,
@@ -113,6 +159,7 @@ def main() -> None:
     print(f"Paper figure and raw tables: {artifacts.raw_dir}")
     if artifacts.unclassified_methods:
         print(f"WARNING: shown as 'Other' on the leaderboard: {artifacts.unclassified_methods}")
+    print("To see the whole leaderboard with this data: python scripts/preview_leaderboard.py")
 
 
 if __name__ == "__main__":
