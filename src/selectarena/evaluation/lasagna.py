@@ -141,19 +141,16 @@ def _format_axes(ax, matrix: pd.DataFrame, log_epv: np.ndarray) -> None:
     ax.invert_xaxis()
 
 
-def _heatmap(matrix: pd.DataFrame, metric: str, smoothing: float, highlight: pd.DataFrame | None = None) -> Figure:
-    """Interpolated and Gaussian-smoothed heat map, optionally with white outlines around the
-    cells where ``highlight`` is 1."""
-    import matplotlib.pyplot as plt
+def smoothed_grid(matrix: pd.DataFrame, smoothing: float = SMOOTHING) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """The heat map's values: ``(log_epv, dense_edges, Z)`` with ``Z`` of shape (methods, 1000) on
+    the log-EPV grid ``dense_edges``, each method interpolated over the EPVs where it has a value
+    and smoothed with a Gaussian filter."""
     from scipy.ndimage import gaussian_filter1d
 
     log_epv = np.log(matrix.columns.to_numpy(dtype=float))
     edges = _bin_edges(log_epv)
     dense_edges = np.linspace(edges[0], edges[-1], 1001)
     dense = 0.5 * (dense_edges[:-1] + dense_edges[1:])
-    y_edges = np.arange(len(matrix.index) + 1) - 0.5
-
-    # Each method is interpolated over the EPVs where it has a value.
     Z = np.vstack(
         [
             np.interp(dense, log_epv[row.notna().to_numpy()], row.dropna().to_numpy())
@@ -164,6 +161,17 @@ def _heatmap(matrix: pd.DataFrame, metric: str, smoothing: float, highlight: pd.
     )
     if smoothing:
         Z = gaussian_filter1d(Z, sigma=smoothing, axis=1, mode="nearest")
+    return log_epv, dense_edges, Z
+
+
+def _heatmap(matrix: pd.DataFrame, metric: str, smoothing: float, highlight: pd.DataFrame | None = None) -> Figure:
+    """Interpolated and Gaussian-smoothed heat map, optionally with white outlines around the
+    cells where ``highlight`` is 1."""
+    import matplotlib.pyplot as plt
+
+    log_epv, dense_edges, Z = smoothed_grid(matrix, smoothing)
+    edges = _bin_edges(log_epv)
+    y_edges = np.arange(len(matrix.index) + 1) - 0.5
 
     fig, ax = plt.subplots(figsize=_figure_size(matrix))
     image = ax.pcolormesh(dense_edges, y_edges, Z, cmap=_cmap(), vmin=0, vmax=1, shading="flat", rasterized=True)

@@ -148,7 +148,7 @@ def test_layout(artifacts):
     assert meta["has_results_explorer"] and (data / "results_explorer.html").is_file()
     assert meta["subsets"][0]["pareto"]
     for subset in meta["subsets"]:
-        assert (data / subset["path"] / "pareto.svg").is_file() == subset["pareto"]
+        assert (data / subset["path"] / "pareto.html").is_file() == subset["pareto"]
     lasagna = meta["lasagna"]
     assert lasagna["variants"] == ["plain", "overlay_top_3", "binary_thr_003"]
     # Regression has a single dataset, i.e. a single EPV: no plot.
@@ -157,7 +157,7 @@ def test_layout(artifacts):
     for folder in [lasagna["stability"], *lasagna["validity"]]:
         for tasks in folder["task_types"]:
             for variant in lasagna["variants"]:
-                assert (data / folder["path"] / f"tasks_{tasks}" / f"{variant}.svg").is_file()
+                assert (data / folder["path"] / f"tasks_{tasks}" / f"{variant}.html").is_file()
     assert not (data / "per_dataset_table.html").exists()  # the site no longer shows the per-dataset ranks
     assert not list(data.rglob("*.png"))
     assert (artifacts.raw_dir / "main_figure.pdf").is_file()
@@ -463,3 +463,24 @@ def test_clean_model_names():
     models = pd.Series(["TA-RealMLP", "TA-TabICLv2", "TabICLv2", "LightGBM", None])
     cleaned = clean_model_names(models)
     assert cleaned[:4].tolist() == ["RealMLP", "TA-TabICLv2", "TabICLv2", "LightGBM"] and pd.isna(cleaned[4])
+
+
+def test_interactive_pareto_and_lasagna(artifacts):
+    """The Pareto front and the lasagna plots are interactive pages like the Elo figure."""
+    data = artifacts.website_data
+    meta = json.loads((data / "meta.json").read_text())
+    pareto = (data / "subsets" / Subset().rel_path / "pareto.html").read_text()
+    front = pd.read_csv(data / "subsets" / Subset().rel_path / "pareto.csv")
+    shown = front[front["method"] != "LaplacianScore"]  # hidden in the figure, as in the paper
+    assert pareto.count("class='sa-hit'") == len(shown)
+    assert "Improvement over Random" in pareto and "saSvg('selectarena_pareto')" in pareto
+    lasagna = meta["lasagna"]["stability"]
+    folder = data / lasagna["path"] / "tasks_all"
+    long = pd.read_csv(folder / "per_epv.csv")
+    for variant in meta["lasagna"]["variants"]:
+        page = (folder / f"{variant}.html").read_text()
+        assert page.count("class='sa-hit'") == len(long)  # one tooltip per method and EPV
+        assert "Datasets: " in page or "Dataset: " in page
+        assert ("data:image/png;base64," in page) == (not variant.startswith("binary_"))
+    # Downloads use the light colours, whatever the page's theme.
+    assert "var SA_LIGHT" in pareto and "getComputedStyle(document.documentElement)" not in pareto
