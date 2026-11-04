@@ -1,10 +1,31 @@
-# SelectArena
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.svg">
+    <img src="docs/assets/banner-light.svg" alt="SelectArena: A modern benchmark for feature selection on real-world tabular data" width="760">
+  </picture>
+</p>
 
-SelectArena is a living benchmark for feature selection on real-world tabular IID data. Each feature selection method
-selects a budgeted number of features, and the selection is judged by the downstream performance of tabular models trained on the selected features, 
-plus a stability and validity benchmarking to capture the interpretability of methods. 
-The paper is available at [arXiv:2610.13644](https://arxiv.org/abs/2610.13644). We provide a public leaderboard that is updated with new methods: [Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). Our data can be found here: [Data](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets).
+<p align="center">
+  <a href="https://arxiv.org/abs/2610.13644"><img src="https://img.shields.io/badge/arXiv-2610.13644-b31b1b.svg" alt="arXiv paper"></a>
+  <a href="https://huggingface.co/spaces/SelectArena/Leaderboard"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Leaderboard-SelectArena-0072b2" alt="Leaderboard"></a>
+  <a href="https://huggingface.co/datasets/SelectArena/SelectArena_Datasets"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Datasets-SelectArena-0072b2" alt="Datasets"></a>
+  <a href="https://github.com/autogluon/tabarena"><img src="https://img.shields.io/badge/built%20on-TabArena-d55e00" alt="Built on TabArena"></a>
+  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.13-3776ab.svg" alt="Python 3.11 to 3.13">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0 license"></a>
+</p>
 
+<p align="center">
+  <a href="https://arxiv.org/abs/2610.13644"><b>Paper</b></a> ·
+  <a href="https://huggingface.co/spaces/SelectArena/Leaderboard"><b>Leaderboard</b></a> ·
+  <a href="https://huggingface.co/datasets/SelectArena/SelectArena_Datasets"><b>Datasets</b></a> ·
+  <a href="#add-your-method-to-selectarena"><b>Add your method</b></a>
+</p>
+
+SelectArena is a **living benchmark** for feature selection on real-world tabular IID data. Each feature selection
+method selects a budgeted number of features, and the selection is judged by the downstream performance of tabular
+models trained on the selected features, plus a stability and validity benchmark that captures the interpretability
+of the methods. The [leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is updated as new methods
+are added.
 
 ## Installation
 
