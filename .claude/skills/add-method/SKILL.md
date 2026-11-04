@@ -115,6 +115,8 @@ Read `src/selectarena/methods/registry.py`, then add the class in one pass:
 2. `PAPER_NAMES["<ClassName>"] = "<MethodName>"`
 3. `METHOD_SUBGROUPS["<ClassName>"] = "<Subgroup>"` (and `SUBGROUP_CATEGORIES` for a new subgroup)
 4. `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL` if it calls `evaluate_proxy_model`
+5. `METHOD_PAPERS["<ClassName>"] = "<link to its paper>"` (a DOI link where there is one) if the method
+   is published; the leaderboard links the method's name to it. Skip it for an unpublished method.
 
 A new library dependency goes into `dependencies` in `pyproject.toml` (every method runs in the
 benchmark, so it is not an optional extra), with a lower bound and a comment naming the method.

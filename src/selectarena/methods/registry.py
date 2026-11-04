@@ -53,6 +53,28 @@ PAPER_NAMES: dict[str, str] = {
     "SequentialForwardSelectionFeatureSelector": "SFS",
 }
 
+#: Link to the paper each method is cited with in the paper (Table 2 and Appendix B.4; the links of
+#: Appendix C.1, a DOI where there is one). The leaderboard links the method's name to it. Optional: a method
+#: without a paper (Random, or a new method not published yet) shows its name without a link.
+METHOD_PAPERS: dict[str, str] = {
+    "CARTFeatureSelector": "https://doi.org/10.1201/9781315139470",  # Breiman et al., 1984
+    "ElasticNetFeatureSelector": "https://doi.org/10.1111/j.1467-9868.2005.00503.x",  # Zou & Hastie, 2005
+    "FTestFeatureSelector": "https://doi.org/10.1016/0169-7439(89)80095-4",  # Ståhle et al., 1989
+    "GainRatioFeatureSelector": "https://doi.org/10.1007/BF00116251",  # Quinlan, 1986
+    "LaplacianScoreFeatureSelector": (  # He et al., 2005
+        "https://proceedings.neurips.cc/paper_files/paper/2005/file/b5b03f06271f8917685d14cea7c6c50a-Paper.pdf"
+    ),
+    "LassoFeatureSelector": "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x",  # Tibshirani, 1996
+    "LOCOFeatureSelector": "https://arxiv.org/abs/1604.04173",  # Lei et al., 2017 (Appendix B.4.7)
+    "MarkovBlanketFeatureSelector": "http://ilpubs.stanford.edu:8090/208/",  # Koller & Sahami, 1996
+    "mRMRFeatureSelector": "https://doi.org/10.1109/TPAMI.2005.159",  # Peng et al., 2005
+    "MIFeatureSelector": "https://doi.org/10.1109/72.298224",  # Battiti, 1994
+    "ReliefFFeatureSelector": "https://doi.org/10.1023/A:1008280620621",  # Kononenko et al., 1997
+    "RFImportanceFeatureSelector": "https://doi.org/10.1023/A:1010933404324",  # Breiman, 2001
+    "SequentialBackwardEliminationFeatureSelector": "https://doi.org/10.1023/A:1012487302797",  # Guyon et al., 2002
+    "SequentialForwardSelectionFeatureSelector": "https://doi.org/10.1109/TSMC.1977.4309803",  # Cover & Van Campenhout, 1977
+}
+
 #: Class names in results written by tabarena_fork_fs before the methods were renamed, mapped to
 #: their current class. Reading old results through these keeps one name per method.
 LEGACY_NAMES: dict[str, str] = {

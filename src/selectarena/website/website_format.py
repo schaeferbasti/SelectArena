@@ -12,7 +12,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from selectarena.methods.registry import METHOD_SUBGROUPS, PAPER_NAMES, SUBGROUP_CATEGORIES
+from selectarena.methods.registry import METHOD_PAPERS, METHOD_SUBGROUPS, PAPER_NAMES, SUBGROUP_CATEGORIES
 
 OTHER = "Other"
 _PAPER_NAME_TO_CLASS = {name: cls for cls, name in PAPER_NAMES.items()}
@@ -44,6 +44,12 @@ def method_subgroup(method: str) -> str:
     """Taxonomy subgroup of a leaderboard method label (``MI`` or ``MI [nofallback]``), ``Other`` if unknown."""
     base = method.split(" [")[0]
     return METHOD_SUBGROUPS.get(_PAPER_NAME_TO_CLASS.get(base, base), OTHER)
+
+
+def method_paper(method: str) -> str | None:
+    """Link to the paper of a leaderboard method label (``MI`` or ``MI [nofallback]``), ``None`` if it has none."""
+    base = method.split(" [")[0]
+    return METHOD_PAPERS.get(_PAPER_NAME_TO_CLASS.get(base, base))
 
 
 def method_category(method: str) -> str:
