@@ -23,7 +23,8 @@ overview.
   in place of TabArena's SLURM `submit_template.sh`.
 - `src/selectarena/extra_benchmark/`: stability/validity runs, plain SLURM arrays.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`),
-  Pareto front (`pareto.py`) and lasagna plots (`lasagna.py`), ported from the paper's plotting code.
+  Pareto front (`pareto.py`) and lasagna plots (`lasagna.py`), ported from the paper's plotting code;
+  their interactive website versions are in `website/figures.py`.
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`).
   The Space's app lives in its own repo (`huggingface.co/spaces/SelectArena/Leaderboard`), as for
   TabArena. It is a static site (keep it static: Gradio Spaces need a paid plan); the folder names

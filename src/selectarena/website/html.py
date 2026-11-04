@@ -24,11 +24,19 @@ import math
 import numpy as np
 import pandas as pd
 
-_BASE_CSS = """
+_DARK_TOKENS = "--fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df;"
+# Dark mode follows the system unless the Space's theme button set data-theme on the page.
+_BASE_CSS = (
+    """
 :root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
 @media (prefers-color-scheme: dark) {
-  :root { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+  :root:not([data-theme="light"]) { """
+    + _DARK_TOKENS
+    + """ }
 }
+:root[data-theme="dark"] { """
+    + _DARK_TOKENS
+    + """ }
 html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
   font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
 .toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
@@ -37,8 +45,21 @@ html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
   border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
 .toolbar button:hover { border-color:var(--accent); }
 """
+)
 
 _DOWNLOAD_JS = """
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
 function saDownload(name, blob) {
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -456,20 +477,24 @@ _FIGURE_JS = """
   });
   document.addEventListener('mouseleave', hide);
 })();
+// Downloads always use the light colours (the paper look), whatever the page's theme.
+var SA_LIGHT = {'--fg': '#1f2328', '--muted': '#59636e', '--line': '#d1d9e0', '--bg': '#ffffff',
+  '--soft': '#f6f8fa', '--accent': '#0072B2'};
 function saSvgString() {
   var svg = document.getElementById('sa-figure').cloneNode(true);
-  var style = getComputedStyle(document.documentElement);
-  var vars = ['--fg', '--muted', '--line', '--bg'];
-  var css = svg.querySelector('style').textContent;
-  vars.forEach(function (v) { css = css.split('var(' + v + ')').join(style.getPropertyValue(v).trim()); });
-  svg.querySelector('style').textContent = css;
+  var style = svg.querySelector('style');
+  var css = style.textContent;
+  Object.keys(SA_LIGHT).forEach(function (v) { css = css.split('var(' + v + ')').join(SA_LIGHT[v]); });
+  style.textContent = css;
+  svg.querySelectorAll('.sa-hit').forEach(function (hit) { hit.remove(); });
   svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
   return new XMLSerializer().serializeToString(svg);
 }
-function saSvg() {
-  saDownload('selectarena_elo.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
+function saSvg(name) {
+  saDownload(name + '.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
 }
-function saPng() {
+function saPng(name) {
   var svg = document.getElementById('sa-figure');
   var box = svg.viewBox.baseVal, scale = 3;
   var img = new Image();
@@ -477,10 +502,10 @@ function saPng() {
     var canvas = document.createElement('canvas');
     canvas.width = box.width * scale; canvas.height = box.height * scale;
     var ctx = canvas.getContext('2d');
-    ctx.fillStyle = getComputedStyle(document.body).backgroundColor;
+    ctx.fillStyle = SA_LIGHT['--bg'];
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(function (blob) { saDownload('selectarena_elo.png', blob); });
+    canvas.toBlob(function (blob) { saDownload(name + '.png', blob); });
   };
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
 }
@@ -624,13 +649,18 @@ def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
     return "".join(parts)
 
 
+def figure_toolbar(name: str, hint: str) -> str:
+    """Hint plus SVG / PNG / CSV buttons of a figure page; the files are ``<name>.svg`` etc."""
+    return (
+        f"<div class='toolbar'><span class='hint'>{html.escape(hint)}</span>"
+        f"<button onclick=\"saSvg('{name}')\">SVG</button><button onclick=\"saPng('{name}')\">PNG</button>"
+        f"<button onclick=\"saCsv('{name}.csv')\">CSV</button></div>"
+    )
+
+
 def elo_explorer_html(leaderboard: pd.DataFrame, *, title: str) -> str:
     """``elo_explorer.html``: the main figure of one subset with SVG / PNG / CSV export."""
-    toolbar = (
-        "<div class='toolbar'><span class='hint'>Hover or tap a method for its values.</span>"
-        "<button onclick='saSvg()'>SVG</button><button onclick='saPng()'>PNG</button>"
-        "<button onclick=\"saCsv('selectarena_elo.csv')\">CSV</button></div>"
-    )
+    toolbar = figure_toolbar("selectarena_elo", "Hover or tap a method for its values.")
     columns = ["Method", "Category", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
     csv = leaderboard[[c for c in columns if c in leaderboard]]
     return _page(title, toolbar + elo_figure_svg(leaderboard) + _csv_block(csv), _TIP_CSS, _FIGURE_JS)

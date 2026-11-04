@@ -102,7 +102,7 @@ find "$W" -name '*.png' | wc -l                          # must be 0: the Space 
 
 Also look at the main figure: `generated_website_artifacts/raw_website_artifacts/main_figure.png`
 (the paper version) or open `$W/subsets/tasks_all/models_all/budgets_all/elo_explorer.html`, and
-at `$W/subsets/tasks_all/models_all/budgets_all/pareto.svg` and `$W/lasagna/stability/tasks_all/plain.svg`.
+at `$W/subsets/tasks_all/models_all/budgets_all/pareto.html` and `$W/lasagna/stability/tasks_all/plain.html`.
 No lasagna plots usually means the validity results lack `num_samples` / `min_samples_per_class`.
 
 ## Step 3: Refresh the Space's `data/`

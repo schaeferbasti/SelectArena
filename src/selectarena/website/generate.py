@@ -11,12 +11,12 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``subsets/tasks_<t>/models_<m>/budgets_<b>/``: per subset ``website_leaderboard.csv``,
     ``leaderboard_table.html``, ``elo_explorer.html`` and, when the number of features of the
     datasets is known (from the stability or validity results), the Pareto front of improvement
-    over Random vs. selection time, ``pareto.svg`` and ``pareto.csv`` (see
+    over Random vs. selection time, ``pareto.html`` (interactive) and ``pareto.csv`` (see
     :mod:`selectarena.website.subsets` and :mod:`selectarena.evaluation.pareto`); the all-models
     folder of each task type and budget also holds ``per_model.csv`` and ``per_model_table.html``,
     the Elo of each method per downstream model (``"per_model": true`` in ``meta.json``);
   - ``lasagna/stability/tasks_<t>/`` and ``lasagna/validity/noise_<level>/tasks_<t>/``: the
-    paper's lasagna plots per task type, one ``<variant>.svg`` per variant plus ``per_epv.csv``
+    paper's lasagna plots per task type, one interactive ``<variant>.html`` per variant plus ``per_epv.csv``
     (see :mod:`selectarena.evaluation.lasagna`);
   - ``results.csv`` and ``results_explorer.html``: the complete results, per dataset, method, downstream
     model and budget, averaged over splits;
@@ -59,8 +59,9 @@ from selectarena.evaluation.leaderboard import (
     validity_per_run,
     validity_table,
 )
-from selectarena.evaluation.pareto import improvement_and_runtime, pareto_figure
+from selectarena.evaluation.pareto import improvement_and_runtime
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
+from selectarena.website.figures import lasagna_explorer_html, pareto_explorer_html
 from selectarena.website.html import (
     elo_explorer_html,
     extra_table_html,
@@ -104,16 +105,6 @@ def _version() -> str:
         return "dev"
 
 
-def _save_svg(fig, path: Path) -> None:
-    """Write a matplotlib figure as SVG without a date, so unchanged data gives an unchanged file."""
-    import matplotlib.pyplot as plt
-
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with plt.rc_context({"svg.hashsalt": "selectarena", "svg.fonttype": "none"}):
-        fig.savefig(path, format="svg", bbox_inches="tight", metadata={"Date": None})
-    plt.close(fig)
-
-
 def _noise_label(noise: float) -> str:
     return f"{float(noise):g}"
 
@@ -121,7 +112,8 @@ def _noise_label(noise: float) -> str:
 def _lasagna_plots(
     rows: pd.DataFrame, value: str, folder: Path, problem_types: pd.Series, log: Callable[[str], None]
 ) -> list[str]:
-    """Write one folder per task type with ``per_epv.csv`` and one SVG per variant; return the task types."""
+    """Write one folder per task type with ``per_epv.csv`` and one interactive page per variant
+    (``<variant>.html``); return the task types."""
     written = []
     for tasks, allowed in TASK_TYPES.items():
         sub = rows if allowed is None else rows[rows["dataset"].map(problem_types).isin(allowed)]
@@ -132,8 +124,18 @@ def _lasagna_plots(
         target.mkdir(parents=True, exist_ok=True)
         long.round(4).to_csv(target / "per_epv.csv", index=False)
         matrix = lasagna.epv_matrix(long, value)
+        named = sub.dropna(subset=["epv"])
+        datasets = {float(epv): sorted(group["dataset"].unique()) for epv, group in named.groupby("epv")}
         for variant in lasagna.VARIANTS:
-            _save_svg(lasagna.lasagna_figure(matrix, value, variant), target / f"{variant}.svg")
+            page = lasagna_explorer_html(
+                matrix,
+                long.round(4),
+                value,
+                variant,
+                datasets=datasets,
+                title=f"SelectArena: {value} ({folder.name.replace('_', ' ')}, {tasks} tasks)",
+            )
+            (target / f"{variant}.html").write_text(page)
         written.append(tasks)
     log(f"{value} lasagna plots ({folder.name}): {', '.join(written) or 'none'}")
     return written
@@ -312,7 +314,7 @@ def generate_website_artifacts(
             front = improvement_and_runtime(subset.filter(df).assign(dataset=lambda d: d["dataset_key"]), num_features)
             if len(front) >= 2 and "Random" in set(front["method"]):
                 front.round(4).to_csv(target / "pareto.csv", index=False)
-                _save_svg(pareto_figure(front), target / "pareto.svg")
+                (target / "pareto.html").write_text(pareto_explorer_html(front.round(4), title=title))
                 has_pareto = True
         published.append(
             {

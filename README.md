@@ -112,7 +112,9 @@ python scripts/run_generate_website_artifacts.py \
 folder.
 `raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
 `selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
-(`pareto.py`) and the lasagna plots (`lasagna.py`).
+(`pareto.py`) and the lasagna plots (`lasagna.py`) are in `selectarena/evaluation/`. All figures on
+the website are interactive SVG pages (`website/html.py`, `website/figures.py`) that follow its
+light or dark theme; their SVG / PNG downloads always use the light paper look.
 
 **Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
