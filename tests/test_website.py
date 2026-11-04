@@ -192,9 +192,20 @@ def test_html_is_self_contained(artifacts):
     table = (data / "subsets" / Subset().rel_path / "leaderboard_table.html").read_text()
     assert "CART" in table and ">Tree<" in table
     header = table.split("<thead", 1)[1].split("</thead>", 1)[0]
-    assert ">Improvability" in header
-    for hidden in ("Win rate", "Error vs. all", "#Datasets"):  # kept in the CSV, not shown
-        assert hidden not in header
+    assert ">Improvement over Random" in header
+    for hidden in ("Win rate", "Error vs. all", "#Datasets", "Avg. rank", "Improvability"):
+        assert hidden not in table  # neither shown nor in the CSV download
+    overall = pd.read_csv(data / "subsets" / Subset().rel_path / "website_leaderboard.csv").set_index("Method")
+    assert overall.loc["Random", "Improvement over Random (%)"] == 0
+    assert overall["Improvement over Random (%)"].notna().all()
+    # The same numbers as the Pareto front (both average per dataset, then over datasets).
+    pareto = pd.read_csv(data / "subsets" / Subset().rel_path / "pareto.csv").set_index("method")
+    pd.testing.assert_series_equal(
+        overall["Improvement over Random (%)"].sort_index(),
+        pareto["improvement"].round(1).rename("Improvement over Random (%)").rename_axis("Method").sort_index(),
+        check_exact=False,
+        atol=0.11,
+    )
 
 
 def test_figure_tooltip(artifacts):

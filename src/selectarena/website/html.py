@@ -277,12 +277,12 @@ LEADERBOARD_TABLE_COLUMNS = [
         "help": "Bradley-Terry Elo from pairwise matches within each dataset, budget and downstream model. "
         "Random = 1000. +/− give the 95% bootstrap interval.",
     },
-    {"key": "Avg. rank", "label": "Avg. rank ↓", "digits": 2, "help": "Mean rank of the downstream error."},
     {
-        "key": "Improvability (%)",
-        "label": "Improvability ↓",
+        "key": "Improvement over Random (%)",
+        "label": "Improvement over Random ↑",
         "digits": 1,
-        "help": "Mean relative gap (error − best error) / error to the best method, in %.",
+        "help": "Mean reduction of the downstream error compared with random selection on the same dataset, "
+        "in % (as in the Pareto figure; Random is 0).",
     },
     {
         "key": "Stability",
@@ -315,11 +315,30 @@ LEADERBOARD_TABLE_COLUMNS = [
 ]
 
 
+#: Columns of the table's CSV download: what the table shows (its Type column is Category and
+#: Subgroup, its Elo cell includes the interval). ``website_leaderboard.csv`` keeps every column.
+LEADERBOARD_DOWNLOAD_COLUMNS = [
+    "Rank",
+    "Method",
+    "Category",
+    "Subgroup",
+    "Elo",
+    "Elo CI low",
+    "Elo CI high",
+    "Improvement over Random (%)",
+    "Stability",
+    "Validity",
+    "Selection time (s)",
+    "Fallback rate (%)",
+]
+
+
 def leaderboard_table_html(leaderboard: pd.DataFrame, *, title: str) -> str:
     """``leaderboard_table.html`` of one subset, from its ``website_leaderboard.csv`` table."""
     return table_html(
         leaderboard,
         LEADERBOARD_TABLE_COLUMNS,
+        csv=leaderboard[[c for c in LEADERBOARD_DOWNLOAD_COLUMNS if c in leaderboard]],
         title=title,
         csv_name="selectarena_leaderboard.csv",
         hint="Click a column to sort. Hover a header for its definition. Stability and validity are shaded "

@@ -30,6 +30,29 @@ _ORANGE = "#D55E00"
 _GREEN = "#009E73"
 
 
+def _improvement_per_dataset(per_dataset: pd.DataFrame) -> pd.DataFrame:
+    """Add ``improvement`` (%) to per-(dataset, method) mean errors; datasets without Random are dropped."""
+    random_error = per_dataset[per_dataset["method"] == RANDOM].set_index("dataset")["metric_error"]
+    per_dataset = per_dataset.assign(random_error=per_dataset["dataset"].map(random_error))
+    per_dataset = per_dataset[per_dataset["random_error"] > 0]
+    return per_dataset.assign(
+        improvement=(per_dataset["random_error"] - per_dataset["metric_error"]) / per_dataset["random_error"] * 100
+    )
+
+
+def improvement_over_random(df: pd.DataFrame) -> pd.Series:
+    """Mean improvement over Random (%) of each method, as in the Pareto figure.
+
+    ``df`` holds one row per result with ``dataset``, ``method`` and ``metric_error`` (runs without
+    feature selection have no ``method`` and are ignored). The improvement on a dataset is
+    ``(error_random - error_method) / error_random * 100`` of the errors averaged over budgets,
+    downstream models and splits; the result is its mean over datasets (Random: 0).
+    """
+    df = df[df["method"].notna()]
+    per_dataset = df.groupby(["dataset", "method"], as_index=False)["metric_error"].mean()
+    return _improvement_per_dataset(per_dataset).groupby("method")["improvement"].mean()
+
+
 def improvement_and_runtime(df: pd.DataFrame, num_features: Mapping[str, float]) -> pd.DataFrame:
     """Mean improvement over Random (%) and mean selection time per 1k features of each method.
 
@@ -45,12 +68,7 @@ def improvement_and_runtime(df: pd.DataFrame, num_features: Mapping[str, float])
     df = df[df["num_features"] > 0]
     df["time_per_1k"] = df["feature_selection_fit_time"] / df["num_features"] * 1000
     per_dataset = df.groupby(["dataset", "method"], as_index=False)[["metric_error", "time_per_1k"]].mean()
-    random_error = per_dataset[per_dataset["method"] == RANDOM].set_index("dataset")["metric_error"]
-    per_dataset["random_error"] = per_dataset["dataset"].map(random_error)
-    per_dataset = per_dataset[per_dataset["random_error"] > 0]
-    per_dataset["improvement"] = (
-        (per_dataset["random_error"] - per_dataset["metric_error"]) / per_dataset["random_error"] * 100
-    )
+    per_dataset = _improvement_per_dataset(per_dataset)
     summary = (
         per_dataset.groupby("method")
         .agg(
