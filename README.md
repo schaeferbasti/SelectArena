@@ -116,6 +116,26 @@ folder.
 the website are interactive SVG pages (`website/html.py`, `website/figures.py`) that follow its
 light or dark theme; their SVG / PNG downloads always use the light paper look.
 
+### Your method on the leaderboard, locally
+
+You do not need the maintainers' result files to see a new method next to the published ones. Benchmark
+your method (see [Add your method to SelectArena](#add-your-method-to-selectarena)), then:
+
+```bash
+python scripts/run_generate_website_artifacts.py --with-published-results \
+    --results <run dir>/results.csv --extra-dir <folder with stability_results.csv, validity_results.csv>
+python scripts/preview_leaderboard.py      # the whole leaderboard website at http://localhost:8000
+```
+
+`--with-published-results` downloads the published results of all methods from
+[SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) into
+`results/` (several GB, only when they are not there yet) and adds your results to them; your results
+replace the published ones of the same method on the same dataset (e.g. a rerun). The leaderboard
+compares methods on the same dataset splits, so run your method with the benchmark config of the
+published results (`configs/benchmark.yaml`). `preview_leaderboard.py` downloads the website's page
+from the Space (not its data) and serves it with your generated data; `--site <clone of the Space>`
+uses a local clone instead. To get your method on the public leaderboard, open a pull request with it.
+
 **Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
 (`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
@@ -133,12 +153,13 @@ src/selectarena/
   benchmark/        FSBench pipelines and the TabArena subclasses
   extra_benchmark/  stability / validity benchmark (selection only)
   evaluation/       reading results.pkl files into a table, leaderboard tables, Elo
-  website/          the leaderboard Space's data (subsets, tables, interactive figure)
+  website/          the leaderboard Space's data (subsets, tables, interactive figures) and its local preview
   datasets.py       the dataset suite (Data Foundry containers)
+  published_results.py  the published results (download, merge with your own)
   config.py         YAML configs and the tabflow_slurm plan built from them
 configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.example.yaml (OAR)
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
-                    run_generate_website_artifacts.py, check_method.py
+                    run_generate_website_artifacts.py, preview_leaderboard.py, check_method.py
 .claude/skills/     add-method: add a feature selection method;
                     update-leaderboard: regenerate and publish the leaderboard
 examples/           quickstart.py, run_local.py

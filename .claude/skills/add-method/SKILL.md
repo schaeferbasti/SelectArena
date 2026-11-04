@@ -122,9 +122,9 @@ benchmark, so it is not an optional extra), with a lower bound and a comment nam
 ## Step 5: Documentation
 
 - Add a row to the methods table in `README.md` (`Class | Paper name | Subgroup | Proxy model`).
-- The leaderboard Space's About tab (`index.html` in the Space repo) lists the methods per
-  subgroup. If a Space checkout is available (e.g. `../SelectArenaLeaderboard`), add the method
-  there too; otherwise list it as a TODO in the report.
+- If the leaderboard Space's page (`index.html` in the Space repo, e.g. `../SelectArenaLeaderboard`)
+  names methods per subgroup (the Type note under the leaderboard table), add the method there too;
+  otherwise there is nothing to do on the Space side.
 
 ## Step 6: Verify (Claude runs)
 
@@ -162,7 +162,10 @@ only the new method and add it to existing results:
    (submit the printed `sbatch` command), then `... eval ...` for its `results.csv`.
 3. Stability and validity: `python scripts/run_extra_benchmark.py setup --config configs/benchmark_<module>.yaml --submit`,
    then `collect`.
-4. Combine with the existing results (`pd.concat` of the result CSVs) and publish with the
+4. Rank it against the published methods and look at it locally:
+   `python scripts/run_generate_website_artifacts.py --with-published-results --results <run dir>/results.csv --extra-dir <extra results dir>`
+   (downloads the published results into `results/` if missing and adds the new ones), then
+   `python scripts/preview_leaderboard.py` (http://localhost:8000). Maintainers publish with the
    **update-leaderboard** skill.
 
 Elo compares methods within the same dataset, split, budget and downstream model, so results can
@@ -177,5 +180,5 @@ maintainer before combining.
 Tell the maintainer: the files created and edited; the kind (scoring / subset), proxy-model use
 and subgroup chosen, with the reason; new dependencies; the `check_method.py` and test results
 (including any `WARN`); the comparison with a reference implementation if one was made; open
-TODOs (Space About text, the benchmark run of Step 8). Commit only when asked; the commit message
+TODOs (the benchmark run of Step 8). Commit only when asked; the commit message
 names the method and its reference.

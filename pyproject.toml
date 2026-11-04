@@ -37,6 +37,8 @@ dependencies = [
   "matplotlib",
   # Label placement of the Pareto figure on the leaderboard (as in the paper's plotting code).
   "adjustText>=1.0",
+  # The published results (--with-published-results) and the leaderboard preview (also a TabArena dependency).
+  "huggingface_hub",
   "numpy",
   "pandas",
   "scikit-learn",
