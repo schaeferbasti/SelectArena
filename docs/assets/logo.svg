@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 84" role="img" aria-label="SelectArena logo: a stadium seen from above with a data table as the field">
+  <title>SelectArena</title>
+  <defs>
+    <clipPath id="sa-stands">
+      <rect x="2" y="2" width="116" height="80" rx="40"/>
+    </clipPath>
+  </defs>
+  <!-- Stands: outer and inner tier of a stadium seen from above -->
+  <rect x="2" y="2" width="116" height="80" rx="40" fill="#0072B2"/>
+  <rect x="11" y="10" width="98" height="64" rx="32" fill="#3F9AD2"/>
+  <!-- Aisles between seating blocks -->
+  <g clip-path="url(#sa-stands)" stroke="#ffffff" stroke-opacity="0.55" stroke-width="1.6">
+    <line x1="60" y1="42" x2="60" y2="-8"/>
+    <line x1="60" y1="42" x2="60" y2="92"/>
+    <line x1="60" y1="42" x2="2" y2="-8"/>
+    <line x1="60" y1="42" x2="118" y2="-8"/>
+    <line x1="60" y1="42" x2="2" y2="92"/>
+    <line x1="60" y1="42" x2="118" y2="92"/>
+    <line x1="60" y1="42" x2="-20" y2="42"/>
+    <line x1="60" y1="42" x2="140" y2="42"/>
+    <line x1="60" y1="42" x2="-20" y2="12"/>
+    <line x1="60" y1="42" x2="140" y2="12"/>
+    <line x1="60" y1="42" x2="-20" y2="72"/>
+    <line x1="60" y1="42" x2="140" y2="72"/>
+    <line x1="60" y1="42" x2="30" y2="-8"/>
+    <line x1="60" y1="42" x2="90" y2="-8"/>
+    <line x1="60" y1="42" x2="30" y2="92"/>
+    <line x1="60" y1="42" x2="90" y2="92"/>
+  </g>
+  <!-- Field: a data table; selected columns (features) in orange, deselected ones in grey -->
+  <rect x="25" y="21" width="70" height="42" rx="5" fill="#ffffff"/>
+  <rect x="28.5" y="25" width="11" height="6" rx="1.2" fill="#A94600"/>
+  <rect x="28.5" y="33" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="28.5" y="40" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="28.5" y="47" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="28.5" y="54" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="41.5" y="25" width="11" height="6" rx="1.2" fill="#A9B6C3"/>
+  <rect x="41.5" y="33" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="41.5" y="40" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="41.5" y="47" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="41.5" y="54" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="54.5" y="25" width="11" height="6" rx="1.2" fill="#A94600"/>
+  <rect x="54.5" y="33" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="54.5" y="40" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="54.5" y="47" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="54.5" y="54" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="67.5" y="25" width="11" height="6" rx="1.2" fill="#A94600"/>
+  <rect x="67.5" y="33" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="67.5" y="40" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="67.5" y="47" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="67.5" y="54" width="11" height="5" rx="1" fill="#D55E00"/>
+  <rect x="80.5" y="25" width="11" height="6" rx="1.2" fill="#A9B6C3"/>
+  <rect x="80.5" y="33" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="80.5" y="40" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="80.5" y="47" width="11" height="5" rx="1" fill="#D3DCE5"/>
+  <rect x="80.5" y="54" width="11" height="5" rx="1" fill="#D3DCE5"/>
+</svg>
