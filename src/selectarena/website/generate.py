@@ -59,7 +59,7 @@ from selectarena.evaluation.leaderboard import (
     validity_per_run,
     validity_table,
 )
-from selectarena.evaluation.pareto import improvement_and_runtime
+from selectarena.evaluation.pareto import improvement_and_runtime, improvement_over_random
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
 from selectarena.website.figures import lasagna_explorer_html, pareto_explorer_html
 from selectarena.website.html import (
@@ -301,6 +301,7 @@ def generate_website_artifacts(
             stability=_mean(stab_rows, "stability"),
             validity=_mean(val_rows, "validity"),
             n_datasets=sub.groupby("method")["dataset_key"].nunique(),
+            improvement=improvement_over_random(subset.filter(df).assign(dataset=lambda d: d["dataset_key"])),
         )
         target = website_data / "subsets" / subset.rel_path
         target.mkdir(parents=True)

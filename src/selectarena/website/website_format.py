@@ -29,6 +29,7 @@ LEADERBOARD_COLUMNS = [
     "Avg. rank",
     "Win rate (%)",
     "Improvability (%)",
+    "Improvement over Random (%)",
     "Error vs. all features",
     "Stability",
     "Validity",
@@ -62,19 +63,22 @@ def format_leaderboard(
     stability: pd.Series | None = None,
     validity: pd.Series | None = None,
     n_datasets: pd.Series | None = None,
+    improvement: pd.Series | None = None,
 ) -> pd.DataFrame:
     """The website table of one subset, best Elo first.
 
     Args:
         elo: ``method``, ``elo``, ``elo_ci_low``, ``elo_ci_high`` (:func:`~selectarena.evaluation.elo.compute_elo`).
         summary: :func:`~selectarena.evaluation.leaderboard.aggregate` of the subset's scores.
-        stability, validity, n_datasets: values per method (index), if available.
+        stability, validity, n_datasets, improvement: values per method (index), if available
+            (``improvement``: :func:`~selectarena.evaluation.pareto.improvement_over_random`).
     """
     df = elo.merge(summary, on="method", how="outer")
     empty = pd.Series(dtype=float)
     df["stability"] = df["method"].map(stability if stability is not None else empty)
     df["validity"] = df["method"].map(validity if validity is not None else empty)
     df["n_datasets"] = df["method"].map(n_datasets if n_datasets is not None else empty)
+    df["improvement"] = df["method"].map(improvement if improvement is not None else empty)
     df = df.sort_values(["elo", "avg_rank"], ascending=[False, True], na_position="last").reset_index(drop=True)
     out = pd.DataFrame(
         {
@@ -88,6 +92,7 @@ def format_leaderboard(
             "Avg. rank": df["avg_rank"].round(2),
             "Win rate (%)": (100 * df["win_rate"]).round(1),
             "Improvability (%)": (100 * df["improvability"]).round(1),
+            "Improvement over Random (%)": df["improvement"].round(1),
             "Error vs. all features": df["rel_error_vs_all_features"].round(3),
             "Stability": df["stability"].round(3),
             "Validity": df["validity"].round(3),
