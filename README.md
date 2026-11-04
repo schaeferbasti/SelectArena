@@ -1,18 +1,14 @@
 # SelectArena
 
-SelectArena is a benchmark for feature selection on tabular data. Each feature selection method
-selects a budgeted number of features, and the selection is judged by the downstream performance of
-strong tabular models trained on the selected features, plus a selection-only stability and
-validity benchmark. The paper is available at [arXiv:2610.13644](https://arxiv.org/abs/2610.13644). We provide a public leaderboard: [SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard).
+SelectArena is a living benchmark for feature selection on real-world tabular IID data. Each feature selection method
+selects a budgeted number of features, and the selection is judged by the downstream performance of tabular models trained on the selected features, 
+plus a stability and validity benchmarking to capture the interpretability of methods. 
+The paper is available at [arXiv:2610.13644](https://arxiv.org/abs/2610.13644). We provide a public leaderboard that is updated with new methods: [Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). Our data can be found here: [Data](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets).
 
 
 ## Installation
 
-SelectArena depends on [TabArena](https://github.com/autogluon/tabarena) for datasets, models,
-the experiment runner, the validation protocol and the SLURM tooling.
-Python 3.11 to 3.13. TabArena is pinned to one upstream commit (see `pyproject.toml`), and
-AutoGluon comes from its pre-release builds, so allow pre-releases:
-
+SelectArena depends on [TabArena](https://github.com/autogluon/tabarena).
 ```bash
 uv venv --python 3.12 .venv && source .venv/bin/activate
 uv pip install --prerelease=allow -e ".[models,dev]"
@@ -61,26 +57,22 @@ With `scheduler: oar` in the cluster config, the same scripts write OAR parametr
 and print `oarsub` commands instead of `sbatch` ones (`--submit` submits them). The jobs, their
 bundling and the results are the same as on SLURM. Start from `configs/cluster.oar.example.yaml`.
 
-## Datasets
+## Add your method to SelectArena
 
-The suite is 71 curated [Data Foundry](https://github.com/TabArena/data-foundry) containers
-(`selectarena.datasets.BENCHMARK_DATA_FOUNDRY_TASKS`), published in the Hugging Face dataset
-repository [SelectArena/SelectArena_Datasets](https://huggingface.co/datasets/SelectArena/SelectArena_Datasets). 
-They are downloaded on first use: `run_benchmark.py setup` and `run_extra_benchmark.py setup` fetch
-the containers into the `data_foundry` cache of the cluster config and convert the ones the run
-needs into TabArena tasks in the `openml` cache. `scripts/prepare_datasets.py` does the same for the
-whole suite in advance, e.g. on a front end when the compute nodes have no internet access. To read
-the containers from a local copy instead (e.g. a Data Foundry warehouse), set
-`data_foundry_warehouse` in the cluster config to the directory that holds them as
-`<dataset>/<container uuid>/`.
+To add a method, ask Claude Code to "add <method>" in this repo: the `add-method` skill
+(`.claude/skills/add-method/`) writes the `AbstractFeatureSelector` subclass from templates,
+registers it and verifies it. `python scripts/check_method.py <ClassName>` (or `--all`) checks any
+method against the benchmark's contract: registration, output format on binary / multiclass /
+regression data, determinism and the selection time limit.
 
-New containers go into the Hugging Face repository first, in the same layout; then add their paths
-to `BENCHMARK_DATA_FOUNDRY_TASKS` and update `HF_REVISION` to the repository's new commit.
+Search methods (forward, backward, leave-one-out) evaluate many feature subsets; non-search methods
+use a proxy instead (Appendix A of the paper). Methods with a proxy model fit a LightGBM model
+(configurable through `ProxyModelConfig`) inside the selection.
+
 
 ## Leaderboard
 
-The public leaderboard is the Hugging Face Space
-[SelectArena/Leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard). The Space repo holds the site and this repo generates the data it serves:
+The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) holds the site and this repo generates the data it serves:
 
 ```bash
 python scripts/run_benchmark.py eval                # results.csv
@@ -96,60 +88,19 @@ python scripts/run_generate_website_artifacts.py \
 ```
 
 `generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
-folder: one leaderboard per task type, downstream model and budget (`website_leaderboard.csv`, a
-sortable `leaderboard_table.html` and `elo_explorer.html`, the paper's main figure as an interactive
-SVG, and the Pareto front of improvement over Random vs. selection time as `pareto.svg`), the
-paper's lasagna plots of stability and validity per task type (`lasagna/`), the per-dataset ranks
-(`per_dataset.csv`), the stability / validity tables and a filterable explorer of the complete results
-(`results.csv`), all as text. The Space shows them in four tabs: Leaderboard (the table, overall or as
-the Elo per downstream model: `per_model_table.html` in the all-models folders), Performance (Elo
-figure, Pareto front and complete results), Stability and Validity.
+folder.
 `raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
 `selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
-(`pareto.py`) and the lasagna plots (`lasagna.py`) port `elo_v4.py`, `scripts/pareto.py` and
-`fsplots/lasagna.py` from the paper's plotting code. The lasagna plots place datasets by events per
-variable, which needs the `num_samples` / `min_samples_per_class` columns of the validity results.
+(`pareto.py`) and the lasagna plots (`lasagna.py`).
 
 **Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
 ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
 (`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
 has a subgroup of the paper's taxonomy, regenerates the artifacts, swaps them into the Space's
 `data/`, bumps the site's version, runs the Space's smoke test and a local preview, and leaves
-the commit and `git push` (which deploys) to you. The
-manual steps are in the docstring of `scripts/run_generate_website_artifacts.py`.
+the commit and `git push` (which deploys) to you. The manual steps are in the docstring of 
+`scripts/run_generate_website_artifacts.py`.
 
-## Feature selection methods
-
-| Class | Paper name | Subgroup (paper, Table 2) | Proxy model |
-|---|---|---|---|
-| `RandomFeatureSelector` | Random | Baseline | |
-| `FTestFeatureSelector` | F-Test | Correlation | |
-| `MIFeatureSelector` | MI | Information theory | |
-| `GainRatioFeatureSelector` | GainRatio | Information theory | |
-| `mRMRFeatureSelector` | mRMR | Information theory | |
-| `ReliefFFeatureSelector` | (R)ReliefF | Distance | |
-| `LaplacianScoreFeatureSelector` | LaplacianScore | Distance | |
-| `MarkovBlanketFeatureSelector` | MarkovBlanket | Backward search | |
-| `LassoFeatureSelector` | Lasso | Regularization | |
-| `ElasticNetFeatureSelector` | ElasticNet | Regularization | |
-| `CARTFeatureSelector` | CART | Tree | |
-| `RFImportanceFeatureSelector` | RFImportance | Tree | |
-| `LOCOFeatureSelector` | LOCO | Leave-one-out | yes |
-| `SequentialForwardSelectionFeatureSelector` | SFS | Forward search | yes |
-| `SequentialBackwardEliminationFeatureSelector` | SBE | Backward search | yes |
-
-To add a method, ask Claude Code to "add <method>" in this repo: the `add-method` skill
-(`.claude/skills/add-method/`) writes the `AbstractFeatureSelector` subclass from templates,
-registers it and verifies it. `python scripts/check_method.py <ClassName>` (or `--all`) checks any
-method against the benchmark's contract: registration, output format on binary / multiclass /
-regression data, determinism and the selection time limit.
-
-Search methods (forward, backward, leave-one-out) evaluate many feature subsets; non-search methods
-use a proxy instead (Appendix A of the paper). Methods with a proxy model fit a LightGBM model
-(configurable through `ProxyModelConfig`) inside the selection.
-
-The budget: for `d` features and total budget `b`, budget index `i` (0-based) keeps
-`ceil(d * (i+1) / (b+1))` features when `d <= 100` and `ceil(d ** ((i+1) / (b+1)))` otherwise.
 
 ## Repository layout
 
