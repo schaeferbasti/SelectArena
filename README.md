@@ -9,8 +9,6 @@
   <a href="https://arxiv.org/abs/2610.13644"><img src="https://img.shields.io/badge/arXiv-2610.13644-b31b1b.svg" alt="arXiv paper"></a>
   <a href="https://huggingface.co/spaces/SelectArena/Leaderboard"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Leaderboard-SelectArena-0072b2" alt="Leaderboard"></a>
   <a href="https://huggingface.co/datasets/SelectArena/SelectArena_Datasets"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Datasets-SelectArena-0072b2" alt="Datasets"></a>
-  <a href="https://github.com/autogluon/tabarena"><img src="https://img.shields.io/badge/built%20on-TabArena-d55e00" alt="Built on TabArena"></a>
-  <img src="https://img.shields.io/badge/python-3.11%E2%80%933.13-3776ab.svg" alt="Python 3.11 to 3.13">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0 license"></a>
 </p>
 
@@ -134,16 +132,10 @@ replace the published ones of the same method on the same dataset (e.g. a rerun)
 compares methods on the same dataset splits, so run your method with the benchmark config of the
 published results (`configs/benchmark.yaml`). `preview_leaderboard.py` downloads the website's page
 from the Space (not its data) and serves it with your generated data; `--site <clone of the Space>`
-uses a local clone instead. To get your method on the public leaderboard, open a pull request with it.
+uses a local clone instead.
 
-**Publishing** is done by the `update-leaderboard` skill (`.claude/skills/update-leaderboard/`):
-ask Claude Code to "update the leaderboard" in this repo with the path of a clone of the Space
-(`git clone https://huggingface.co/spaces/SelectArena/Leaderboard`). It checks that every method
-has a subgroup of the paper's taxonomy, regenerates the artifacts, swaps them into the Space's
-`data/`, bumps the site's version, runs the Space's smoke test and a local preview, and leaves
-the commit and `git push` (which deploys) to you. The manual steps are in the docstring of 
-`scripts/run_generate_website_artifacts.py`.
-
+To get your method on the public leaderboard, open a pull request with it; the maintainers then
+run it and publish the updated leaderboard.
 
 ## Repository layout
 
