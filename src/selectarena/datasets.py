@@ -50,7 +50,7 @@ BENCHMARK_DATA_FOUNDRY_TASKS = [
     "forest_fires/019d9cdb-6862-7bcb-8733-cb9db5f573ed",
     "framingham_heart_study/019d9cdc-9a0d-7c91-ba72-e2c31fd7c833",
     "give_me_some_credit/019d9cdd-4000-7593-9945-fae38e6aefeb",
-    "hazelnut_spread_contaminant_detection_10GHz/019d9cde-0193-7306-935a-65c5e6e3358e",
+    "hazelnut_spread_contaminant_detection_10ghz/019d9cde-0193-7306-935a-65c5e6e3358e",
     "heart_disease_cleveland/019d9cdf-175e-7644-911d-c70dfeeb60e1",
     "heart_disease_hungary/019d9ce0-2349-7e3f-ada9-a96dfad347a6",
     "heart_disease_switzerland/019d9cdf-3ce5-7e78-840a-3dffae2b965e",
@@ -175,6 +175,19 @@ EARLIER_DATA_FOUNDRY_TASKS = [
     "wine_quality/019d4816-2a31-7d60-a95f-2f6167c8e008",
 ]
 
+#: Containers of :data:`BENCHMARK_DATA_FOUNDRY_TASKS` under their name before Data Foundry required
+#: snake_case dataset names. The task id hashes the name, so results from before the rename carry
+#: these ids. Only needed to name the datasets of those results.
+RENAMED_DATA_FOUNDRY_TASKS = [
+    "hazelnut_spread_contaminant_detection_10GHz/019d9cde-0193-7306-935a-65c5e6e3358e",
+]
+
+
+def _dataset_of(path: str) -> str:
+    """Dataset name of a container path (``<dataset>/<uuid>``), lowercased as Data Foundry now requires,
+    so a container renamed to snake_case keeps its name across results from before and after."""
+    return path.split("/")[0].lower()
+
 
 def user_task_id(task_name: str) -> int:
     """The id TabArena gives the ``UserTask`` of a Data Foundry container (``<dataset>/<uuid>``).
@@ -186,15 +199,16 @@ def user_task_id(task_name: str) -> int:
 
 #: Task id of every known container -> dataset name.
 TASK_ID_TO_DATASET: dict[int, str] = {
-    user_task_id(path): path.split("/")[0] for path in [*EARLIER_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
+    user_task_id(path): _dataset_of(path)
+    for path in [*EARLIER_DATA_FOUNDRY_TASKS, *RENAMED_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
 }
 
 #: Hash part of TabArena's task slug (``UserTask.slug``, ``<dataset>-<first 12 hex chars of the
 #: task name's SHA-256>``) of every known container -> dataset name. The slug is the task name in
 #: the results; its dataset part is cut to 40 characters, so the hash identifies the dataset.
 TASK_SLUG_HASH_TO_DATASET: dict[str, str] = {
-    hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]: path.split("/")[0]
-    for path in [*EARLIER_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
+    hashlib.sha256(path.encode("utf-8")).hexdigest()[:12]: _dataset_of(path)
+    for path in [*EARLIER_DATA_FOUNDRY_TASKS, *RENAMED_DATA_FOUNDRY_TASKS, *BENCHMARK_DATA_FOUNDRY_TASKS]
 }
 
 
@@ -209,7 +223,7 @@ def task_names_from_ids(task_id_strs) -> dict[int, str]:
     for value in task_id_strs:
         parts = str(value).split("|")
         if len(parts) > 2 and parts[0] == "UserTask" and parts[1].isdigit():
-            names[int(parts[1])] = parts[2].split("/")[0]
+            names[int(parts[1])] = _dataset_of(parts[2])
     return names
 
 
@@ -228,7 +242,7 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
         parts = text.split("|")
         text = parts[2] if len(parts) > 2 else parts[1]
     if "/" in text:
-        return text.split("/")[0]
+        return _dataset_of(text)
     match = _TASK_ID.fullmatch(text)
     if match:
         task_id = int(match.group(1))
@@ -236,16 +250,16 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
     slug = _TASK_SLUG.fullmatch(text)
     if slug:
         return TASK_SLUG_HASH_TO_DATASET.get(slug.group(1), text)
-    return text
+    return text.lower()
 
 
 #: Hugging Face dataset repository holding the suite's containers, in the warehouse layout
 #: ``<dataset>/<container uuid>/`` (as ``TabArena/BeyondArena`` holds BeyondArena's).
 HF_REPO_ID = "SelectArena/SelectArena_Datasets"
-#: Commit of :data:`HF_REPO_ID` the containers are read from (2026-11-02). Pinned so the files behind a
+#: Commit of :data:`HF_REPO_ID` the containers are read from (2026-11-05). Pinned so the files behind a
 #: container path cannot change, as ``data_foundry.collections`` pins BeyondArena's; update it whenever
 #: the repository gets new containers. ``None`` reads ``main``.
-HF_REVISION: str | None = "9185f0de2bcaa631c424ed6ad8932fef8e9e76dd"
+HF_REVISION: str | None = "eafa3761749d889d90df16cf776d3234f35b4776"
 
 
 def make_collection(warehouse_dir: str | Path | None = None) -> DatasetCollection:
