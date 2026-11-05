@@ -277,19 +277,14 @@ LEADERBOARD_TABLE_COLUMNS = [
         "help": "Click a method to open its paper (the one cited in Table 2 of the SelectArena paper).",
     },
     {
-        "key": "Subgroup",
+        "key": "Type",
         "label": "Type",
         "render": lambda r: (
             f"<span class='pill cat-{html.escape(str(r['Category']).lower(), quote=True)}'>"
-            f"{html.escape(str(r['Subgroup']))}</span>"
-            + (
-                ""
-                if r["Category"] in ("Baseline", "Other")
-                else f"<span class='sub'>{html.escape(str(r['Category']).lower())}</span>"
-            )
+            f"{html.escape(str(r['Type']))}</span>"
         ),
         "help": "Taxonomy of the paper (Appendix A). Search methods evaluate many feature subsets with the model "
-        "(forward, backward, leave-one-out); non-search methods use a proxy instead (correlation, distance, "
+        "(forward, backward, leave-one-out); the others use a proxy instead (correlation, distance, "
         "information theory, tree, regularization).",
     },
     {
@@ -338,13 +333,12 @@ LEADERBOARD_TABLE_COLUMNS = [
 ]
 
 
-#: Columns of the table's CSV download: what the table shows (its Type column is Category and
-#: Subgroup, its Elo cell includes the interval). ``website_leaderboard.csv`` keeps every column.
+#: Columns of the table's CSV download: what the table shows (its Elo cell includes the interval).
+#: ``website_leaderboard.csv`` keeps every column (Category and Subgroup instead of Type).
 LEADERBOARD_DOWNLOAD_COLUMNS = [
     "Rank",
     "Method",
-    "Category",
-    "Subgroup",
+    "Type",
     "Elo",
     "Elo CI low",
     "Elo CI high",
@@ -356,8 +350,17 @@ LEADERBOARD_DOWNLOAD_COLUMNS = [
 ]
 
 
+def method_type(category: str, subgroup: str) -> str:
+    """The Type column of the leaderboard table: ``Search`` for every search method (forward,
+    backward, leave-one-out), the subgroup (e.g. ``Tree``) for the others."""
+    return "Search" if category == "Search" else subgroup
+
+
 def leaderboard_table_html(leaderboard: pd.DataFrame, *, title: str) -> str:
     """``leaderboard_table.html`` of one subset, from its ``website_leaderboard.csv`` table."""
+    leaderboard = leaderboard.assign(
+        Type=[method_type(c, s) for c, s in zip(leaderboard["Category"], leaderboard["Subgroup"], strict=True)]
+    )
     return table_html(
         leaderboard,
         LEADERBOARD_TABLE_COLUMNS,
