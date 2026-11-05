@@ -25,13 +25,16 @@ NAME_TO_MODULE_MAP: dict[str, str] = {
     "RFImportanceFeatureSelector": "rf_importance",
     "SequentialBackwardEliminationFeatureSelector": "sbe",
     "SequentialForwardSelectionFeatureSelector": "sfs",
+    "SHAPFeatureSelector": "shap",
 }
 FEATURE_SELECTION_METHODS: list[str] = list(NAME_TO_MODULE_MAP.keys())
-#: Methods that fit a proxy model internally and therefore need a ``ProxyModelConfig``.
+#: Methods that fit a proxy model internally (``evaluate_proxy_model`` or ``fitted_proxy_model``) and
+#: therefore need a ``ProxyModelConfig``.
 FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL: list[str] = [
     "LOCOFeatureSelector",
     "SequentialBackwardEliminationFeatureSelector",
     "SequentialForwardSelectionFeatureSelector",
+    "SHAPFeatureSelector",
 ]
 
 #: Method names as used in the paper (Table 2, Figure 1).
@@ -51,6 +54,7 @@ PAPER_NAMES: dict[str, str] = {
     "RFImportanceFeatureSelector": "RFImportance",
     "SequentialBackwardEliminationFeatureSelector": "SBE",
     "SequentialForwardSelectionFeatureSelector": "SFS",
+    "SHAPFeatureSelector": "SHAP",
 }
 
 #: Link to the paper each method is cited with in the paper (Table 2 and Appendix B.4; the links of
@@ -73,6 +77,7 @@ METHOD_PAPERS: dict[str, str] = {
     "RFImportanceFeatureSelector": "https://doi.org/10.1023/A:1010933404324",  # Breiman, 2001
     "SequentialBackwardEliminationFeatureSelector": "https://doi.org/10.1023/A:1012487302797",  # Guyon et al., 2002
     "SequentialForwardSelectionFeatureSelector": "https://doi.org/10.1109/TSMC.1977.4309803",  # Cover & Van Campenhout, 1977
+    "SHAPFeatureSelector": "https://arxiv.org/abs/1705.07874",  # Lundberg & Lee, 2017 (NeurIPS)
 }
 
 #: Class names in results written by tabarena_fork_fs before the methods were renamed, mapped to
@@ -102,6 +107,7 @@ METHOD_SUBGROUPS: dict[str, str] = {
     "RFImportanceFeatureSelector": "Tree",
     "SequentialBackwardEliminationFeatureSelector": "Backward search",
     "SequentialForwardSelectionFeatureSelector": "Forward search",
+    "SHAPFeatureSelector": "Game theory",
 }
 
 #: Category of each subgroup (Figure A.1). A new subgroup needs an entry here as well.
@@ -114,6 +120,7 @@ SUBGROUP_CATEGORIES: dict[str, str] = {
     "Information theory": "Non-search",
     "Tree": "Non-search",
     "Regularization": "Non-search",
+    "Game theory": "Non-search",
     "Baseline": "Baseline",
 }
 

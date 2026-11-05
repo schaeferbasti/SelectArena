@@ -17,7 +17,11 @@ from selectarena.benchmark.fs_config import (
     with_encoding_permutation_variants,
 )
 from selectarena.evaluation.read_results import _CompatUnpickler
-from selectarena.methods import FEATURE_SELECTION_METHODS, ProxyModelConfig
+from selectarena.methods import (
+    FEATURE_SELECTION_METHODS,
+    FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL,
+    ProxyModelConfig,
+)
 
 
 def test_config_string_round_trip():
@@ -64,11 +68,7 @@ def test_selector_from_pipeline_string(method):
     assert selector.skip_random_fallback
     assert selector.encoding_permutation_seed == 3
     assert selector.max_features_input(10) == 4
-    if method in {
-        "LOCOFeatureSelector",
-        "SequentialBackwardEliminationFeatureSelector",
-        "SequentialForwardSelectionFeatureSelector",
-    }:
+    if method in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL:
         assert isinstance(selector.proxy_mode_config, ProxyModelConfig)
     else:
         assert selector.proxy_mode_config is None

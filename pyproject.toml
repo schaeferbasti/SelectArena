@@ -44,6 +44,8 @@ dependencies = [
   "scikit-learn",
   "scipy",
   "pyyaml",
+  # Shapley values of the proxy model (SHAPFeatureSelector).
+  "shapiq>=1.4",
 ]
 
 [project.optional-dependencies]

@@ -15,6 +15,7 @@ from tabarena.benchmark.task.user_task import from_sklearn_splits_to_user_task_s
 from selectarena.benchmark import SelectArenaBagExperiment
 from selectarena.config import build_plan, load_benchmark_config, load_cluster_config
 from selectarena.datasets import COLLECTION_NAME
+from selectarena.methods import FEATURE_SELECTION_METHODS
 
 REPO_ROOT = Path(__file__).parent.parent
 
@@ -55,7 +56,7 @@ def test_example_configs_build_a_plan(tmp_path):
     assert len(plan.context.task_metadata_collection.dataset_names()) == 1
     assert plan.resources_setup.time_limit_for_model_agnostic_preprocessing == 3600
     pipelines = benchmark.feature_selection.pipelines()
-    assert len(pipelines) == 15 * 5
+    assert len(pipelines) == len(FEATURE_SELECTION_METHODS) * 5  # methods: all, 5 budgets
 
     (setup,) = plan.build_setups(num_ray_cpus=1)  # one model job in the example config
     experiments = setup.experiment_bundle.build_experiments()

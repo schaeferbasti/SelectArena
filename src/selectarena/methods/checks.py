@@ -112,17 +112,20 @@ def check_registry(name: str) -> list[CheckResult]:
         results.append(_ok("taxonomy", f"{subgroup} ({SUBGROUP_CATEGORIES[subgroup].lower()})"))
 
     class_source = inspect.getsource(cls)
-    uses_proxy = "evaluate_proxy_model" in class_source
+    uses_proxy = "evaluate_proxy_model" in class_source or "fitted_proxy_model" in class_source
     listed = name in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL
     if uses_proxy and not listed:
         results.append(
-            _fail("proxy model", "calls evaluate_proxy_model but is not in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL")
+            _fail(
+                "proxy model",
+                "calls evaluate_proxy_model / fitted_proxy_model but is not in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL",
+            )
         )
     elif listed and not uses_proxy:
         results.append(
             _warn(
                 "proxy model",
-                "listed in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL but never calls evaluate_proxy_model",
+                "listed in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL but calls neither evaluate_proxy_model nor fitted_proxy_model",
             )
         )
     else:
