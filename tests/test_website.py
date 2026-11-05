@@ -339,6 +339,7 @@ def test_task_ids_are_named():
     from selectarena.datasets import (
         BENCHMARK_DATA_FOUNDRY_TASKS,
         EARLIER_DATA_FOUNDRY_TASKS,
+        RENAMED_DATA_FOUNDRY_TASKS,
         dataset_name,
         user_task_id,
     )
@@ -356,6 +357,12 @@ def test_task_ids_are_named():
         assert dataset_name(UserTask(task_name=path).slug) == name  # TabArena's tabarena_task_name
     assert dataset_name("anneal") == "anneal"
     assert dataset_name("123") == "123"
+    # A container renamed to snake_case keeps its dataset name for results from before the rename.
+    for path in RENAMED_DATA_FOUNDRY_TASKS:
+        renamed = path.lower()
+        assert renamed in BENCHMARK_DATA_FOUNDRY_TASKS
+        assert dataset_name(user_task_id(path)) == dataset_name(user_task_id(renamed)) == renamed.split("/")[0]
+        assert dataset_name(path.split("/")[0]) == renamed.split("/")[0]
 
 
 def test_results_with_task_ids(tmp_path):
