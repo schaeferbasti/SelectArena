@@ -480,6 +480,29 @@ def test_extra_tables_medals_and_paper_links(artifacts):
         assert "_rank" not in text  # helper column: not shown, not in the CSV
 
 
+def test_leaderboard_type_column():
+    from selectarena.website.html import leaderboard_table_html
+
+    table = pd.DataFrame(
+        {
+            "Rank": [1, 2, 3, 4],
+            "Method": ["SFS", "LOCO", "CART", "Random"],
+            "Category": ["Search", "Search", "Non-search", "Baseline"],
+            "Subgroup": ["Forward search", "Leave-one-out", "Tree", "Baseline"],
+            "Elo": [1100, 1050, 1020, 1000],
+            "Elo CI low": [1080, 1030, 1000, 980],
+            "Elo CI high": [1120, 1070, 1040, 1020],
+        }
+    )
+    page = leaderboard_table_html(table, title="t")
+    body = page.split("<tbody>", 1)[1].split("</tbody>", 1)[0]
+    assert body.count(">Search</span>") == 2 and ">Tree</span>" in body and ">Baseline</span>" in body
+    assert "search</span>" not in body.replace(">Search</span>", "")  # no search / non-search label
+    assert "Forward search" not in body and "Leave-one-out" not in body
+    csv_header = page.split("Rank,Method,", 1)[1].split("\n", 1)[0]
+    assert csv_header.startswith("Type,Elo") and "Subgroup" not in csv_header and "Category" not in csv_header
+
+
 def test_per_model_tables(artifacts):
     data = artifacts.website_data
     meta = json.loads((data / "meta.json").read_text())
