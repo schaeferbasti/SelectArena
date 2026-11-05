@@ -5,7 +5,8 @@ from __future__ import annotations
 import math
 import tempfile
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
@@ -19,6 +20,7 @@ from autogluon.tabular.models.lgb.lgb_model import LGBModel
 if TYPE_CHECKING:
     import pandas as pd
     from autogluon.core.models.abstract.abstract_model import AbstractModel
+    from autogluon.features.generators import AutoMLPipelineFeatureGenerator
 
 
 @dataclass
@@ -39,6 +41,40 @@ class ProxyModelConfig:
     """The problem type of the current datasets."""
     eval_metric: str | None = None
     """The evaluation metric used to evaluate the proxy model."""
+
+
+@dataclass
+class FittedProxyModel:
+    """A proxy model fitted by ``AbstractFeatureSelector.fitted_proxy_model``, with the data it was fitted on."""
+
+    model: AbstractModel
+    feature_generator: AutoMLPipelineFeatureGenerator
+    label_cleaner: LabelCleaner
+    problem_type: str
+    X_train: pd.DataFrame
+    """Rows the model was fitted on, with the columns passed to ``fitted_proxy_model``."""
+    y_train: pd.Series
+    X_val: pd.DataFrame
+    """Held-out rows of the same split (``evaluate_proxy_model`` scores on them)."""
+    y_val: pd.Series
+
+    def predict(self, X: pd.DataFrame) -> np.ndarray:
+        """Predictions for ``X`` (columns as passed to ``fitted_proxy_model``).
+
+        Classification: class probabilities, shape ``(n, n_classes)``, columns in the order of
+        ``encode_labels`` (binary tasks included). Regression: the predicted values, shape ``(n,)``.
+        """
+        X_model = self.feature_generator.transform(X)
+        if self.problem_type not in ("binary", "multiclass"):
+            return np.asarray(self.model.predict(X_model), dtype=float)
+        proba = np.asarray(self.model.predict_proba(X_model), dtype=float)
+        if proba.ndim == 1:  # binary: AutoGluon returns the probability of the positive class
+            proba = np.column_stack([1.0 - proba, proba])
+        return proba
+
+    def encode_labels(self, y: pd.Series) -> np.ndarray:
+        """Class labels as column indices of ``predict``'s probabilities (NaN for a class unseen in training)."""
+        return np.asarray(self.label_cleaner.transform(y), dtype=float)
 
 
 class AbstractFeatureSelector(AbstractFeatureGenerator):
@@ -386,57 +422,19 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
         n_val_fraction: float = 0.33,
     ) -> float | None:
         """Evaluate the proxy model on the given data."""
-        from autogluon.core.models import BaggedEnsembleModel
         from autogluon.core.utils.exceptions import NoValidFeatures
-        from autogluon.core.utils.utils import generate_train_test_split
-        from autogluon.features.generators import AutoMLPipelineFeatureGenerator
 
-        if self.proxy_mode_config is None:
-            raise ValueError(
-                "Proxy mode is not configured but the feature selection method needs a proxy model. "
-                "Pass a ProxyModelConfig to the feature selection method!"
-            )
-        assert self.proxy_mode_config.eval_metric is not None, "When ProxyModel is needed, eval_metric must be set."
-        assert self.proxy_mode_config.problem_type is not None, "When ProxyModel is needed, problem_type must be set."
+        self._check_proxy_config()
         self._log(20, f"\tFitting Proxy Model (remaining time_limit: {time_limit})")
 
-        # Init Proxy model
-        problem_type = self.proxy_mode_config.problem_type
-        eval_metric = self.proxy_mode_config.eval_metric
-        model_class = self.proxy_mode_config.model_class
-        use_bagged_model = self.proxy_mode_config.use_bagged_model
-        hps = self.proxy_mode_config.model_hyperparameters
-        bagging_hps = self.proxy_mode_config.bagging_hyperparameters
-        verbosity = self.proxy_mode_config.verbosity
-        model_kwargs = dict(
-            name=f"ProxyModel_{model_class.ag_name}",
-            problem_type=problem_type,
-            eval_metric=eval_metric,
-            hyperparameters=hps,
-        )
-
         # Validation splits + Subsampling
-        X, y = X.copy(), y.copy()  # avoid modifying the input data
-        X_train, X_val, y_train, y_val = generate_train_test_split(
-            X=X, y=y, test_size=n_val_fraction, random_state=self.random_state, problem_type=problem_type
+        X_train, X_val, y_train, y_val = self._split_proxy_data(
+            X=X, y=y, n_train_subsample=n_train_subsample, n_val_fraction=n_val_fraction
         )
         del X, y  # free up memory
-        if (n_train_subsample is not None) and (len(X_train) > n_train_subsample):
-            self._log(
-                20,
-                f"\tNumber of training samples {len(X_train)} is greater than {n_train_subsample}. "
-                f"Using {n_train_subsample} samples as training data.",
-            )
-            drop_ratio = 1.0 - n_train_subsample / len(X_train)
-            X_train, _, y_train, _ = generate_train_test_split(
-                X=X_train, y=y_train, problem_type=problem_type, random_state=self.random_state, test_size=drop_ratio
-            )
 
         # Preprocessing
-        feature_generator, label_cleaner = (
-            AutoMLPipelineFeatureGenerator(verbosity=verbosity),
-            LabelCleaner.construct(problem_type=problem_type, y=y_train, verbose=verbosity > 1),
-        )
+        feature_generator, label_cleaner = self._new_proxy_preprocessors(y_train=y_train)
         X_train, y_train = (
             feature_generator.fit_transform(X_train),
             label_cleaner.transform(y_train),
@@ -446,15 +444,7 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
         # Run proxy model
         try:
             with tempfile.TemporaryDirectory() as tmp_dir:
-                model_kwargs["path"] = tmp_dir
-                if use_bagged_model:
-                    model = BaggedEnsembleModel(
-                        model_class(**model_kwargs),
-                        hyperparameters=bagging_hps,
-                    )
-                else:
-                    model = model_class(**model_kwargs)
-                model.rename("FeatureSelector_" + model.name)
+                model = self._new_proxy_model(path=tmp_dir)
                 model.fit(
                     X=X_train,
                     y=y_train,
@@ -471,6 +461,117 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
             return None
         # Ensure Python dtype
         return float(score)
+
+    @contextmanager
+    def fitted_proxy_model(
+        self,
+        *,
+        X: pd.DataFrame,
+        y: pd.Series,
+        time_limit: float | None = None,
+        n_train_subsample: int | None = 10_000,
+        n_val_fraction: float = 0.33,
+    ) -> Iterator[FittedProxyModel]:
+        """Fit the proxy model once and yield it, for methods that use the fitted model itself
+        (e.g. to explain its predictions) instead of its validation score.
+
+        The split, subsampling, preprocessing and model are those of ``evaluate_proxy_model``, so the
+        model is the one ``evaluate_proxy_model`` would score on the same columns. The model lives in a
+        temporary directory that is removed when the ``with`` block ends: use it only inside the block.
+
+        Raises:
+            TimeLimitExceeded: the fit ran out of time.
+            NoValidFeatures: every feature was dropped as constant after the split.
+        """
+        self._check_proxy_config()
+        self._log(20, f"\tFitting Proxy Model (remaining time_limit: {time_limit})")
+        X_train, X_val, y_train, y_val = self._split_proxy_data(
+            X=X, y=y, n_train_subsample=n_train_subsample, n_val_fraction=n_val_fraction
+        )
+        feature_generator, label_cleaner = self._new_proxy_preprocessors(y_train=y_train)
+        X_train_model = feature_generator.fit_transform(X_train)
+        y_train_model = label_cleaner.transform(y_train)
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            model = self._new_proxy_model(path=tmp_dir)
+            model.fit(
+                X=X_train_model,
+                y=y_train_model,
+                time_limit=time_limit,
+                num_classes=label_cleaner.num_classes,
+                label_cleaner=label_cleaner,
+            )
+            yield FittedProxyModel(
+                model=model,
+                feature_generator=feature_generator,
+                label_cleaner=label_cleaner,
+                problem_type=self.proxy_mode_config.problem_type,
+                X_train=X_train,
+                y_train=y_train,
+                X_val=X_val,
+                y_val=y_val,
+            )
+
+    def _check_proxy_config(self) -> None:
+        if self.proxy_mode_config is None:
+            raise ValueError(
+                "Proxy mode is not configured but the feature selection method needs a proxy model. "
+                "Pass a ProxyModelConfig to the feature selection method!"
+            )
+        assert self.proxy_mode_config.eval_metric is not None, "When ProxyModel is needed, eval_metric must be set."
+        assert self.proxy_mode_config.problem_type is not None, "When ProxyModel is needed, problem_type must be set."
+
+    def _split_proxy_data(
+        self, *, X: pd.DataFrame, y: pd.Series, n_train_subsample: int | None, n_val_fraction: float
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+        """Train / validation split of the proxy model, the training part subsampled to ``n_train_subsample`` rows."""
+        from autogluon.core.utils.utils import generate_train_test_split
+
+        problem_type = self.proxy_mode_config.problem_type
+        X, y = X.copy(), y.copy()  # avoid modifying the input data
+        X_train, X_val, y_train, y_val = generate_train_test_split(
+            X=X, y=y, test_size=n_val_fraction, random_state=self.random_state, problem_type=problem_type
+        )
+        if (n_train_subsample is not None) and (len(X_train) > n_train_subsample):
+            self._log(
+                20,
+                f"\tNumber of training samples {len(X_train)} is greater than {n_train_subsample}. "
+                f"Using {n_train_subsample} samples as training data.",
+            )
+            drop_ratio = 1.0 - n_train_subsample / len(X_train)
+            X_train, _, y_train, _ = generate_train_test_split(
+                X=X_train, y=y_train, problem_type=problem_type, random_state=self.random_state, test_size=drop_ratio
+            )
+        return X_train, X_val, y_train, y_val
+
+    def _new_proxy_preprocessors(self, *, y_train: pd.Series) -> tuple[AutoMLPipelineFeatureGenerator, LabelCleaner]:
+        """Unfitted feature generator and the label cleaner of the proxy model."""
+        from autogluon.features.generators import AutoMLPipelineFeatureGenerator
+
+        verbosity = self.proxy_mode_config.verbosity
+        return (
+            AutoMLPipelineFeatureGenerator(verbosity=verbosity),
+            LabelCleaner.construct(problem_type=self.proxy_mode_config.problem_type, y=y_train, verbose=verbosity > 1),
+        )
+
+    def _new_proxy_model(self, *, path: str) -> AbstractModel:
+        """The configured proxy model, unfitted, saving under ``path``."""
+        from autogluon.core.models import BaggedEnsembleModel
+
+        config = self.proxy_mode_config
+        model_class = config.model_class
+        model_kwargs = dict(
+            name=f"ProxyModel_{model_class.ag_name}",
+            problem_type=config.problem_type,
+            eval_metric=config.eval_metric,
+            hyperparameters=config.model_hyperparameters,
+            path=path,
+        )
+        if config.use_bagged_model:
+            model = BaggedEnsembleModel(model_class(**model_kwargs), hyperparameters=config.bagging_hyperparameters)
+        else:
+            model = model_class(**model_kwargs)
+        model.rename("FeatureSelector_" + model.name)
+        return model
 
     def _seeded_feature_order(self) -> list[str]:
         """Original features in a per-split-seeded random order (``self._rng`` is seeded from the

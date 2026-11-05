@@ -49,6 +49,8 @@ randomness, and its cost in the number of features and samples (the time limit, 
   `{"feature": name, "value": float}` (value `nan` when the method has no per-feature number).
 - Model refits on candidate subsets → use `self.evaluate_proxy_model(X=..., y=..., time_limit=...)`
   and list the class in `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL` (LightGBM by default).
+- Uses the fitted proxy model itself (e.g. explains its predictions) → `with self.fitted_proxy_model(X=..., y=...,
+  time_limit=...) as proxy:` (see `methods/shap.py`), listed in `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL` as well.
 - A library selector that fits its own model internally (e.g. a random-forest importance) is not a
   proxy-model method; fit it directly, seeded with `self.random_state`.
 
@@ -61,8 +63,8 @@ randomness, and its cost in the number of features and samples (the time limit, 
   algorithms and reinforcement learning as further search subgroups.
 - **Non-search** (a proxy instead of repeated subset evaluation): `Correlation` (F-Test),
   `Distance` ((R)ReliefF, LaplacianScore), `Information theory` (MI, mRMR, GainRatio), `Tree`
-  (CART, RFImportance), `Regularization` (Lasso, ElasticNet). Appendix A names game-theoretic and
-  knowledge-driven approaches as further non-search subgroups.
+  (CART, RFImportance), `Regularization` (Lasso, ElasticNet), `Game theory` (SHAP). Appendix A names
+  knowledge-driven approaches as a further non-search subgroup.
 
 Reuse an existing subgroup when it fits; a new one also needs a `SUBGROUP_CATEGORIES` entry.
 Confirm the choice with the maintainer: it is what the leaderboard shows in its Type column.
@@ -114,7 +116,7 @@ Read `src/selectarena/methods/registry.py`, then add the class in one pass:
 1. `NAME_TO_MODULE_MAP["<ClassName>"] = "<module>"`
 2. `PAPER_NAMES["<ClassName>"] = "<MethodName>"`
 3. `METHOD_SUBGROUPS["<ClassName>"] = "<Subgroup>"` (and `SUBGROUP_CATEGORIES` for a new subgroup)
-4. `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL` if it calls `evaluate_proxy_model`
+4. `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL` if it calls `evaluate_proxy_model` or `fitted_proxy_model`
 5. `METHOD_PAPERS["<ClassName>"] = "<link to its paper>"` (a DOI link where there is one) if the method
    is published; the leaderboard links the method's name to it. Skip it for an unpublished method.
 
