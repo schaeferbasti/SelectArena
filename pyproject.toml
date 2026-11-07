@@ -46,6 +46,8 @@ dependencies = [
   "pyyaml",
   # Shapley values of the proxy model (SHAPFeatureSelector).
   "shapiq>=1.4",
+  # Regularization path of a sparse neural network (LassoNetFeatureSelector).
+  "lassonet>=0.0.22",
 ]
 
 [project.optional-dependencies]
