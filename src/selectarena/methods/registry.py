@@ -14,6 +14,7 @@ NAME_TO_MODULE_MAP: dict[str, str] = {
     "RandomFeatureSelector": "random_baseline",
     "FTestFeatureSelector": "f_test",
     "CARTFeatureSelector": "cart",
+    "CPIFeatureSelector": "cpi",
     "ElasticNetFeatureSelector": "elastic_net",
     "GainRatioFeatureSelector": "gain_ratio",
     "LaplacianScoreFeatureSelector": "laplacian_score",
@@ -32,6 +33,7 @@ FEATURE_SELECTION_METHODS: list[str] = list(NAME_TO_MODULE_MAP.keys())
 #: Methods that fit a proxy model internally (``evaluate_proxy_model`` or ``fitted_proxy_model``) and
 #: therefore need a ``ProxyModelConfig``.
 FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL: list[str] = [
+    "CPIFeatureSelector",
     "LOCOFeatureSelector",
     "SequentialBackwardEliminationFeatureSelector",
     "SequentialForwardSelectionFeatureSelector",
@@ -44,6 +46,7 @@ PAPER_NAMES: dict[str, str] = {
     "RandomFeatureSelector": "Random",
     "FTestFeatureSelector": "F-Test",
     "CARTFeatureSelector": "CART",
+    "CPIFeatureSelector": "CPI",
     "ElasticNetFeatureSelector": "ElasticNet",
     "GainRatioFeatureSelector": "GainRatio",
     "LaplacianScoreFeatureSelector": "LaplacianScore",
@@ -64,6 +67,7 @@ PAPER_NAMES: dict[str, str] = {
 #: without a paper (Random, or a new method not published yet) shows its name without a link.
 METHOD_PAPERS: dict[str, str] = {
     "CARTFeatureSelector": "https://doi.org/10.1201/9781315139470",  # Breiman et al., 1984
+    "CPIFeatureSelector": "https://arxiv.org/abs/2309.07593",  # Chamma et al., 2023 (NeurIPS)
     "ElasticNetFeatureSelector": "https://doi.org/10.1111/j.1467-9868.2005.00503.x",  # Zou & Hastie, 2005
     "FTestFeatureSelector": "https://doi.org/10.1016/0169-7439(89)80095-4",  # Ståhle et al., 1989
     "GainRatioFeatureSelector": "https://doi.org/10.1007/BF00116251",  # Quinlan, 1986
@@ -96,6 +100,7 @@ LEGACY_NAMES: dict[str, str] = {
 #: leaderboard's Type column; every registered method needs an entry, or it shows as "Other".
 METHOD_SUBGROUPS: dict[str, str] = {
     "CARTFeatureSelector": "Tree",
+    "CPIFeatureSelector": "Conditional Importance",
     "ElasticNetFeatureSelector": "Regularization",
     "FTestFeatureSelector": "Correlation",
     "GainRatioFeatureSelector": "Information theory",
@@ -125,6 +130,7 @@ SUBGROUP_CATEGORIES: dict[str, str] = {
     "Tree": "Non-search",
     "Regularization": "Non-search",
     "Game theory": "Non-search",
+    "Conditional Importance": "Non-search",
     "Baseline": "Baseline",
 }
 
