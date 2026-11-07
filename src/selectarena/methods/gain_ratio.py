@@ -19,8 +19,8 @@ class GainRatioFeatureSelector(AbstractITFeatureSelector):
     IGR(Y,X) = IG(Y,X)/SI(X)
     IG(Y,X) = H(Y) - H(Y|X) = MI(Y,X)
     SI(X) = H(X)
-    Changes to the algorithm:
-        - Time constraint
+
+    Implementation: the SelectArena team (with a time constraint).
     """
 
     name = "GainRatioFeatureSelector"

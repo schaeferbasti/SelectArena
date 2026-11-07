@@ -1,6 +1,6 @@
 """The SelectArena main figure: Elo per method, bars shaded by stability and validity.
 
-Port of ``plot`` in ``performance/baseline/elo_v4.py`` (paper Figure 1). Methods are ordered
+As in the paper's Figure 1. Methods are ordered
 from worst to best Elo. Each method gets two bars of the same height: the left one shaded by
 stability (blue), the right one by validity (orange), darker is better. The error bar is the
 95% bootstrap interval of the Elo rating.

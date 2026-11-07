@@ -7,7 +7,6 @@ time, and (for ``FSBench__*`` runs) what the feature selector did.
 
 from __future__ import annotations
 
-import io
 import logging
 import pickle
 from pathlib import Path
@@ -16,22 +15,12 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-#: Module paths of the tabarena_fork_fs era, so results written by the fork can still be read.
-_LEGACY_MODULES = {
-    "tabarena.benchmark.feature_selection_methods.feature_selection_benchmark_utils": "selectarena.benchmark.fs_config",
-}
-
-
-class _CompatUnpickler(pickle.Unpickler):
-    def find_class(self, module: str, name: str):
-        return super().find_class(_LEGACY_MODULES.get(module, module), name)
-
 
 def load_result(path: str | Path) -> dict:
-    """Load a (possibly gzipped) ``results.pkl``, also when it was written by tabarena_fork_fs."""
+    """Load a (possibly gzipped) ``results.pkl``."""
     from tabarena.utils.pickle_utils import read_pickle_bytes
 
-    return _CompatUnpickler(io.BytesIO(read_pickle_bytes(path))).load()
+    return pickle.loads(read_pickle_bytes(path))
 
 
 def parse_result(path: str | Path) -> dict:

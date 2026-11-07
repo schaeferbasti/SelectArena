@@ -80,8 +80,8 @@ METHOD_PAPERS: dict[str, str] = {
     "SHAPFeatureSelector": "https://arxiv.org/abs/1705.07874",  # Lundberg & Lee, 2017 (NeurIPS)
 }
 
-#: Class names in results written by tabarena_fork_fs before the methods were renamed, mapped to
-#: their current class. Reading old results through these keeps one name per method.
+#: Former class names of renamed methods (as in the published stability / validity results), mapped
+#: to their current class, so every method keeps one name.
 LEGACY_NAMES: dict[str, str] = {
     "AccuracyFeatureSelector": "LOCOFeatureSelector",
     "ANOVAFeatureSelector": "FTestFeatureSelector",

@@ -20,8 +20,7 @@ class mRMRFeatureSelector(AbstractITFeatureSelector):
     "Feature selection based on mutual information criteria of max-dependency, max-relevance, and min-redundancy."
     IEEE Transactions on pattern analysis and machine intelligence 27.8 (2005): 1226-1238.
 
-    Changes to the implementation:
-        - Time constraint
+    Implementation: the SelectArena team (with a time constraint).
     """
 
     name = "mRMRFeatureSelector"

@@ -47,7 +47,7 @@ VALIDITY_NOISE_MAIN_FIGURE = 1.0
 def parse_method_name(name: str) -> dict:
     """Split a result's method name, e.g. ``LightGBM_c1_FSBench__MIFeatureSelector__5__0__lgbm__3600_BAG_L1``.
 
-    A name without a pipeline (``LightGBM_c1_BAG_L1``, how the fork named runs on all features) is
+    A name without a pipeline (``LightGBM_c1_BAG_L1``, a run on all features) is
     the ``default`` pipeline.
     """
     match = _CONFIG_NAME.match(name)
@@ -77,7 +77,7 @@ def clean_model_names(models: pd.Series) -> pd.Series:
 
 
 def method_class(pipeline: str | None) -> str | None:
-    """Current class name of an FSBench pipeline's method (fork-era names are translated)."""
+    """Current class name of an FSBench pipeline's method (former names of renamed methods are translated)."""
     if not isinstance(pipeline, str) or not pipeline.startswith("FSBench__"):
         return None
     name = pipeline.split("__")[1]
@@ -150,8 +150,8 @@ def _as_list(value) -> list:
 
 
 def feature_names(value) -> list:
-    """Selected features as names. Current runs store names; runs of the fork before commit
-    ``0dcac02a`` stored the selector's ``{"feature": name, "value": score}`` entries."""
+    """Selected features as names, from names or from the selector's ``{"feature": name, "value": score}``
+    entries (as in the published results)."""
     return [item.get("feature") if isinstance(item, dict) else item for item in _as_list(value)]
 
 

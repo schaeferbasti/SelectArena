@@ -1,4 +1,4 @@
-"""Elo ratings match the paper's script (elo_v4.py: logistic-regression Bradley-Terry fit)."""
+"""Elo ratings match the paper's computation (a logistic-regression Bradley-Terry fit)."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def _scores(seed: int = 0) -> pd.DataFrame:
 
 
 def _reference_elo(scores: pd.DataFrame) -> dict[str, float]:
-    """``build_matches`` + ``fit_bt`` + anchoring from elo_v4.py."""
+    """The paper's computation: all pairwise matches, a Bradley-Terry fit, anchored at Random."""
     cells = cell_errors(scores)
     methods = sorted(cells["method"].unique())
     index = {m: i for i, m in enumerate(methods)}
