@@ -552,3 +552,22 @@ def test_interactive_pareto_and_lasagna(artifacts):
         assert ("data:image/png;base64," in page) == (not variant.startswith("binary_"))
     # Downloads use the light colours, whatever the page's theme.
     assert "var SA_LIGHT" in pareto and "getComputedStyle(document.documentElement)" not in pareto
+
+
+def test_analysis_figures(artifacts):
+    data = artifacts.website_data
+    analysis = json.loads((data / "meta.json").read_text())["analysis"]
+    keys = [g["key"] for g in analysis["groupings"]]
+    # Dataset sizes come from the extra results; groupings with a single group are left out.
+    assert {"task_type", "samples", "model", "budget"} <= set(keys)
+    folder = data / analysis["path"]
+    for key in keys:
+        page = (folder / f"heatmap_{key}.html").read_text()
+        assert "id='sa-figure'" in page and ">All<" in page
+    table = pd.read_csv(folder / "heatmap.csv")
+    assert set(table["grouping"]) == {g["label"] for g in analysis["groupings"]}
+    assert analysis["selection_time"] and (folder / "selection_time.html").is_file()
+    assert analysis["improvement_by_model"] and (folder / "improvement_by_model.html").is_file()
+    assert analysis["improvement_by_task_type"] == (folder / "improvement_by_task_type.html").is_file()
+    # The rank correlation needs at least five datasets (the fixture has fewer).
+    assert analysis["rank_by_size"] == (folder / "rank_by_size.html").is_file()

@@ -21,6 +21,11 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``results.csv`` and ``results_explorer.html``: the complete results, per dataset, method, downstream
     model and budget, averaged over splits;
   - ``per_dataset.csv``: mean rank per dataset and method (data only; the site does not show it);
+  - ``analysis/``: where and why methods win (see :mod:`selectarena.evaluation.characteristics`):
+    ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
+    model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
+    dataset size), ``improvement_by_model.html`` and ``improvement_by_task_type.html`` / ``.csv``
+    (improvement over Random per downstream model and per task type) and ``selection_time.html`` / ``.csv`` (selection time against the number of features);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -45,7 +50,7 @@ import numpy as np
 import pandas as pd
 
 from selectarena.datasets import dataset_name, task_names_from_ids
-from selectarena.evaluation import lasagna
+from selectarena.evaluation import characteristics, lasagna
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
     VALIDITY_NOISE_MAIN_FIGURE,
@@ -61,6 +66,13 @@ from selectarena.evaluation.leaderboard import (
 )
 from selectarena.evaluation.pareto import improvement_and_runtime, improvement_over_random
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
+from selectarena.website.characteristic_figures import (
+    group_improvement_html,
+    improvement_heatmap_html,
+    method_order,
+    rank_sensitivity_html,
+    selection_time_html,
+)
 from selectarena.website.figures import lasagna_explorer_html, pareto_explorer_html
 from selectarena.website.html import (
     elo_explorer_html,
@@ -139,6 +151,98 @@ def _lasagna_plots(
         written.append(tasks)
     log(f"{value} lasagna plots ({folder.name}): {', '.join(written) or 'none'}")
     return written
+
+
+def _analysis_figures(
+    df: pd.DataFrame,
+    scores: pd.DataFrame,
+    chars: pd.DataFrame,
+    folder: Path,
+    n_bootstrap: int,
+    log: Callable[[str], None],
+) -> dict:
+    """The figures of the Performance tab's "where methods win" section, in ``folder``; returns their
+    entry of ``meta.json``."""
+    folder.mkdir(parents=True)
+    with_chars = characteristics.add_characteristics(df[df["method"].notna()], chars)
+    groupings = characteristics.available_groupings(with_chars)
+    if not chars.empty and len(chars) < scores["dataset_key"].nunique():
+        log(
+            f"Dataset sizes known for {len(chars)} of {scores['dataset_key'].nunique()} datasets (from the extra results)."
+        )
+    tables, order = [], None
+    for grouping in groupings:
+        table = characteristics.improvement_by_grouping(with_chars, grouping)
+        order = order or method_order(table)
+        tables.append(table.assign(grouping=grouping.label))
+        (folder / f"heatmap_{grouping.key}.html").write_text(
+            improvement_heatmap_html(
+                table,
+                grouping.label,
+                title=f"SelectArena: improvement over Random by {grouping.label.lower()}",
+                name=f"selectarena_improvement_by_{grouping.key}_groups",
+            )
+        )
+    if tables:
+        pd.concat(tables)[["grouping", "group", "method", "improvement", "n_datasets"]].round(4).to_csv(
+            folder / "heatmap.csv", index=False
+        )
+    # Improvement over Random per downstream model and per task type.
+    per_group = {}
+    named = df.assign(dataset=df["dataset_key"])
+    for key, column, labels, all_label, between in (
+        ("model", "model", None, "All models", "the downstream models"),
+        ("task_type", "problem_type", characteristics.TASK_TYPE_LABELS, "All task types", "the task types"),
+    ):
+        per_group[key] = False
+        if not order or named[column].nunique() < 2:
+            continue
+        table = characteristics.improvement_by(named, column, labels)
+        if table.empty:
+            continue
+        table.rename(columns={"group": key}).round(4).to_csv(folder / f"improvement_by_{key}.csv", index=False)
+        (folder / f"improvement_by_{key}.html").write_text(
+            group_improvement_html(
+                table,
+                order,
+                characteristics.ranking_agreement(table),
+                title=f"SelectArena: improvement over Random per {all_label.removeprefix('All ').rstrip('s')}",
+                name=f"selectarena_improvement_by_{key}",
+                all_label=all_label,
+                agreement_label=between,
+            )
+        )
+        per_group[key] = True
+    has_size = has_time = False
+    if not chars.empty and order:
+        sens = characteristics.rank_sensitivity(scores, chars, n_bootstrap=n_bootstrap)
+        if not sens.empty:
+            sens.round(4).to_csv(folder / "rank_by_size.csv", index=False)
+            (folder / "rank_by_size.html").write_text(
+                rank_sensitivity_html(sens, order, title="SelectArena: rank by dataset size")
+            )
+            has_size = True
+        times, limit = characteristics.selection_time(df, chars)
+        if not times.empty:
+            binned = characteristics.binned_time(times)
+            times.round(4).to_csv(folder / "selection_time.csv", index=False)
+            (folder / "selection_time.html").write_text(
+                selection_time_html(binned, limit, order, title="SelectArena: selection time by number of features")
+            )
+            has_time = True
+    log(
+        f"Analysis figures: {len(groupings)} groupings, per model {per_group['model']}, per task type "
+        f"{per_group['task_type']}, rank by size {has_size}, "
+        f"selection time {has_time}."
+    )
+    return {
+        "path": "analysis",
+        "groupings": [{"key": g.key, "label": g.label} for g in groupings],
+        "improvement_by_model": per_group["model"],
+        "improvement_by_task_type": per_group["task_type"],
+        "rank_by_size": has_size,
+        "selection_time": has_time,
+    }
 
 
 def _results_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -387,6 +491,9 @@ def generate_website_artifacts(
         if levels:
             lasagna_meta["validity"] = levels
 
+    chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
+    analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
+
     total_budget = _total_budget(df)
     results_table = _results_table(df)
     results_table.to_csv(website_data / "results.csv", index=False)
@@ -437,6 +544,7 @@ def generate_website_artifacts(
         "has_validity": val_table is not None,
         "validity_tables": validity_tables,
         "lasagna": lasagna_meta,
+        "analysis": analysis_meta,
         "has_results_explorer": True,
         "subsets": published,
     }
