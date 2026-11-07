@@ -19,6 +19,8 @@ class ReliefFFeatureSelector(AbstractFeatureSelector):
        Applied Intelligence 7.1 (1997): 39-55.
     2) Marko Robnik-Sikonja and Igor Kononenko. "An adaptation of Relief for attribute estimation in regression"
        International Conference on Machine Learning (1997): 296-304.
+
+    Implementation: the SelectArena team.
     """
 
     name = "ReliefFFeatureSelector"

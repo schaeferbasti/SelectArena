@@ -80,33 +80,13 @@ land in `<workspace>/output/<benchmark_name>/`. On an OAR cluster, start from
 
 ## Leaderboard
 
-The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) holds the site and this repo generates the data it serves:
-
-```bash
-python scripts/run_benchmark.py eval                # results.csv
-python scripts/run_extra_benchmark.py collect       # optional: stability / validity
-python scripts/run_generate_website_artifacts.py    # generated_website_artifacts/
-```
-
-Put the result files in `results/` and pass them explicitly; no cluster config is needed then:
-
-```bash
-python scripts/run_generate_website_artifacts.py \
-    --results results/performance_results.csv --extra-dir results   # stability_results.csv, validity_results.csv
-```
-
-`generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
-folder.
-`raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
-`selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
-(`pareto.py`) and the lasagna plots (`lasagna.py`) are in `selectarena/evaluation/`. All figures on
-the website are interactive SVG pages (`website/html.py`, `website/figures.py`) that follow its
-light or dark theme; their SVG / PNG downloads always use the light paper look.
+The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is generated from
+the benchmark results with `scripts/run_generate_website_artifacts.py`.
 
 ### Your method on the leaderboard, locally
 
-You do not need the maintainers' result files to see a new method next to the published ones. Benchmark
-your method (see [Running the benchmark](#running-the-benchmark)), then:
+To see your method next to the published ones, benchmark it (see
+[Running the benchmark](#running-the-benchmark)), then:
 
 ```bash
 python scripts/run_generate_website_artifacts.py --with-published-results \
@@ -116,24 +96,18 @@ python scripts/preview_leaderboard.py      # the whole leaderboard website at ht
 
 `--with-published-results` downloads the published results of all methods from
 [SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) into
-`results/` (several GB, only when they are not there yet) and adds your results to them; your results
-replace the published ones of the same method on the same dataset (e.g. a rerun). The leaderboard
-compares methods on the same dataset splits, so run your method with the benchmark config of the
-published results (`configs/benchmark.yaml`). `preview_leaderboard.py` downloads the website's page
-from the Space (not its data) and serves it with your generated data; `--site <clone of the Space>`
-uses a local clone instead.
-
-To get your method on the public leaderboard, open a pull request with it; the maintainers then
-run it and publish the updated leaderboard.
+`results/` (several GB, only once) and adds yours; your results replace the published ones of the
+same method on the same dataset (e.g. a rerun). Methods are compared on the same dataset splits, so
+run your method with the published `configs/benchmark.yaml`.
 
 ## Repository layout
 
 ```
 src/selectarena/
   methods/          feature selectors, their base class and the registry
-  benchmark/        FSBench pipelines and the TabArena subclasses
+  benchmark/        the benchmark pipeline on top of TabArena
   extra_benchmark/  stability / validity benchmark (selection only)
-  evaluation/       reading results.pkl files into a table, leaderboard tables, Elo
+  evaluation/       results tables and the leaderboard metrics (Elo, stability, validity)
   website/          the leaderboard Space's data (subsets, tables, interactive figures) and its local preview
   datasets.py       the dataset suite (Data Foundry containers)
   published_results.py  the published results (download, merge with your own)
@@ -142,7 +116,7 @@ configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.ex
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
                     run_generate_website_artifacts.py, preview_leaderboard.py, check_method.py
 .claude/skills/     add-method: add a feature selection method;
-                    update-leaderboard: regenerate and publish the leaderboard
+                    update-leaderboard: publish new results (maintainers)
 examples/           quickstart.py, run_local.py
 tests/
 ```
@@ -153,4 +127,4 @@ tests/
 pytest
 ```
 
-`tests/test_benchmark_integration.py` runs real (small) fits through TabArena's experiment runner.
+The integration test (`tests/test_benchmark_integration.py`) runs small real fits and takes about a minute.

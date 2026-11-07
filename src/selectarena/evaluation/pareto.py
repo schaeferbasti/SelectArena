@@ -1,7 +1,6 @@
 """Predictive performance vs. selection time: the Pareto front of the feature selection methods.
 
-Ported from the paper's plotting code (``Plotting_FS/scripts/pareto.py``) so the leaderboard shows
-the same figure as the paper:
+The same figure as in the paper:
 
 * improvement over Random per dataset: ``(error_random - error_method) / error_random * 100``;
 * selection time per 1k features: ``selection time / number of original features * 1000``.

@@ -206,8 +206,8 @@ def generate_website_artifacts(
         validity_noise: noise level whose validity the leaderboard shows (``None``: mean over levels).
         include_ablations: keep ablation runs (``MI [nofallback]``, ``MI [permenc1]``) as methods of
             their own; by default only the main runs are ranked.
-        include_unregistered: keep methods that are not in the registry (e.g. retired fork-era
-            methods such as ``AccuracyLinearFeatureSelector``); by default they are left out.
+        include_unregistered: keep methods that are not in the registry (e.g. a method removed
+            from it); by default they are left out.
     """
     out_dir = Path(out_dir)
     raw_dir, clean_dir = out_dir / RAW_DIR, out_dir / CLEAN_DIR

@@ -1,6 +1,4 @@
 # What SelectArena benchmarks. Machine-specific settings live in configs/cluster.yaml.
-# The model jobs and splits follow the last downstream-performance launcher of tabarena_fork_fs;
-# adjust them to the run you want.
 #
 #   python scripts/run_benchmark.py setup  --config configs/benchmark.yaml
 #   python scripts/run_benchmark.py eval   --config configs/benchmark.yaml

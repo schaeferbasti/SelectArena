@@ -1,6 +1,6 @@
 ---
 name: add-method
-description: Add a new feature selection method to SelectArena. Use whenever someone wants to integrate a feature selection method into the benchmark, e.g. "add Boruta", "implement X feature selection", "integrate this method from <paper/repo>", "support <library>'s selector". Writes the method module (an AbstractFeatureSelector subclass), registers it (registry, paper name, taxonomy subgroup, proxy-model list), adds it to the README, and verifies it with scripts/check_method.py and the selector tests. Ends with how to benchmark it; publishing results is the update-leaderboard skill.
+description: Add a new feature selection method to SelectArena. Use whenever someone wants to integrate a feature selection method into the benchmark, e.g. "add Boruta", "implement X feature selection", "integrate this method from <paper/repo>", "support <library>'s selector". Writes the method module (an AbstractFeatureSelector subclass), registers it (registry, paper name, taxonomy subgroup, proxy-model list, paper link), and verifies it with scripts/check_method.py and the selector tests. Ends with how to benchmark it and compare it locally with the published methods.
 argument-hint: <MethodName> [<paper-or-code-url>] [<pip-package>]
 user-invocable: true
 ---
@@ -14,7 +14,11 @@ Every method is **one module** in `src/selectarena/methods/<module>.py` with one
 validity benchmark, `tests/test_selectors.py` (fits it on binary, multiclass and regression data),
 `scripts/check_method.py` and the leaderboard (paper name and taxonomy subgroup).
 
-Lifecycle: **add-method** (this skill) → benchmark the method (Step 8) → **update-leaderboard**.
+Lifecycle: **add-method** (this skill) → benchmark the method (Step 8) → pull request.
+
+The user wants their method in the benchmark, not a tour of SelectArena's internals. Keep progress
+notes short and about their method; name internal pieces (registry entries, pipeline strings,
+base-class hooks) only when the user has to act on them or asks.
 
 The base class contract and copy-ready templates are in `references/method_patterns.md`; read it
 before writing code. The base class itself is `src/selectarena/methods/abstract.py`.
@@ -32,7 +36,7 @@ Parse `$ARGUMENTS`; ask only for what is missing or ambiguous.
 | implementation source | library, paper pseudo-code, own code | Determines Step 1 and whether a new dependency is needed. |
 | `pip_package` | `boruta>=0.4` | Only if a library is wrapped. |
 | kind | scoring / subset | Step 1 decides; ask if the description allows both. |
-| subgroup | `Tree`, `Forward search`, ... | The paper's taxonomy (Step 1b). Confirm with the maintainer. |
+| subgroup | `Tree`, `Forward search`, ... | The paper's taxonomy (Step 1b). Confirm with the user. |
 
 ## Step 1: Understand the method
 
@@ -67,7 +71,8 @@ randomness, and its cost in the number of features and samples (the time limit, 
   knowledge-driven approaches as a further non-search subgroup.
 
 Reuse an existing subgroup when it fits; a new one also needs a `SUBGROUP_CATEGORIES` entry.
-Confirm the choice with the maintainer: it is what the leaderboard shows in its Type column.
+Confirm the choice with the user: the leaderboard shows it in its Type column (`Search` for the
+search subgroups).
 
 ## Step 2: Read the closest existing method
 
@@ -125,10 +130,8 @@ benchmark, so it is not an optional extra), with a lower bound and a comment nam
 
 ## Step 5: Documentation
 
-- Add a row to the methods table in `README.md` (`Class | Paper name | Subgroup | Proxy model`).
-- If the leaderboard Space's page (`index.html` in the Space repo, e.g. `../SelectArenaLeaderboard`)
-  names methods per subgroup (the Type note under the leaderboard table), add the method there too;
-  otherwise there is nothing to do on the Space side.
+Nothing beyond the class docstring: the leaderboard and its paper link come from the registry
+entries of Step 4.
 
 ## Step 6: Verify (Claude runs)
 
@@ -169,20 +172,17 @@ only the new method and add it to existing results:
 4. Rank it against the published methods and look at it locally:
    `python scripts/run_generate_website_artifacts.py --with-published-results --results <run dir>/results.csv --extra-dir <extra results dir>`
    (downloads the published results into `results/` if missing and adds the new ones), then
-   `python scripts/preview_leaderboard.py` (http://localhost:8000). Maintainers publish with the
-   **update-leaderboard** skill.
+   `python scripts/preview_leaderboard.py` (http://localhost:8000).
+5. To get it on the public leaderboard, the user opens a pull request.
 
-Elo compares methods within the same dataset, split, budget and downstream model, so results can
-only be combined when they come from the same dataset containers and splits. Results of the fork
-(`tabarena_fork_fs`) used an earlier curation of the datasets (`EARLIER_DATA_FOUNDRY_TASKS` in
-`selectarena/datasets.py`); a new method run on the current containers should be compared with a
-rerun of the other methods on the same containers, not with fork-era results. Raise this with the
-maintainer before combining.
+Elo compares methods within the same dataset, split, budget and downstream model, so the new
+method has to run with the published config (datasets, splits, budgets, time limits, models);
+otherwise it cannot be ranked against the published results.
 
 ## Step 9: Report
 
-Tell the maintainer: the files created and edited; the kind (scoring / subset), proxy-model use
-and subgroup chosen, with the reason; new dependencies; the `check_method.py` and test results
-(including any `WARN`); the comparison with a reference implementation if one was made; open
-TODOs (the benchmark run of Step 8). Commit only when asked; the commit message
+Tell the user, in terms of their method: what was added (the method file and any new
+dependency); how it selects features and why it is classified as its subgroup; whether the checks
+passed, and what a `WARN` means for their method; the comparison with a reference implementation if
+one was made; the next step, benchmarking it (Step 8). Commit only when asked; the commit message
 names the method and its reference.

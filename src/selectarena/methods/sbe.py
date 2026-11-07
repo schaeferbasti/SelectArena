@@ -20,8 +20,7 @@ logger = logging.getLogger(__name__)
 class SequentialBackwardEliminationFeatureSelector(AbstractFeatureSelector):
     """SequentialBackwardElimination Feature Selection.
 
-    Implementation Source: Algorithm implemented by Bastian Schäfer
-    (including time constraint using the autogluon model)
+    Implementation: the SelectArena team (with a time constraint on the proxy model fits).
     """
 
     name = "SequentialBackwardEliminationFeatureSelector"

@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class RandomFeatureSelector(AbstractFeatureSelector):
-    """Random Feature Selection."""
+    """Random Feature Selection.
+
+    Implementation: the SelectArena team.
+    """
 
     name = "RandomFeatureSelector"
 

@@ -330,16 +330,9 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
 
         Note: as we assume that we call the feature selector as a post generator,
         all data should be in a proper format for the feature selector.
-        TODO: if not, determine how to adapt the code that the feature selector performs
-            its own preprocessing.
         """
         return dict()
 
-    # TODO: investigate how to improve randomness of this fallback method
-    #   Note: by default, the column order of input features is likely always the same.
-    #   Thus, the randomly selected features are likely always the same across different runs,
-    #   which is not ideal for a fallback method. So likely, we want to somehow adjust the random state
-    #   based on some property of the input data, or pass a different random state per run.
     def fallback_feature_selection(
         self, *, selected_features: list[dict[str, float | None]] | None = None
     ) -> list[dict[str, float | None]]:
@@ -406,12 +399,6 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
 
         return selection
 
-    # TODO: make this a standalone static method re-usable across TabArena/AutoGluon
-    #   - Similar to code in autogluon.core.utils.feature_selection.FeatureSelector
-    #     we can add logging, stability, more...
-    #   - Add support for cross-validation (instead of holdout?)
-    #   - Figure out how to handle TimeLimitExceeded raise in this code or the code that calls this.
-    #       -> would need to skip step.
     def evaluate_proxy_model(
         self,
         *,

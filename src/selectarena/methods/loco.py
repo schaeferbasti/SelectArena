@@ -14,7 +14,10 @@ if TYPE_CHECKING:
 
 
 class LOCOFeatureSelector(AbstractFeatureSelector):
-    """Leave-One-Covariate-Out Feature Selection."""
+    """Leave-One-Covariate-Out Feature Selection.
+
+    Implementation: the SelectArena team.
+    """
 
     name = "LOCOFeatureSelector"
     feature_scoring_method: bool = True

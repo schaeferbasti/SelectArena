@@ -589,7 +589,7 @@ def _nice_step(span: float) -> int:
 
 
 def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
-    """The main figure as inline SVG, methods from worst to best Elo (port of ``elo_v4.plot``)."""
+    """The main figure as inline SVG, methods from worst to best Elo (as in the paper's Figure 1)."""
     df = leaderboard.dropna(subset=["Elo"]).sort_values("Elo").reset_index(drop=True)
     if df.empty:
         return "<p>No Elo ratings in this subset.</p>"
