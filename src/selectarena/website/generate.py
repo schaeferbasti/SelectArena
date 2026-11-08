@@ -24,8 +24,12 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``analysis/``: where and why methods win (see :mod:`selectarena.evaluation.characteristics`):
     ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
     model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
-    dataset size), ``improvement_by_model.html`` and ``improvement_by_task_type.html`` / ``.csv``
-    (improvement over Random per downstream model and per task type) and ``selection_time.html`` / ``.csv`` (selection time against the number of features);
+    dataset size), ``improvement_by_model.html``, ``improvement_by_task_type.html`` and
+    ``improvement_by_domain.html`` / ``improvement_by_data_foundry_domain.html`` / ``.csv``
+    (improvement over Random per downstream model, task type and domain, in the paper's domains and in
+    those of Data Foundry; :mod:`selectarena.datasets`), ``stability/`` and ``validity/noise_<g>/``
+    (``by_domain.html`` and ``by_size.html`` / ``.csv``: stability and validity per paper domain and
+    their rank correlation with the dataset size) and ``selection_time.html`` / ``.csv`` (selection time against the number of features);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -49,7 +53,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from selectarena.datasets import dataset_name, task_names_from_ids
+from selectarena.datasets import DATA_FOUNDRY_DOMAINS, dataset_name, task_names_from_ids
 from selectarena.evaluation import characteristics, lasagna
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
@@ -190,9 +194,17 @@ def _analysis_figures(
     # Improvement over Random per downstream model and per task type.
     per_group = {}
     named = df.assign(dataset=df["dataset_key"])
+    domains = characteristics.domain_labels(named["dataset"].unique())
+    named["domain"] = named["dataset"].map(domains.astype(str))
+    domain_order = {d: d for d in domains.cat.categories}
+    df_domains = characteristics.domain_labels(named["dataset"].unique(), DATA_FOUNDRY_DOMAINS)
+    named["data_foundry_domain"] = named["dataset"].map(df_domains.astype(str))
+    df_domain_order = {d: d for d in df_domains.cat.categories}
     for key, column, labels, all_label, between in (
         ("model", "model", None, "All models", "the downstream models"),
         ("task_type", "problem_type", characteristics.TASK_TYPE_LABELS, "All task types", "the task types"),
+        ("domain", "domain", domain_order, "All domains", "the domains"),
+        ("data_foundry_domain", "data_foundry_domain", df_domain_order, "All domains", "the domains"),
     ):
         per_group[key] = False
         if not order or named[column].nunique() < 2:
@@ -232,7 +244,7 @@ def _analysis_figures(
             has_time = True
     log(
         f"Analysis figures: {len(groupings)} groupings, per model {per_group['model']}, per task type "
-        f"{per_group['task_type']}, rank by size {has_size}, "
+        f"{per_group['task_type']}, per domain {per_group['domain']}, rank by size {has_size}, "
         f"selection time {has_time}."
     )
     return {
@@ -240,9 +252,67 @@ def _analysis_figures(
         "groupings": [{"key": g.key, "label": g.label} for g in groupings],
         "improvement_by_model": per_group["model"],
         "improvement_by_task_type": per_group["task_type"],
+        "improvement_by_domain": per_group["domain"],
+        "improvement_by_data_foundry_domain": per_group["data_foundry_domain"],
         "rank_by_size": has_size,
         "selection_time": has_time,
     }
+
+
+def _measure_figures(
+    rows: pd.DataFrame,
+    value: str,
+    root: Path,
+    path: str,
+    chars: pd.DataFrame,
+    n_bootstrap: int,
+) -> dict:
+    """``value`` (``stability`` or ``validity``) of every method per paper domain (``by_domain.html``)
+    and its rank correlation with the dataset size (``by_size.html``), in ``root/path``; returns
+    their entry of ``meta.json``."""
+    folder = root / path
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = rows.dropna(subset=[value])
+    order = rows.groupby("method")[value].mean().sort_values(ascending=False).index.tolist()
+    out = {"path": f"{root.name}/{path}", "by_domain": False, "by_size": False}
+    domains = characteristics.domain_labels(rows["dataset"].unique())
+    if len(domains.cat.categories) >= 2:
+        table = characteristics.measure_by(rows, value, domains)
+        table.rename(columns={"group": "domain"}).round(4).to_csv(folder / "by_domain.csv", index=False)
+        (folder / "by_domain.html").write_text(
+            group_improvement_html(
+                table,
+                order,
+                characteristics.ranking_agreement(table, value),
+                title=f"SelectArena: {value} per domain",
+                name=f"selectarena_{value}_by_domain",
+                all_label="All domains",
+                agreement_label="the domains",
+                value=value,
+                axis_label=f"Mean {value}",
+                unit="",
+            )
+        )
+        out["by_domain"] = True
+    if not chars.empty:
+        sens = characteristics.measure_sensitivity(rows, value, chars, n_bootstrap=n_bootstrap)
+        if not sens.empty:
+            sens.round(4).to_csv(folder / "by_size.csv", index=False)
+            adjective = {"stability": "stable", "validity": "valid"}.get(value, value)
+            (folder / "by_size.html").write_text(
+                rank_sensitivity_html(
+                    sens,
+                    order,
+                    title=f"SelectArena: {value} by dataset size",
+                    name=f"selectarena_{value}_by_size",
+                    better=f"more {adjective}",
+                    worse=f"less {adjective}",
+                    direction="higher",
+                    label=f"Rank correlation of each method's {value} with the size of the datasets",
+                )
+            )
+            out["by_size"] = True
+    return out
 
 
 def _results_table(df: pd.DataFrame) -> pd.DataFrame:
@@ -493,6 +563,26 @@ def generate_website_artifacts(
 
     chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
     analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
+    # Stability and validity per domain and dataset size (Stability and Validity tabs).
+    if stab_rows is not None:
+        analysis_meta["stability"] = _measure_figures(
+            stab_rows, "stability", website_data / "analysis", "stability", chars, n_bootstrap
+        )
+    if val_all is not None:
+        analysis_meta["validity"] = [
+            {
+                "noise": float(noise),
+                **_measure_figures(
+                    rows,
+                    "validity",
+                    website_data / "analysis",
+                    f"validity/noise_{_noise_label(noise)}",
+                    chars,
+                    n_bootstrap,
+                ),
+            }
+            for noise, rows in val_all.dropna(subset=["noise"]).groupby("noise")
+        ]
 
     total_budget = _total_budget(df)
     results_table = _results_table(df)
