@@ -99,6 +99,104 @@ BENCHMARK_DATA_FOUNDRY_TASKS = [
     "wine_quality/019d9d40-e358-7271-88e9-2277666b5a62",
 ]
 
+#: Domain of every dataset of :data:`BENCHMARK_DATA_FOUNDRY_TASKS` in Data Foundry (``domain_str`` of
+#: its dataset metadata), corrected where the metadata is off (marked).
+DATA_FOUNDRY_DOMAINS: dict[str, str] = {
+    "allstate_claims_severity": "insurance",  # Kaggle insurance claims (no Data Foundry metadata at hand)
+    "ancestry_study": "biology & life sciences",
+    "anneal": "industry & manufacturing",
+    "aps_failure": "industry & manufacturing",
+    "audiology_diagnosis": "medical & healthcare",
+    "automobile": "industry & manufacturing",
+    "bad_customer_detection": "business & marketing",
+    "bank_customer_churn": "business & marketing",
+    "bank_marketing": "finance",
+    "bioresponse": "biology & life sciences",
+    "body_density_prediction": "medical & healthcare",
+    "brasilian_houses": "finance",
+    "churn": "technology & internet",
+    "clock_protein_period": "biology & life sciences",
+    "clock_protein_toxicity": "biology & life sciences",
+    "coil_2000_insurance_policies": "business & marketing",
+    "colon_tumor": "medical & healthcare",
+    "credit_approval": "finance",
+    "credit_card_clients_default": "finance",
+    "customer_satisfaction_in_airline": "business & marketing",  # airline customers (metadata: biology & life sciences)
+    "drug_induced_autoimmunity_prediction": "medical & healthcare",
+    "forest_fires": "environmental science & climate",
+    "framingham_heart_study": "medical & healthcare",  # heart-disease study (metadata: physics & astronomy)
+    "give_me_some_credit": "finance",
+    "hazelnut_spread_contaminant_detection_10ghz": "biology & life sciences",
+    "heart_disease_cleveland": "medical & healthcare",
+    "heart_disease_hungary": "medical & healthcare",
+    "heart_disease_switzerland": "medical & healthcare",
+    "heart_disease_va_long_beach": "medical & healthcare",
+    "heloc": "finance",
+    "hepatitis_survival_prediction": "medical & healthcare",
+    "hiva_agnostic": "chemistry & material science",
+    "homesite_quote_conversion": "insurance",
+    "horse_colic_survival": "biology & life sciences",
+    "hr_analytics": "business & marketing",
+    "in_vehicle_coupon_recommendation": "business & marketing",
+    "ionosphere": "physics & astronomy",
+    "japanese_credit_screening": "finance",
+    "kdd_cup_09_appetency": "business & marketing",
+    "labor_negotiations": "business & marketing",
+    "leukemia_allaml": "medical & healthcare",
+    "ljubljana_primary_tumor": "medical & healthcare",
+    "lung_cancer": "medical & healthcare",
+    "lymphography": "medical & healthcare",
+    "marketing_campaign": "business & marketing",
+    "mechanisms_of_action": "biology & life sciences",
+    "miami_housing": "finance",
+    "mic": "medical & healthcare",
+    "naticusdroid_android_permissions_dataset": "technology & internet",
+    "nci_ovarian_cancer": "medical & healthcare",
+    "nci_pancreatic_cancer": "medical & healthcare",
+    "nci_prostate_cancer": "medical & healthcare",
+    "online_shoppers_purchasing_intention_dataset": "business & marketing",
+    "otto_group_product_classification_challenge": "business & marketing",
+    "polish_companies_bankruptcy": "finance",
+    "porto_seguro": "insurance",
+    "predict_students_dropout_and_academic_success": "education",
+    "prostate_cancer": "medical & healthcare",
+    "pva_revenue_prediction_kddcup98": "business & marketing",
+    "qsar_biodeg": "biology & life sciences",
+    "qsar_oral_toxicity": "biology & life sciences",
+    "qsar_tid_11": "chemistry & material science",
+    "santander_customer_transaction_prediction": "finance",
+    "sdss_17": "physics & astronomy",
+    "smoking_lung_cancer": "medical & healthcare",
+    "soybean_large": "biology & life sciences",
+    "srbct_prediction": "medical & healthcare",
+    "superconductivity": "physics & astronomy",
+    "taiwanese_bankruptcy_prediction": "finance",
+    "thyroid_discordant": "medical & healthcare",
+    "wine_quality": "chemistry & material science",
+}
+
+#: Domains of the paper (Table 1).
+PAPER_DOMAINS = ("environmental", "biomedical", "technological", "scientific", "financial")
+#: Paper domain (:data:`PAPER_DOMAINS`) of every Data Foundry domain.
+PAPER_DOMAIN_OF_DATA_FOUNDRY_DOMAIN = {
+    "medical & healthcare": "biomedical",
+    "biology & life sciences": "biomedical",
+    "finance": "financial",
+    "insurance": "financial",
+    "business & marketing": "financial",
+    "technology & internet": "technological",
+    "industry & manufacturing": "technological",
+    "physics & astronomy": "scientific",
+    "chemistry & material science": "scientific",
+    "education": "scientific",
+    "environmental science & climate": "environmental",
+}
+#: Paper domain of every dataset of :data:`BENCHMARK_DATA_FOUNDRY_TASKS`, for the leaderboard's
+#: analysis per domain.
+DATASET_DOMAINS: dict[str, str] = {
+    dataset: PAPER_DOMAIN_OF_DATA_FOUNDRY_DOMAIN[domain] for dataset, domain in DATA_FOUNDRY_DOMAINS.items()
+}
+
 #: Containers of :data:`BENCHMARK_DATA_FOUNDRY_TASKS` under their name before Data Foundry required
 #: snake_case dataset names. The task id hashes the name, so results from before the rename (the
 #: published results) carry these ids. Only needed to name the datasets of those results.

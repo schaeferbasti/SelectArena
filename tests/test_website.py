@@ -569,5 +569,15 @@ def test_analysis_figures(artifacts):
     assert analysis["selection_time"] and (folder / "selection_time.html").is_file()
     assert analysis["improvement_by_model"] and (folder / "improvement_by_model.html").is_file()
     assert analysis["improvement_by_task_type"] == (folder / "improvement_by_task_type.html").is_file()
+    assert analysis["improvement_by_domain"] == (folder / "improvement_by_domain.html").is_file()
+    # Stability and validity per domain and size: an entry per measure (and noise level), files as listed.
+    entries = [analysis["stability"], *analysis["validity"]]
+    assert len(analysis["validity"]) == len(json.loads((data / "meta.json").read_text())["validity_tables"])
+    for entry in entries:
+        for kind in ("by_domain", "by_size"):
+            assert entry[kind] == (data / entry["path"] / f"{kind}.html").is_file()
+    assert (
+        analysis["improvement_by_data_foundry_domain"] == (folder / "improvement_by_data_foundry_domain.html").is_file()
+    )
     # The rank correlation needs at least five datasets (the fixture has fewer).
     assert analysis["rank_by_size"] == (folder / "rank_by_size.html").is_file()
