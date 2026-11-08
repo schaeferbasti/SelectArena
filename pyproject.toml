@@ -44,6 +44,8 @@ dependencies = [
   "scikit-learn",
   "scipy",
   "pyyaml",
+  # CD-PFN (CDPFNFeatureSelector).
+  "varselpfn>=0.2.0",
 ]
 
 [project.optional-dependencies]

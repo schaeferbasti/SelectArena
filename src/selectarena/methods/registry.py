@@ -14,6 +14,7 @@ NAME_TO_MODULE_MAP: dict[str, str] = {
     "RandomFeatureSelector": "random_baseline",
     "FTestFeatureSelector": "f_test",
     "CARTFeatureSelector": "cart",
+    "CDPFNFeatureSelector": "cd_pfn",
     "ElasticNetFeatureSelector": "elastic_net",
     "GainRatioFeatureSelector": "gain_ratio",
     "LaplacianScoreFeatureSelector": "laplacian_score",
@@ -40,6 +41,7 @@ PAPER_NAMES: dict[str, str] = {
     "RandomFeatureSelector": "Random",
     "FTestFeatureSelector": "F-Test",
     "CARTFeatureSelector": "CART",
+    "CDPFNFeatureSelector": "CD-PFN",
     "ElasticNetFeatureSelector": "ElasticNet",
     "GainRatioFeatureSelector": "GainRatio",
     "LaplacianScoreFeatureSelector": "LaplacianScore",
@@ -58,6 +60,7 @@ PAPER_NAMES: dict[str, str] = {
 #: without a paper (Random, or a new method not published yet) shows its name without a link.
 METHOD_PAPERS: dict[str, str] = {
     "CARTFeatureSelector": "https://doi.org/10.1201/9781315139470",  # Breiman et al., 1984
+    "CDPFNFeatureSelector": "https://arxiv.org/abs/2611.05966",  # Melikechi, 2026
     "ElasticNetFeatureSelector": "https://doi.org/10.1111/j.1467-9868.2005.00503.x",  # Zou & Hastie, 2005
     "FTestFeatureSelector": "https://doi.org/10.1016/0169-7439(89)80095-4",  # Ståhle et al., 1989
     "GainRatioFeatureSelector": "https://doi.org/10.1007/BF00116251",  # Quinlan, 1986
@@ -88,6 +91,7 @@ LEGACY_NAMES: dict[str, str] = {
 #: leaderboard's Type column; every registered method needs an entry, or it shows as "Other".
 METHOD_SUBGROUPS: dict[str, str] = {
     "CARTFeatureSelector": "Tree",
+    "CDPFNFeatureSelector": "Pretrained network",
     "ElasticNetFeatureSelector": "Regularization",
     "FTestFeatureSelector": "Correlation",
     "GainRatioFeatureSelector": "Information theory",
@@ -114,6 +118,7 @@ SUBGROUP_CATEGORIES: dict[str, str] = {
     "Information theory": "Non-search",
     "Tree": "Non-search",
     "Regularization": "Non-search",
+    "Pretrained network": "Non-search",
     "Baseline": "Baseline",
 }
 
