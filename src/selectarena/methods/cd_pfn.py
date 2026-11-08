@@ -14,11 +14,11 @@ class CDPFNFeatureSelector(AbstractFeatureSelector):
     Scores each feature by CD-PFN's posterior probability that the target depends on it given the other features,
     from a pretrained prior-data fitted network. Multiclass targets are scored by the mean of the one-vs-rest
     probabilities; rare classes, features with extreme values, and large inputs are handled inside the package (see
-    ``help(varselpfn.CDPFN)``). A one-shot call that cannot be
-    interrupted: about a minute at 10,000 rows and 100 features on a laptop CPU, longer for thousands of features.
+    ``help(varselpfn.CDPFN)``). A one-shot call that cannot be interrupted: about a minute at 10,000 rows and 100
+    features on a laptop CPU, longer for thousands of features.
 
     Reference: Melikechi, Omar. "Prior-data fitted networks for variable selection." arXiv:2611.05966 (2026).
-    Implementation: the varselpfn package (https://github.com/omelikechi/varselpfn), MIT licence.
+    Implementation: the varselpfn package (https://github.com/omelikechi/varselpfn), MIT license.
     """
 
     name = "CDPFNFeatureSelector"
