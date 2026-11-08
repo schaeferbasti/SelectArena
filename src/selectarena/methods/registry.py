@@ -15,6 +15,7 @@ NAME_TO_MODULE_MAP: dict[str, str] = {
     "FTestFeatureSelector": "f_test",
     "CARTFeatureSelector": "cart",
     "CPIFeatureSelector": "cpi",
+    "CDPFNFeatureSelector": "cd_pfn",
     "ElasticNetFeatureSelector": "elastic_net",
     "GainRatioFeatureSelector": "gain_ratio",
     "LaplacianScoreFeatureSelector": "laplacian_score",
@@ -70,6 +71,7 @@ PAPER_NAMES: dict[str, str] = {
     "FTestFeatureSelector": "F-Test",
     "CARTFeatureSelector": "CART",
     "CPIFeatureSelector": "CPI",
+    "CDPFNFeatureSelector": "CD-PFN",
     "ElasticNetFeatureSelector": "ElasticNet",
     "GainRatioFeatureSelector": "GainRatio",
     "LaplacianScoreFeatureSelector": "LaplacianScore",
@@ -91,6 +93,7 @@ PAPER_NAMES: dict[str, str] = {
 METHOD_PAPERS: dict[str, str] = {
     "CARTFeatureSelector": "https://doi.org/10.1201/9781315139470",  # Breiman et al., 1984
     "CPIFeatureSelector": "https://arxiv.org/abs/2309.07593",  # Chamma et al., 2023 (NeurIPS)
+    "CDPFNFeatureSelector": "https://arxiv.org/abs/2611.05966",  # Melikechi, 2026
     "ElasticNetFeatureSelector": "https://doi.org/10.1111/j.1467-9868.2005.00503.x",  # Zou & Hastie, 2005
     "FTestFeatureSelector": "https://doi.org/10.1016/0169-7439(89)80095-4",  # Ståhle et al., 1989
     "GainRatioFeatureSelector": "https://doi.org/10.1007/BF00116251",  # Quinlan, 1986
@@ -124,6 +127,7 @@ LEGACY_NAMES: dict[str, str] = {
 METHOD_SUBGROUPS: dict[str, str] = {
     "CARTFeatureSelector": "Tree",
     "CPIFeatureSelector": "Conditional Importance",
+    "CDPFNFeatureSelector": "TFM",
     "ElasticNetFeatureSelector": "Regularization",
     "FTestFeatureSelector": "Correlation",
     "GainRatioFeatureSelector": "Information theory",
@@ -154,6 +158,7 @@ SUBGROUP_CATEGORIES: dict[str, str] = {
     "Regularization": "Non-search",
     "Game theory": "Non-search",
     "Conditional Importance": "Non-search",
+    "TFM": "Non-search",
     "Baseline": "Baseline",
 }
 

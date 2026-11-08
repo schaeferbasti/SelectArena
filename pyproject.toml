@@ -48,6 +48,8 @@ dependencies = [
   "shapiq>=1.4",
   # Regularization path of a sparse neural network (LassoNetFeatureSelector).
   "lassonet>=0.0.22",
+  # CD-PFN (CDPFNFeatureSelector).
+  "varselpfn>=0.2.0",
 ]
 
 [project.optional-dependencies]
