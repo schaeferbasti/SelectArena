@@ -30,8 +30,9 @@ class SHAPFeatureSelector(AbstractFeatureSelector):
     which is exact for up to 11 features.
 
     Time limit: the proxy fit gets the remaining time, then rows are explained one at a time until
-    the time runs out. The scores average over the rows explained so far, and each row gives a value
-    for every feature. If the proxy fit times out or no row is explained, the method returns no
+    the time runs out. The limit is enforced (``_enforced_time_limit``), so a row that is still
+    running when the time is up is interrupted and discarded. The scores average over the rows
+    explained so far, and each row gives a value for every feature. If the proxy fit times out or no row is explained, the method returns no
     scores and the random fallback selects the features.
 
     Reference: Lundberg, Scott M., and Su-In Lee. "A unified approach to interpreting model predictions."
@@ -93,17 +94,28 @@ class SHAPFeatureSelector(AbstractFeatureSelector):
                 )
             return explainers[target]
 
-        abs_sum, n_explained = np.zeros(n_features), 0
-        for x, target in zip(X_explained, targets, strict=True):
-            if self._timed_out(time_limit, start_time):
-                break
-            if not np.isfinite(target):  # class absent from the proxy's training rows
-                continue
-            values = explainer_for(int(target)).explain(x, budget=budget).get_n_order_values(1)
-            abs_sum += np.abs(values)
-            n_explained += 1
+        # One entry per finished row, added with a single append so that a TimeLimitExceeded raised
+        # by the enforced time limit (possibly mid-row) never leaves a half-recorded row.
+        row_values: list[np.ndarray] = []
+        try:
+            with self._enforced_time_limit(time_limit, start_time):
+                for x, target in zip(X_explained, targets, strict=True):
+                    if self._timed_out(time_limit, start_time):
+                        break
+                    if not np.isfinite(target):  # class absent from the proxy's training rows
+                        continue
+                    values = explainer_for(int(target)).explain(x, budget=budget).get_n_order_values(1)
+                    row_values.append(np.abs(values))
+        except TimeLimitExceeded:
+            self._log(
+                30,
+                f"Warning: time limit reached while explaining a row "
+                f"(Time Elapsed = {time.monotonic() - start_time:.1f}s, Time Limit = {time_limit}s); "
+                f"discarding the unfinished row.",
+            )
+        n_explained = len(row_values)
         self._log(20, f"\tExplained {n_explained} rows with a budget of {budget} coalitions.")
         if n_explained == 0:
             return {}
-        scores = np.nan_to_num(abs_sum / n_explained, nan=-np.inf)
+        scores = np.nan_to_num(np.mean(row_values, axis=0), nan=-np.inf)
         return dict(zip(columns, scores.tolist(), strict=True))

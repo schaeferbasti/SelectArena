@@ -567,6 +567,47 @@ class AbstractFeatureSelector(AbstractFeatureGenerator):
         idx = self._rng.permutation(len(self._original_features))
         return [self._original_features[i] for i in idx]
 
+    @contextmanager
+    def _enforced_time_limit(self, time_limit: float | None, start_time: float) -> Iterator[None]:
+        """Raise ``TimeLimitExceeded`` inside the ``with`` block once ``time_limit`` seconds have
+        passed since ``start_time``, even in the middle of a long call.
+
+        ``_timed_out`` is only checked between steps, so a single step that runs far past the limit
+        (e.g. one KernelSHAP row on 20k features) would otherwise run until SLURM kills the job.
+        Uses ``SIGALRM``: the exception is raised at the next Python bytecode, i.e. after the
+        currently running C call (such as one LightGBM predict batch) returns. Callers must leave
+        their state consistent at every point (e.g. record a finished step with one append).
+        Without a time limit, or outside the main thread, or where ``SIGALRM`` does not exist, it
+        does nothing.
+        """
+        import signal
+        import threading
+
+        from autogluon.core.utils.exceptions import TimeLimitExceeded
+
+        if (
+            time_limit is None
+            or not hasattr(signal, "SIGALRM")
+            or threading.current_thread() is not threading.main_thread()
+        ):
+            yield
+            return
+
+        remaining = time_limit - (time.monotonic() - start_time)
+        if remaining <= 0:
+            raise TimeLimitExceeded
+
+        def _on_alarm(signum, frame):
+            raise TimeLimitExceeded
+
+        previous_handler = signal.signal(signal.SIGALRM, _on_alarm)
+        signal.setitimer(signal.ITIMER_REAL, remaining)
+        try:
+            yield
+        finally:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, previous_handler)
+
     def _timed_out(self, time_limit, start_time) -> bool:
         if time_limit is None:
             return False
