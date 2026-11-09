@@ -170,10 +170,8 @@ pre {
 #pareto-figure { max-width: min(960px, max(560px, calc((100vh - 330px) * 1.75))); }
 /* Where Methods Win: the figures keep about their natural width (the heat map is narrow). */
 #group-figure { max-width: 780px; }
-#model-figure, #task-figure, #domain-figure, #dfdomain-figure, .domain-measure { max-width: 840px; }
-.size-measure { max-width: 900px; }
+#model-figure, #task-figure { max-width: 840px; }
 #size-figure { max-width: 900px; }
-#time-figure { max-width: 840px; }
 
 /* Heading at the top of a tab (Elo, Stability, Validity). */
 .tab-title { margin: 4px 0 2px; }

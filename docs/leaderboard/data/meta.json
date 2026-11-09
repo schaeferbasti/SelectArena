@@ -151,35 +151,7 @@
     ],
     "improvement_by_model": true,
     "improvement_by_task_type": true,
-    "improvement_by_domain": true,
-    "improvement_by_data_foundry_domain": true,
-    "rank_by_size": true,
-    "selection_time": true,
-    "stability": {
-      "path": "analysis/stability",
-      "by_domain": true,
-      "by_size": true
-    },
-    "validity": [
-      {
-        "noise": 0.5,
-        "path": "analysis/validity/noise_0.5",
-        "by_domain": true,
-        "by_size": true
-      },
-      {
-        "noise": 0.75,
-        "path": "analysis/validity/noise_0.75",
-        "by_domain": true,
-        "by_size": true
-      },
-      {
-        "noise": 1.0,
-        "path": "analysis/validity/noise_1",
-        "by_domain": true,
-        "by_size": true
-      }
-    ]
+    "rank_by_size": true
   },
   "has_results_explorer": true,
   "subsets": [

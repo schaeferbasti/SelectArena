@@ -293,7 +293,6 @@
     $('stability-missing').hidden = !!(info || hasTable);
     $('stability-content').hidden = !(info || hasTable);
     if (hasTable) setFrame($('frame-stability'), 'data/stability_table.html');
-    showMeasureAnalysis('stab', meta && meta.analysis && meta.analysis.stability);
     var figure = $('plot-stability').closest('figure');
     figure.hidden = !info;
     $('chips-stab-tasks').closest('.controls').hidden = !info;
@@ -306,17 +305,6 @@
     renderChips('chips-stab-variant', variants, state.svariant,
       function (value) { state.svariant = value; renderStability(); });
     showLasagna('stability', info.path, state.stasks, state.svariant);
-  }
-
-  // Stability or validity per domain and dataset size (meta.analysis.stability, or the entry of
-  // meta.analysis.validity for the noise level shown): {path, by_domain, by_size}.
-  function showMeasureAnalysis(prefix, info) {
-    $(prefix + '-analysis').hidden = !(info && (info.by_domain || info.by_size));
-    if (!info) return;
-    $(prefix + '-domain-figure').hidden = !info.by_domain;
-    if (info.by_domain) setFrame($('plot-' + prefix + '-domain'), 'data/' + info.path + '/by_domain.html');
-    $(prefix + '-size-figure').hidden = !info.by_size;
-    if (info.by_size) setFrame($('plot-' + prefix + '-size'), 'data/' + info.path + '/by_size.html');
   }
 
   function renderValidity() {
@@ -336,10 +324,6 @@
       return { value: n, label: noiseLabel(n) + ' per feature' };
     }), state.noise, function (value) { state.noise = value; renderValidity(); });
 
-    var analysis = ((meta && meta.analysis && meta.analysis.validity) || []).filter(function (a) {
-      return noiseKey(a.noise) === state.noise;
-    })[0];
-    showMeasureAnalysis('val', analysis);
     var table = tables.filter(function (t) { return noiseKey(t.noise) === state.noise; })[0];
     $('frame-validity').hidden = !table;
     if (table) setFrame($('frame-validity'), 'data/' + table.path);
@@ -360,9 +344,7 @@
   }
 
   // ---- where methods win (Performance tab; all results, not filtered by the chips above) ----
-  // meta.analysis: {path, groupings: [{key, label}], improvement_by_model, improvement_by_task_type, improvement_by_domain,
-  // improvement_by_data_foundry_domain,
-  // rank_by_size, selection_time}.
+  // meta.analysis: {path, groupings: [{key, label}], improvement_by_model, improvement_by_task_type, rank_by_size}.
   function renderAnalysis() {
     var info = meta && meta.analysis;
     var groupings = (info && info.groupings) || [];
@@ -377,16 +359,8 @@
     if (info.improvement_by_model) setFrame($('plot-model'), dir + 'improvement_by_model.html');
     $('task-figure').hidden = !info.improvement_by_task_type;
     if (info.improvement_by_task_type) setFrame($('plot-task'), dir + 'improvement_by_task_type.html');
-    $('domain-figure').hidden = !info.improvement_by_domain;
-    if (info.improvement_by_domain) setFrame($('plot-domain'), dir + 'improvement_by_domain.html');
-    $('dfdomain-figure').hidden = !info.improvement_by_data_foundry_domain;
-    if (info.improvement_by_data_foundry_domain) {
-      setFrame($('plot-dfdomain'), dir + 'improvement_by_data_foundry_domain.html');
-    }
     $('size-figure').hidden = !info.rank_by_size;
     if (info.rank_by_size) setFrame($('plot-size'), dir + 'rank_by_size.html');
-    $('time-figure').hidden = !info.selection_time;
-    if (info.selection_time) setFrame($('plot-time'), dir + 'selection_time.html');
   }
 
   // ---- complete results (Performance tab; not filtered by the chips) ----
