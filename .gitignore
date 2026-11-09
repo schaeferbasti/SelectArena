@@ -33,3 +33,7 @@ private/
 # Repo-local workspace and caches of configs/cluster.yaml (benchmark runs, OpenML / Data Foundry data)
 /workspace/
 /cache/
+
+# IDE and OS files
+.idea/
+.DS_Store
