@@ -1,6 +1,6 @@
 """Regenerate the SelectArena leaderboard website artifacts.
 
-The publishing pipeline behind the leaderboard Space (https://huggingface.co/spaces/SelectArena/Leaderboard),
+The publishing pipeline behind the leaderboard Space (https://huggingface.co/spaces/ANONYMIZED/Leaderboard),
 mirroring TabArena's ``scripts/run_generate_website_artifacts.py``. The Space's code lives in the
 Space repo itself; this repo only produces the data it serves. The ``update-leaderboard`` skill
 (``.claude/skills/update-leaderboard/``) runs the whole procedure below.
@@ -31,7 +31,7 @@ Publishing procedure (maintainers; or run the ``update-leaderboard`` skill):
 
 1. Run this script (the Elo intervals take most of the time; ``--elo-bootstrap-rounds 1`` for a
    quick check whose intervals are meaningless).
-2. Clone the Space: ``git clone https://huggingface.co/spaces/SelectArena/Leaderboard``
+2. Clone the Space: ``git clone https://huggingface.co/spaces/ANONYMIZED/Leaderboard``
    (log in once with ``hf auth login --add-to-git-credential``).
 3. Replace its ``data/``: delete the old ``data/`` content, then copy in the content of
    ``generated_website_artifacts/clean_website_artifacts/website_data/``.

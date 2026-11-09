@@ -32,7 +32,7 @@ overview.
   `run_generate_website_artifacts.py --with-published-results` and merged with a user's own results.
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`)
   and its local preview (`website/preview.py`, `scripts/preview_leaderboard.py`).
-  The Space's app lives in its own repo (`huggingface.co/spaces/SelectArena/Leaderboard`), as for
+  The Space's app lives in its own repo (`huggingface.co/spaces/ANONYMIZED/Leaderboard`), as for
   TabArena. It is a static site (keep it static: Gradio Spaces need a paid plan); the folder names
   in `website/subsets.py` and the columns in `website/website_format.py` are the contract with its
   `assets/app.js`. To publish results, use the `update-leaderboard` skill

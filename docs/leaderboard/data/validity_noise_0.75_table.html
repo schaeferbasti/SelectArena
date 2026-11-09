@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena: validity at noise 0.75</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+.wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+th, td { padding:7px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+th { position:sticky; top:0; background:var(--soft); font-weight:600; text-align:left;
+  cursor:pointer; user-select:none; font-size:13px; }
+th.num, td.num { text-align:right; }
+th .arrow { color:var(--muted); font-weight:400; }
+th[aria-sort] { color:var(--accent); }
+tbody tr:hover { background:var(--soft); }
+tbody tr:last-child td { border-bottom:none; }
+td.method { font-weight:600; }
+td.method a.paper { color:inherit; text-decoration:none; border-bottom:1px dotted var(--muted); }
+td.method a.paper:hover { color:var(--accent); border-bottom-color:var(--accent); }
+td .sub { color:var(--muted); font-size:12px; font-weight:400; margin-left:6px; }
+td.na { color:var(--muted); }
+.pill { display:inline-block; padding:0 8px; border:1px solid var(--line); border-radius:999px;
+  font-size:12px; color:var(--fg); }
+.pill.cat-search { border-color:var(--accent); }
+.pill.cat-baseline { color:var(--muted); }
+.medal { display:inline-block; width:1.4em; text-align:center; font-size:15px; line-height:1; }
+td.shaded { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Click a column to sort and a method to open its paper. Medals mark the three best methods.</span><button onclick="saCsv('selectarena_validity.csv')">CSV</button></div><div class='wrap'><table id='sa-table'><thead><tr><th class='' title='Medals for the three highest validity values. Click a method to open its paper.'>Method</th><th class='num' title='Mean over datasets and budgets.'>Validity ↑</th><th class='num'>Budget 1 (smallest)</th><th class='num'>Budget 2</th><th class='num'>Budget 3</th><th class='num'>Budget 4</th><th class='num'>Budget 5 (largest)</th></tr></thead><tbody><tr><td class='method' data-sort='F-Test'><span class='medal' role='img' aria-label='gold medal'>🥇</span><a class='paper' href='https://doi.org/10.1016/0169-7439(89)80095-4' target='_blank' rel='noopener'>F-Test</a></td><td class='num' data-sort='0.8841'>0.884</td><td class='num' data-sort='0.9583'>0.958</td><td class='num' data-sort='0.9437'>0.944</td><td class='num' data-sort='0.9225'>0.922</td><td class='num' data-sort='0.8429'>0.843</td><td class='num' data-sort='0.7531'>0.753</td></tr><tr><td class='method' data-sort='GainRatio'><span class='medal' role='img' aria-label='silver medal'>🥈</span><a class='paper' href='https://doi.org/10.1007/BF00116251' target='_blank' rel='noopener'>GainRatio</a></td><td class='num' data-sort='0.866'>0.866</td><td class='num' data-sort='0.957'>0.957</td><td class='num' data-sort='0.9376'>0.938</td><td class='num' data-sort='0.9016'>0.902</td><td class='num' data-sort='0.8115'>0.811</td><td class='num' data-sort='0.7226'>0.723</td></tr><tr><td class='method' data-sort='LaplacianScore'><span class='medal' role='img' aria-label='bronze medal'>🥉</span><a class='paper' href='https://proceedings.neurips.cc/paper_files/paper/2005/file/b5b03f06271f8917685d14cea7c6c50a-Paper.pdf' target='_blank' rel='noopener'>LaplacianScore</a></td><td class='num' data-sort='0.8363'>0.836</td><td class='num' data-sort='0.8772'>0.877</td><td class='num' data-sort='0.8879'>0.888</td><td class='num' data-sort='0.8573'>0.857</td><td class='num' data-sort='0.8086'>0.809</td><td class='num' data-sort='0.7507'>0.751</td></tr><tr><td class='method' data-sort='MI'><span class='medal'></span><a class='paper' href='https://doi.org/10.1109/72.298224' target='_blank' rel='noopener'>MI</a></td><td class='num' data-sort='0.832'>0.832</td><td class='num' data-sort='0.9218'>0.922</td><td class='num' data-sort='0.8912'>0.891</td><td class='num' data-sort='0.8619'>0.862</td><td class='num' data-sort='0.7867'>0.787</td><td class='num' data-sort='0.6985'>0.699</td></tr><tr><td class='method' data-sort='ElasticNet'><span class='medal'></span><a class='paper' href='https://doi.org/10.1111/j.1467-9868.2005.00503.x' target='_blank' rel='noopener'>ElasticNet</a></td><td class='num' data-sort='0.8033'>0.803</td><td class='num' data-sort='0.9353'>0.935</td><td class='num' data-sort='0.8819'>0.882</td><td class='num' data-sort='0.8235'>0.824</td><td class='num' data-sort='0.7344'>0.734</td><td class='num' data-sort='0.6415'>0.641</td></tr><tr><td class='method' data-sort='Lasso'><span class='medal'></span><a class='paper' href='https://doi.org/10.1111/j.2517-6161.1996.tb02080.x' target='_blank' rel='noopener'>Lasso</a></td><td class='num' data-sort='0.7759'>0.776</td><td class='num' data-sort='0.9065'>0.906</td><td class='num' data-sort='0.8352'>0.835</td><td class='num' data-sort='0.7851'>0.785</td><td class='num' data-sort='0.712'>0.712</td><td class='num' data-sort='0.6408'>0.641</td></tr><tr><td class='method' data-sort='(R)ReliefF'><span class='medal'></span><a class='paper' href='https://doi.org/10.1023/A:1008280620621' target='_blank' rel='noopener'>(R)ReliefF</a></td><td class='num' data-sort='0.7752'>0.775</td><td class='num' data-sort='0.874'>0.874</td><td class='num' data-sort='0.8223'>0.822</td><td class='num' data-sort='0.7948'>0.795</td><td class='num' data-sort='0.7242'>0.724</td><td class='num' data-sort='0.6606'>0.661</td></tr><tr><td class='method' data-sort='RFImportance'><span class='medal'></span><a class='paper' href='https://doi.org/10.1023/A:1010933404324' target='_blank' rel='noopener'>RFImportance</a></td><td class='num' data-sort='0.7155'>0.716</td><td class='num' data-sort='0.829'>0.829</td><td class='num' data-sort='0.7797'>0.780</td><td class='num' data-sort='0.7368'>0.737</td><td class='num' data-sort='0.6578'>0.658</td><td class='num' data-sort='0.5741'>0.574</td></tr><tr><td class='method' data-sort='SFS'><span class='medal'></span><a class='paper' href='https://doi.org/10.1109/TSMC.1977.4309803' target='_blank' rel='noopener'>SFS</a></td><td class='num' data-sort='0.703'>0.703</td><td class='num' data-sort='0.8071'>0.807</td><td class='num' data-sort='0.7599'>0.760</td><td class='num' data-sort='0.6996'>0.700</td><td class='num' data-sort='0.6452'>0.645</td><td class='num' data-sort='0.6032'>0.603</td></tr><tr><td class='method' data-sort='mRMR'><span class='medal'></span><a class='paper' href='https://doi.org/10.1109/TPAMI.2005.159' target='_blank' rel='noopener'>mRMR</a></td><td class='num' data-sort='0.6992'>0.699</td><td class='num' data-sort='0.8119'>0.812</td><td class='num' data-sort='0.7509'>0.751</td><td class='num' data-sort='0.6957'>0.696</td><td class='num' data-sort='0.6426'>0.643</td><td class='num' data-sort='0.5951'>0.595</td></tr><tr><td class='method' data-sort='CART'><span class='medal'></span><a class='paper' href='https://doi.org/10.1201/9781315139470' target='_blank' rel='noopener'>CART</a></td><td class='num' data-sort='0.6483'>0.648</td><td class='num' data-sort='0.7832'>0.783</td><td class='num' data-sort='0.6743'>0.674</td><td class='num' data-sort='0.6349'>0.635</td><td class='num' data-sort='0.5898'>0.590</td><td class='num' data-sort='0.5593'>0.559</td></tr><tr><td class='method' data-sort='LOCO'><span class='medal'></span><a class='paper' href='https://arxiv.org/abs/1604.04173' target='_blank' rel='noopener'>LOCO</a></td><td class='num' data-sort='0.64'>0.640</td><td class='num' data-sort='0.6927'>0.693</td><td class='num' data-sort='0.6586'>0.659</td><td class='num' data-sort='0.6416'>0.642</td><td class='num' data-sort='0.6158'>0.616</td><td class='num' data-sort='0.5913'>0.591</td></tr><tr><td class='method' data-sort='SBE'><span class='medal'></span><a class='paper' href='https://doi.org/10.1023/A:1012487302797' target='_blank' rel='noopener'>SBE</a></td><td class='num' data-sort='0.636'>0.636</td><td class='num' data-sort='0.6665'>0.666</td><td class='num' data-sort='0.6799'>0.680</td><td class='num' data-sort='0.634'>0.634</td><td class='num' data-sort='0.6089'>0.609</td><td class='num' data-sort='0.5909'>0.591</td></tr><tr><td class='method' data-sort='Random'><span class='medal'></span>Random</td><td class='num' data-sort='0.5868'>0.587</td><td class='num' data-sort='0.5798'>0.580</td><td class='num' data-sort='0.6112'>0.611</td><td class='num' data-sort='0.5745'>0.575</td><td class='num' data-sort='0.593'>0.593</td><td class='num' data-sort='0.5756'>0.576</td></tr><tr><td class='method' data-sort='MarkovBlanket'><span class='medal'></span><a class='paper' href='http://ilpubs.stanford.edu:8090/208/' target='_blank' rel='noopener'>MarkovBlanket</a></td><td class='num' data-sort='0.5353'>0.535</td><td class='num' data-sort='0.5461'>0.546</td><td class='num' data-sort='0.5382'>0.538</td><td class='num' data-sort='0.5284'>0.528</td><td class='num' data-sort='0.5374'>0.537</td><td class='num' data-sort='0.5262'>0.526</td></tr></tbody></table></div><script type='text/plain' id='sa-csv'>method,validity,validity_budget_0,validity_budget_1,validity_budget_2,validity_budget_3,validity_budget_4
+F-Test,0.8841,0.9583,0.9437,0.9225,0.8429,0.7531
+GainRatio,0.866,0.957,0.9376,0.9016,0.8115,0.7226
+LaplacianScore,0.8363,0.8772,0.8879,0.8573,0.8086,0.7507
+MI,0.832,0.9218,0.8912,0.8619,0.7867,0.6985
+ElasticNet,0.8033,0.9353,0.8819,0.8235,0.7344,0.6415
+Lasso,0.7759,0.9065,0.8352,0.7851,0.712,0.6408
+(R)ReliefF,0.7752,0.874,0.8223,0.7948,0.7242,0.6606
+RFImportance,0.7155,0.829,0.7797,0.7368,0.6578,0.5741
+SFS,0.703,0.8071,0.7599,0.6996,0.6452,0.6032
+mRMR,0.6992,0.8119,0.7509,0.6957,0.6426,0.5951
+CART,0.6483,0.7832,0.6743,0.6349,0.5898,0.5593
+LOCO,0.64,0.6927,0.6586,0.6416,0.6158,0.5913
+SBE,0.636,0.6665,0.6799,0.634,0.6089,0.5909
+Random,0.5868,0.5798,0.6112,0.5745,0.593,0.5756
+MarkovBlanket,0.5353,0.5461,0.5382,0.5284,0.5374,0.5262
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+(function () {
+  var table = document.getElementById('sa-table');
+  var headers = table.querySelectorAll('th');
+  headers.forEach(function (th, col) {
+    th.addEventListener('click', function () {
+      var asc = th.getAttribute('aria-sort') !== 'ascending';
+      headers.forEach(function (h) { h.removeAttribute('aria-sort'); });
+      th.setAttribute('aria-sort', asc ? 'ascending' : 'descending');
+      var numeric = th.classList.contains('num');
+      var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+      rows.sort(function (a, b) {
+        var x = a.cells[col].getAttribute('data-sort'), y = b.cells[col].getAttribute('data-sort');
+        if (numeric) {
+          x = x === '' ? NaN : parseFloat(x); y = y === '' ? NaN : parseFloat(y);
+          if (isNaN(x)) return 1;
+          if (isNaN(y)) return -1;
+          return asc ? x - y : y - x;
+        }
+        return asc ? x.localeCompare(y) : y.localeCompare(x);
+      });
+      rows.forEach(function (r) { table.tBodies[0].appendChild(r); });
+    });
+  });
+})();
+</script></body></html>

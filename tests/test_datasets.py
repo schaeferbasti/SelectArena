@@ -19,7 +19,7 @@ def test_collection_reads_from_hugging_face_by_default(tmp_path):
     assert isinstance(collection.source, HuggingFaceSource)
     assert collection.source.repo_id == datasets.HF_REPO_ID
     assert collection.source.revision == datasets.HF_REVISION
-    assert datasets.HF_REPO_ID == "SelectArena/SelectArena_Datasets"
+    assert datasets.HF_REPO_ID == "ANONYMIZED/SelectArena_Datasets"
     assert len(datasets.HF_REVISION) == 40  # a commit, not a branch
     assert len(collection) == len(datasets.BENCHMARK_DATA_FOUNDRY_TASKS)
 

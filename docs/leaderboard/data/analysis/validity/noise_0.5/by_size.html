@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena: validity by dataset size</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+#sa-tip { position:fixed; z-index:10; pointer-events:none; display:none; max-width:280px;
+  padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  font-size:12px; line-height:1.45; white-space:pre-line; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#sa-tip b { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Hover or tap a method for its values.</span><button onclick="saSvg('selectarena_validity_by_size')">SVG</button><button onclick="saPng('selectarena_validity_by_size')">PNG</button><button onclick="saCsv('selectarena_validity_by_size.csv')">CSV</button></div><svg id='sa-figure' viewBox='0 0 824 501' role='img' aria-label='Rank correlation of each method&#x27;s validity with the size of the datasets' style='max-width:948px;margin:0 auto'><style>
+svg { display:block; width:100%; height:auto; }
+.sa-text { fill:var(--fg); }
+.sa-muted { fill:var(--muted); }
+.sa-grid { stroke:var(--line); }
+.sa-ink { stroke:var(--fg); }
+.sa-hit { fill:transparent; cursor:default; }
+.sa-hit:hover, .sa-hit.sa-on { fill:var(--fg); fill-opacity:0.06; }
+
+.sa-dim { fill:var(--muted); }
+.sa-frame-line { stroke:var(--fg); stroke-opacity:0.3; fill:none; }
+.sa-point { stroke:var(--fg); }
+.sa-legend { fill:var(--bg); stroke:var(--line); }
+.sa-heat { image-rendering:pixelated; image-rendering:crisp-edges; }
+.sa-halo { paint-order:stroke; stroke:var(--bg); stroke-width:3px; stroke-opacity:0.7; }
+.sa-hollow { fill:var(--bg); stroke:var(--fg); } .sa-ci-none { stroke:var(--muted); }</style><text class='sa-text' x='8.0' y='62.5' font-size='12'>F-Test</text><text class='sa-text' x='8.0' y='87.5' font-size='12'>GainRatio</text><text class='sa-text' x='8.0' y='112.5' font-size='12'>MI</text><text class='sa-text' x='8.0' y='137.5' font-size='12'>LaplacianScore</text><text class='sa-text' x='8.0' y='162.5' font-size='12'>ElasticNet</text><text class='sa-text' x='8.0' y='187.5' font-size='12'>Lasso</text><text class='sa-text' x='8.0' y='212.5' font-size='12'>(R)ReliefF</text><text class='sa-text' x='8.0' y='237.5' font-size='12'>SFS</text><text class='sa-text' x='8.0' y='262.5' font-size='12'>RFImportance</text><text class='sa-text' x='8.0' y='287.5' font-size='12'>mRMR</text><text class='sa-text' x='8.0' y='312.5' font-size='12'>LOCO</text><text class='sa-text' x='8.0' y='337.5' font-size='12'>SBE</text><text class='sa-text' x='8.0' y='362.5' font-size='12'>CART</text><text class='sa-text' x='8.0' y='387.5' font-size='12'>Random</text><text class='sa-text' x='8.0' y='412.5' font-size='12'>MarkovBlanket</text><text class='sa-text' x='233.0' y='28' text-anchor='middle' font-size='12' font-weight='600'>Samples</text><line class='sa-grid' x1='136.0' x2='136.0' y1='42' y2='421.0'/><text class='sa-muted' x='136.0' y='437.0' text-anchor='middle' font-size='11'>-1</text><line class='sa-grid' x1='184.5' x2='184.5' y1='42' y2='421.0'/><text class='sa-muted' x='184.5' y='437.0' text-anchor='middle' font-size='11'>-0.5</text><line class='sa-ink' x1='233.0' x2='233.0' y1='42' y2='421.0' stroke-opacity='0.5'/><text class='sa-muted' x='233.0' y='437.0' text-anchor='middle' font-size='11'>0</text><line class='sa-grid' x1='281.5' x2='281.5' y1='42' y2='421.0'/><text class='sa-muted' x='281.5' y='437.0' text-anchor='middle' font-size='11'>0.5</text><line class='sa-grid' x1='330.0' x2='330.0' y1='42' y2='421.0'/><text class='sa-muted' x='330.0' y='437.0' text-anchor='middle' font-size='11'>1</text><text class='sa-muted' x='233.0' y='454.0' text-anchor='middle' font-size='11'>← higher with fewer · more →</text><line x1='235.7' x2='281.1' y1='58.5' y2='58.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='260.3' cy='58.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='46.0' width='206.0' height='25' data-tip='F-Test · Samples&#10;Rank correlation +0.28 (95% CI +0.03 to +0.50)&#10;More valid with more samples&#10;66 datasets'/><line x1='236.3' x2='279.9' y1='83.5' y2='83.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='259.7' cy='83.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='71.0' width='206.0' height='25' data-tip='GainRatio · Samples&#10;Rank correlation +0.28 (95% CI +0.03 to +0.48)&#10;More valid with more samples&#10;69 datasets'/><line x1='227.5' x2='278.3' y1='108.5' y2='108.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='253.4' cy='108.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='96.0' width='206.0' height='25' data-tip='MI · Samples&#10;Rank correlation +0.21 (95% CI -0.06 to +0.47)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='190.4' x2='235.9' y1='133.5' y2='133.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='211.6' cy='133.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='121.0' width='206.0' height='25' data-tip='LaplacianScore · Samples&#10;Rank correlation -0.22 (95% CI -0.44 to +0.03)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='259.9' x2='296.8' y1='158.5' y2='158.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='279.9' cy='158.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='146.0' width='206.0' height='25' data-tip='ElasticNet · Samples&#10;Rank correlation +0.48 (95% CI +0.28 to +0.66)&#10;More valid with more samples&#10;66 datasets'/><line x1='262.9' x2='302.4' y1='183.5' y2='183.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='284.6' cy='183.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='171.0' width='206.0' height='25' data-tip='Lasso · Samples&#10;Rank correlation +0.53 (95% CI +0.31 to +0.72)&#10;More valid with more samples&#10;66 datasets'/><line x1='201.6' x2='249.9' y1='208.5' y2='208.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='225.7' cy='208.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='196.0' width='206.0' height='25' data-tip='(R)ReliefF · Samples&#10;Rank correlation -0.08 (95% CI -0.32 to +0.17)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='248.5' x2='289.8' y1='233.5' y2='233.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='270.8' cy='233.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='221.0' width='206.0' height='25' data-tip='SFS · Samples&#10;Rank correlation +0.39 (95% CI +0.16 to +0.59)&#10;More valid with more samples&#10;71 datasets'/><line x1='206.4' x2='256.3' y1='258.5' y2='258.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='231.6' cy='258.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='246.0' width='206.0' height='25' data-tip='RFImportance · Samples&#10;Rank correlation -0.01 (95% CI -0.27 to +0.24)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='202.2' x2='252.1' y1='283.5' y2='283.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='227.8' cy='283.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='271.0' width='206.0' height='25' data-tip='mRMR · Samples&#10;Rank correlation -0.05 (95% CI -0.32 to +0.20)&#10;No clear trend (the interval includes 0)&#10;69 datasets'/><line x1='243.5' x2='287.8' y1='308.5' y2='308.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='267.5' cy='308.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='130.0' y='296.0' width='206.0' height='25' data-tip='LOCO · Samples&#10;Rank correlation +0.36 (95% CI +0.11 to +0.56)&#10;More valid with more samples&#10;71 datasets'/><line x1='229.5' x2='275.6' y1='333.5' y2='333.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='252.5' cy='333.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='321.0' width='206.0' height='25' data-tip='SBE · Samples&#10;Rank correlation +0.20 (95% CI -0.04 to +0.44)&#10;No clear trend (the interval includes 0)&#10;71 datasets'/><line x1='218.2' x2='268.1' y1='358.5' y2='358.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='243.6' cy='358.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='346.0' width='206.0' height='25' data-tip='CART · Samples&#10;Rank correlation +0.11 (95% CI -0.15 to +0.36)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='221.7' x2='264.1' y1='383.5' y2='383.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='242.7' cy='383.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='371.0' width='206.0' height='25' data-tip='Random · Samples&#10;Rank correlation +0.10 (95% CI -0.12 to +0.32)&#10;No clear trend (the interval includes 0)&#10;71 datasets'/><line x1='213.0' x2='263.4' y1='408.5' y2='408.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='238.3' cy='408.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='130.0' y='396.0' width='206.0' height='25' data-tip='MarkovBlanket · Samples&#10;Rank correlation +0.05 (95% CI -0.21 to +0.31)&#10;No clear trend (the interval includes 0)&#10;68 datasets'/><text class='sa-text' x='465.0' y='28' text-anchor='middle' font-size='12' font-weight='600'>Features</text><line class='sa-grid' x1='368.0' x2='368.0' y1='42' y2='421.0'/><text class='sa-muted' x='368.0' y='437.0' text-anchor='middle' font-size='11'>-1</text><line class='sa-grid' x1='416.5' x2='416.5' y1='42' y2='421.0'/><text class='sa-muted' x='416.5' y='437.0' text-anchor='middle' font-size='11'>-0.5</text><line class='sa-ink' x1='465.0' x2='465.0' y1='42' y2='421.0' stroke-opacity='0.5'/><text class='sa-muted' x='465.0' y='437.0' text-anchor='middle' font-size='11'>0</text><line class='sa-grid' x1='513.5' x2='513.5' y1='42' y2='421.0'/><text class='sa-muted' x='513.5' y='437.0' text-anchor='middle' font-size='11'>0.5</text><line class='sa-grid' x1='562.0' x2='562.0' y1='42' y2='421.0'/><text class='sa-muted' x='562.0' y='437.0' text-anchor='middle' font-size='11'>1</text><text class='sa-muted' x='465.0' y='454.0' text-anchor='middle' font-size='11'>← higher with fewer · more →</text><line x1='490.0' x2='530.2' y1='58.5' y2='58.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='513.3' cy='58.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='46.0' width='206.0' height='25' data-tip='F-Test · Features&#10;Rank correlation +0.50 (95% CI +0.26 to +0.67)&#10;More valid with more features&#10;66 datasets'/><line x1='467.7' x2='517.7' y1='83.5' y2='83.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='494.3' cy='83.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='71.0' width='206.0' height='25' data-tip='GainRatio · Features&#10;Rank correlation +0.30 (95% CI +0.03 to +0.54)&#10;More valid with more features&#10;69 datasets'/><line x1='460.8' x2='512.9' y1='108.5' y2='108.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='487.0' cy='108.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='362.0' y='96.0' width='206.0' height='25' data-tip='MI · Features&#10;Rank correlation +0.23 (95% CI -0.04 to +0.49)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='506.9' x2='543.2' y1='133.5' y2='133.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='527.9' cy='133.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='121.0' width='206.0' height='25' data-tip='LaplacianScore · Features&#10;Rank correlation +0.65 (95% CI +0.43 to +0.81)&#10;More valid with more features&#10;66 datasets'/><line x1='437.7' x2='486.4' y1='158.5' y2='158.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='460.6' cy='158.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='362.0' y='146.0' width='206.0' height='25' data-tip='ElasticNet · Features&#10;Rank correlation -0.05 (95% CI -0.28 to +0.22)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='428.3' x2='476.9' y1='183.5' y2='183.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='451.8' cy='183.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='362.0' y='171.0' width='206.0' height='25' data-tip='Lasso · Features&#10;Rank correlation -0.14 (95% CI -0.38 to +0.12)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='478.2' x2='523.4' y1='208.5' y2='208.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='502.1' cy='208.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='196.0' width='206.0' height='25' data-tip='(R)ReliefF · Features&#10;Rank correlation +0.38 (95% CI +0.14 to +0.60)&#10;More valid with more features&#10;66 datasets'/><line x1='404.8' x2='444.9' y1='233.5' y2='233.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='422.8' cy='233.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='362.0' y='221.0' width='206.0' height='25' data-tip='SFS · Features&#10;Rank correlation -0.43 (95% CI -0.62 to -0.21)&#10;Less valid with more features&#10;71 datasets'/><line x1='465.6' x2='507.5' y1='258.5' y2='258.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='487.3' cy='258.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='246.0' width='206.0' height='25' data-tip='RFImportance · Features&#10;Rank correlation +0.23 (95% CI +0.01 to +0.44)&#10;More valid with more features&#10;66 datasets'/><line x1='480.6' x2='520.8' y1='283.5' y2='283.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='501.9' cy='283.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='362.0' y='271.0' width='206.0' height='25' data-tip='mRMR · Features&#10;Rank correlation +0.38 (95% CI +0.16 to +0.57)&#10;More valid with more features&#10;69 datasets'/><line x1='410.0' x2='445.0' y1='308.5' y2='308.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='425.7' cy='308.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='362.0' y='296.0' width='206.0' height='25' data-tip='LOCO · Features&#10;Rank correlation -0.41 (95% CI -0.57 to -0.21)&#10;Less valid with more features&#10;71 datasets'/><line x1='407.4' x2='441.4' y1='333.5' y2='333.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='421.6' cy='333.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='362.0' y='321.0' width='206.0' height='25' data-tip='SBE · Features&#10;Rank correlation -0.45 (95% CI -0.59 to -0.24)&#10;Less valid with more features&#10;71 datasets'/><line x1='429.0' x2='476.8' y1='358.5' y2='358.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='452.5' cy='358.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='362.0' y='346.0' width='206.0' height='25' data-tip='CART · Features&#10;Rank correlation -0.13 (95% CI -0.37 to +0.12)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='434.6' x2='479.4' y1='383.5' y2='383.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='456.7' cy='383.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='362.0' y='371.0' width='206.0' height='25' data-tip='Random · Features&#10;Rank correlation -0.09 (95% CI -0.31 to +0.15)&#10;No clear trend (the interval includes 0)&#10;71 datasets'/><line x1='421.4' x2='462.4' y1='408.5' y2='408.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='441.9' cy='408.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='362.0' y='396.0' width='206.0' height='25' data-tip='MarkovBlanket · Features&#10;Rank correlation -0.24 (95% CI -0.45 to -0.03)&#10;Less valid with more features&#10;68 datasets'/><text class='sa-text' x='697.0' y='28' text-anchor='middle' font-size='12' font-weight='600'>Samples per feature</text><line class='sa-grid' x1='600.0' x2='600.0' y1='42' y2='421.0'/><text class='sa-muted' x='600.0' y='437.0' text-anchor='middle' font-size='11'>-1</text><line class='sa-grid' x1='648.5' x2='648.5' y1='42' y2='421.0'/><text class='sa-muted' x='648.5' y='437.0' text-anchor='middle' font-size='11'>-0.5</text><line class='sa-ink' x1='697.0' x2='697.0' y1='42' y2='421.0' stroke-opacity='0.5'/><text class='sa-muted' x='697.0' y='437.0' text-anchor='middle' font-size='11'>0</text><line class='sa-grid' x1='745.5' x2='745.5' y1='42' y2='421.0'/><text class='sa-muted' x='745.5' y='437.0' text-anchor='middle' font-size='11'>0.5</text><line class='sa-grid' x1='794.0' x2='794.0' y1='42' y2='421.0'/><text class='sa-muted' x='794.0' y='437.0' text-anchor='middle' font-size='11'>1</text><text class='sa-muted' x='697.0' y='454.0' text-anchor='middle' font-size='11'>← higher with fewer · more →</text><line x1='663.7' x2='712.3' y1='58.5' y2='58.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='688.0' cy='58.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='46.0' width='206.0' height='25' data-tip='F-Test · Samples per feature&#10;Rank correlation -0.09 (95% CI -0.34 to +0.16)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='674.9' x2='724.6' y1='83.5' y2='83.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='699.0' cy='83.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='71.0' width='206.0' height='25' data-tip='GainRatio · Samples per feature&#10;Rank correlation +0.02 (95% CI -0.23 to +0.28)&#10;No clear trend (the interval includes 0)&#10;69 datasets'/><line x1='677.2' x2='725.7' y1='108.5' y2='108.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='700.8' cy='108.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='96.0' width='206.0' height='25' data-tip='MI · Samples per feature&#10;Rank correlation +0.04 (95% CI -0.20 to +0.30)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='635.1' x2='677.9' y1='133.5' y2='133.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='653.6' cy='133.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='594.0' y='121.0' width='206.0' height='25' data-tip='LaplacianScore · Samples per feature&#10;Rank correlation -0.45 (95% CI -0.64 to -0.20)&#10;Less valid with more samples per feature&#10;66 datasets'/><line x1='714.8' x2='755.1' y1='158.5' y2='158.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='736.4' cy='158.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='594.0' y='146.0' width='206.0' height='25' data-tip='ElasticNet · Samples per feature&#10;Rank correlation +0.41 (95% CI +0.18 to +0.60)&#10;More valid with more samples per feature&#10;66 datasets'/><line x1='721.1' x2='760.0' y1='183.5' y2='183.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='742.2' cy='183.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='594.0' y='171.0' width='206.0' height='25' data-tip='Lasso · Samples per feature&#10;Rank correlation +0.47 (95% CI +0.25 to +0.65)&#10;More valid with more samples per feature&#10;66 datasets'/><line x1='656.5' x2='702.1' y1='208.5' y2='208.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='678.4' cy='208.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='196.0' width='206.0' height='25' data-tip='(R)ReliefF · Samples per feature&#10;Rank correlation -0.19 (95% CI -0.42 to +0.05)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='731.5' x2='761.4' y1='233.5' y2='233.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='748.8' cy='233.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='594.0' y='221.0' width='206.0' height='25' data-tip='SFS · Samples per feature&#10;Rank correlation +0.53 (95% CI +0.36 to +0.66)&#10;More valid with more samples per feature&#10;71 datasets'/><line x1='658.0' x2='705.8' y1='258.5' y2='258.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='681.7' cy='258.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='246.0' width='206.0' height='25' data-tip='RFImportance · Samples per feature&#10;Rank correlation -0.16 (95% CI -0.40 to +0.09)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='648.2' x2='689.6' y1='283.5' y2='283.5' stroke='#D55E00' stroke-width='2' stroke-linecap='round'/><circle cx='668.1' cy='283.5' r='4.5' fill='#D55E00'/><rect class='sa-hit' x='594.0' y='271.0' width='206.0' height='25' data-tip='mRMR · Samples per feature&#10;Rank correlation -0.30 (95% CI -0.50 to -0.08)&#10;Less valid with more samples per feature&#10;69 datasets'/><line x1='730.2' x2='765.2' y1='308.5' y2='308.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='750.8' cy='308.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='594.0' y='296.0' width='206.0' height='25' data-tip='LOCO · Samples per feature&#10;Rank correlation +0.55 (95% CI +0.34 to +0.70)&#10;More valid with more samples per feature&#10;71 datasets'/><line x1='716.1' x2='758.1' y1='333.5' y2='333.5' stroke='#0072B2' stroke-width='2' stroke-linecap='round'/><circle cx='739.3' cy='333.5' r='4.5' fill='#0072B2'/><rect class='sa-hit' x='594.0' y='321.0' width='206.0' height='25' data-tip='SBE · Samples per feature&#10;Rank correlation +0.44 (95% CI +0.20 to +0.63)&#10;More valid with more samples per feature&#10;71 datasets'/><line x1='684.8' x2='734.1' y1='358.5' y2='358.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='710.9' cy='358.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='346.0' width='206.0' height='25' data-tip='CART · Samples per feature&#10;Rank correlation +0.14 (95% CI -0.13 to +0.38)&#10;No clear trend (the interval includes 0)&#10;66 datasets'/><line x1='689.6' x2='730.2' y1='383.5' y2='383.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='711.0' cy='383.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='371.0' width='206.0' height='25' data-tip='Random · Samples per feature&#10;Rank correlation +0.14 (95% CI -0.08 to +0.34)&#10;No clear trend (the interval includes 0)&#10;71 datasets'/><line x1='691.2' x2='738.7' y1='408.5' y2='408.5' class='sa-ci-none' stroke-width='2' stroke-linecap='round'/><circle class='sa-hollow' cx='715.3' cy='408.5' r='4' stroke-width='1.5'/><rect class='sa-hit' x='594.0' y='396.0' width='206.0' height='25' data-tip='MarkovBlanket · Samples per feature&#10;Rank correlation +0.19 (95% CI -0.06 to +0.43)&#10;No clear trend (the interval includes 0)&#10;68 datasets'/><circle cx='133.0' cy='479.0' r='4.5' fill='#0072B2'/><text class='sa-text' x='142.0' y='483' font-size='12'>Positive correlation</text><circle cx='307.0' cy='479.0' r='4.5' fill='#D55E00'/><text class='sa-text' x='316.0' y='483' font-size='12'>Negative correlation</text><circle class='sa-hollow' cx='481.0' cy='479.0' r='4' stroke-width='1.5'/><text class='sa-text' x='490.0' y='483' font-size='12'>No clear trend</text></svg><script type='text/plain' id='sa-csv'>characteristic,method,rho,ci_low,ci_high,n_datasets
+Samples,(R)ReliefF,-0.075,-0.323,0.174,66
+Samples,CART,0.11,-0.152,0.362,66
+Samples,ElasticNet,0.483,0.277,0.658,66
+Samples,F-Test,0.282,0.028,0.496,66
+Samples,GainRatio,0.275,0.034,0.484,69
+Samples,LOCO,0.356,0.109,0.565,71
+Samples,LaplacianScore,-0.22,-0.439,0.03,66
+Samples,Lasso,0.532,0.308,0.715,66
+Samples,MI,0.211,-0.057,0.467,66
+Samples,MarkovBlanket,0.054,-0.206,0.313,68
+Samples,RFImportance,-0.014,-0.275,0.24,66
+Samples,Random,0.1,-0.116,0.321,71
+Samples,SBE,0.201,-0.036,0.439,71
+Samples,SFS,0.389,0.16,0.586,71
+Samples,mRMR,-0.054,-0.317,0.197,69
+Features,(R)ReliefF,0.383,0.136,0.602,66
+Features,CART,-0.128,-0.371,0.122,66
+Features,ElasticNet,-0.045,-0.282,0.221,66
+Features,F-Test,0.497,0.258,0.672,66
+Features,GainRatio,0.302,0.027,0.543,69
+Features,LOCO,-0.405,-0.567,-0.206,71
+Features,LaplacianScore,0.649,0.432,0.806,66
+Features,Lasso,-0.136,-0.378,0.123,66
+Features,MI,0.227,-0.044,0.494,66
+Features,MarkovBlanket,-0.238,-0.449,-0.027,68
+Features,RFImportance,0.23,0.006,0.438,66
+Features,Random,-0.085,-0.314,0.149,71
+Features,SBE,-0.448,-0.594,-0.243,71
+Features,SFS,-0.435,-0.621,-0.207,71
+Features,mRMR,0.381,0.161,0.575,69
+Samples per feature,(R)ReliefF,-0.192,-0.418,0.053,66
+Samples per feature,CART,0.143,-0.126,0.383,66
+Samples per feature,ElasticNet,0.406,0.183,0.599,66
+Samples per feature,F-Test,-0.093,-0.344,0.158,66
+Samples per feature,GainRatio,0.021,-0.228,0.284,69
+Samples per feature,LOCO,0.554,0.342,0.703,71
+Samples per feature,LaplacianScore,-0.448,-0.638,-0.197,66
+Samples per feature,Lasso,0.466,0.248,0.65,66
+Samples per feature,MI,0.039,-0.204,0.296,66
+Samples per feature,MarkovBlanket,0.189,-0.06,0.43,68
+Samples per feature,RFImportance,-0.157,-0.402,0.091,66
+Samples per feature,Random,0.145,-0.076,0.343,71
+Samples per feature,SBE,0.437,0.197,0.63,71
+Samples per feature,SFS,0.534,0.356,0.664,71
+Samples per feature,mRMR,-0.298,-0.503,-0.076,69
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+// Instant tooltip: a native SVG <title> only shows after a browser delay of 1-3 s.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'sa-tip';
+  document.body.appendChild(tip);
+  var current = null;
+  function show(hit, x, y) {
+    if (current !== hit) {
+      if (current) current.classList.remove('sa-on');
+      current = hit;
+      hit.classList.add('sa-on');
+      var lines = hit.getAttribute('data-tip').split('\n');
+      tip.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = lines[0];
+      tip.appendChild(head);
+      tip.appendChild(document.createTextNode('\n' + lines.slice(1).join('\n')));
+      tip.style.display = 'block';
+    }
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 14;
+    if (left + w > window.innerWidth - 4) left = Math.max(4, x - w - 14);
+    if (top + h > window.innerHeight - 4) top = Math.max(4, y - h - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    if (current) current.classList.remove('sa-on');
+    current = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('pointermove', function (e) {
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else if (e.pointerType === 'mouse') hide();
+  });
+  document.addEventListener('pointerdown', function (e) {  // touch: tap a bar to show, elsewhere to hide
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else hide();
+  });
+  document.addEventListener('mouseleave', hide);
+})();
+// Downloads always use the light colours (the paper look), whatever the page's theme.
+var SA_LIGHT = {'--fg': '#1f2328', '--muted': '#59636e', '--line': '#d1d9e0', '--bg': '#ffffff',
+  '--soft': '#f6f8fa', '--accent': '#0072B2'};
+function saSvgString() {
+  var svg = document.getElementById('sa-figure').cloneNode(true);
+  var style = svg.querySelector('style');
+  var css = style.textContent;
+  Object.keys(SA_LIGHT).forEach(function (v) { css = css.split('var(' + v + ')').join(SA_LIGHT[v]); });
+  style.textContent = css;
+  svg.querySelectorAll('.sa-hit').forEach(function (hit) { hit.remove(); });
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  return new XMLSerializer().serializeToString(svg);
+}
+function saSvg(name) {
+  saDownload(name + '.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
+}
+function saPng(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal, scale = 3;
+  var img = new Image();
+  img.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = box.width * scale; canvas.height = box.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = SA_LIGHT['--bg'];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function (blob) { saDownload(name + '.png', blob); });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
+}
+</script></body></html>

@@ -1,0 +1,16 @@
+Rank,Method,Category,Subgroup,Elo,Elo CI low,Elo CI high,Avg. rank,Win rate (%),Improvability (%),Improvement over Random (%),Error vs. all features,Stability,Validity,Selection time (s),Fallback rate (%),#Datasets,#Comparisons
+1,CART,Non-search,Tree,1649.0,1553.0,1816.0,4.72,73.4,15.1,33.6,,0.536,0.827,0.0,0.0,12,36
+2,RFImportance,Non-search,Tree,1636.0,1547.0,1766.0,5.51,67.8,15.2,36.4,,0.68,0.96,0.1,0.0,12,36
+3,MarkovBlanket,Search,Backward search,1614.0,1532.0,1729.0,5.22,69.8,16.4,35.4,,0.473,0.491,0.1,0.0,12,36
+4,MI,Non-search,Information theory,1486.0,1381.0,1621.0,6.69,59.3,24.4,30.2,,0.734,0.988,0.2,0.0,12,36
+5,ElasticNet,Non-search,Regularization,1481.0,1368.0,1617.0,7.03,56.9,20.1,31.1,,0.585,0.975,13.0,0.0,12,36
+6,Lasso,Non-search,Regularization,1439.0,1330.0,1564.0,7.06,56.8,23.2,27.8,,0.478,0.97,5.3,0.0,12,36
+7,mRMR,Non-search,Information theory,1437.0,1347.0,1525.0,7.46,53.9,22.8,30.9,,0.615,0.958,0.2,0.0,12,36
+8,SFS,Search,Forward search,1430.0,1258.0,1596.0,8.19,48.6,24.8,22.8,,0.41,0.709,2408.6,22.2,12,36
+9,(R)ReliefF,Non-search,Distance,1423.0,1312.0,1540.0,7.74,51.9,23.9,30.6,,0.682,0.988,1.7,0.0,12,36
+10,F-Test,Non-search,Correlation,1423.0,1303.0,1557.0,8.19,48.6,28.7,25.6,,0.758,1.0,0.0,0.0,12,36
+11,GainRatio,Non-search,Information theory,1396.0,1248.0,1550.0,8.38,47.3,24.0,26.4,,0.718,0.972,0.1,0.0,12,36
+12,LOCO,Search,Leave-one-out,1382.0,1252.0,1502.0,8.56,46.0,26.4,21.5,,0.294,0.719,389.2,0.0,12,36
+13,SBE,Search,Backward search,1362.0,1164.0,1516.0,9.28,40.9,29.4,16.8,,0.195,0.58,3601.9,61.1,12,36
+14,Random,Baseline,Baseline,1000.0,840.0,1078.0,12.53,17.7,42.0,0.0,,-0.006,0.43,0.0,0.0,12,36
+15,LaplacianScore,Non-search,Distance,977.0,648.0,1133.0,13.44,11.1,46.8,-10.8,,0.499,0.849,0.2,0.0,12,36

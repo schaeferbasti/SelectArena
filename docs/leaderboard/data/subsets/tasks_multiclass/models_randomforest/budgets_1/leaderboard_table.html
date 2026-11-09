@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena leaderboard: multiclass, RandomForest, budget 2</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+.wrap { overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+table { border-collapse:collapse; width:100%; font-variant-numeric:tabular-nums; }
+th, td { padding:7px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
+th { position:sticky; top:0; background:var(--soft); font-weight:600; text-align:left;
+  cursor:pointer; user-select:none; font-size:13px; }
+th.num, td.num { text-align:right; }
+th .arrow { color:var(--muted); font-weight:400; }
+th[aria-sort] { color:var(--accent); }
+tbody tr:hover { background:var(--soft); }
+tbody tr:last-child td { border-bottom:none; }
+td.method { font-weight:600; }
+td.method a.paper { color:inherit; text-decoration:none; border-bottom:1px dotted var(--muted); }
+td.method a.paper:hover { color:var(--accent); border-bottom-color:var(--accent); }
+td .sub { color:var(--muted); font-size:12px; font-weight:400; margin-left:6px; }
+td.na { color:var(--muted); }
+.pill { display:inline-block; padding:0 8px; border:1px solid var(--line); border-radius:999px;
+  font-size:12px; color:var(--fg); }
+.pill.cat-search { border-color:var(--accent); }
+.pill.cat-baseline { color:var(--muted); }
+.medal { display:inline-block; width:1.4em; text-align:center; font-size:15px; line-height:1; }
+td.shaded { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Click a column to sort and a method to open its paper. Hover a header for its definition. Stability and validity are shaded as in the Elo figure: darker is better.</span><button onclick="saCsv('selectarena_leaderboard.csv')">CSV</button></div><div class='wrap'><table id='sa-table'><thead><tr><th class='num' title='Rank by Elo.'>#</th><th class='' title='Click a method to open its paper (the one cited in Table 2 of the SelectArena paper).'>Method</th><th class='' title='Taxonomy of the paper (Appendix A). Search methods evaluate many feature subsets with the model (forward, backward, leave-one-out); the others use a proxy instead (correlation, distance, information theory, tree, regularization).'>Type</th><th class='num' title='Bradley-Terry Elo from pairwise matches within each dataset, budget and downstream model. Random = 1000. +/− give the 95% bootstrap interval.'>Elo ↑</th><th class='num' title='Mean reduction of the downstream error compared with random selection on the same dataset, in % (as in the Pareto figure; Random is 0).'>Improvement over Random ↑</th><th class='num' title='Agreement of the selected features across bootstrap resamples (Nogueira et al., 2018).'>Stability ↑</th><th class='num' title='Share of the budget filled with original features when as many noise features are added.'>Validity ↑</th><th class='num' title='Median wall-clock time of the selection.'>Time (s) ↓</th><th class='num' title='Share of runs where the method ran out of time and random features filled the budget.'>Fallback (%)</th></tr></thead><tbody><tr><td class='num' data-sort='1'><span class='medal' role='img' aria-label='gold medal'>🥇</span>1</td><td class='method' data-sort='RFImportance'><a class='paper' href='https://doi.org/10.1023/A:1010933404324' target='_blank' rel='noopener'>RFImportance</a></td><td class='' data-sort='Tree'><span class='pill cat-non-search'>Tree</span></td><td class='num' data-sort='1505.0'>1505<span class='sub'>+188 / −123</span></td><td class='num' data-sort='34.9'>34.9</td><td class='num shaded' data-sort='0.691' style='background:rgba(0,114,178,0.54)'>0.691</td><td class='num shaded' data-sort='0.874' style='background:rgba(213,94,0,0.67)'>0.874</td><td class='num' data-sort='0.1'>0.1</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='2'><span class='medal' role='img' aria-label='silver medal'>🥈</span>2</td><td class='method' data-sort='MI'><a class='paper' href='https://doi.org/10.1109/72.298224' target='_blank' rel='noopener'>MI</a></td><td class='' data-sort='Information theory'><span class='pill cat-non-search'>Information theory</span></td><td class='num' data-sort='1402.0'>1402<span class='sub'>+74 / −61</span></td><td class='num' data-sort='32.2'>32.2</td><td class='num shaded' data-sort='0.725' style='background:rgba(0,114,178,0.57)'>0.725</td><td class='num shaded' data-sort='0.978' style='background:rgba(213,94,0,0.74)'>0.978</td><td class='num' data-sort='0.2'>0.2</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='3'><span class='medal' role='img' aria-label='bronze medal'>🥉</span>3</td><td class='method' data-sort='Lasso'><a class='paper' href='https://doi.org/10.1111/j.2517-6161.1996.tb02080.x' target='_blank' rel='noopener'>Lasso</a></td><td class='' data-sort='Regularization'><span class='pill cat-non-search'>Regularization</span></td><td class='num' data-sort='1402.0'>1402<span class='sub'>+181 / −140</span></td><td class='num' data-sort='25.5'>25.5</td><td class='num shaded' data-sort='0.508' style='background:rgba(0,114,178,0.42)'>0.508</td><td class='num shaded' data-sort='0.915' style='background:rgba(213,94,0,0.69)'>0.915</td><td class='num' data-sort='4.9'>4.9</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='4'><span class='medal'></span>4</td><td class='method' data-sort='MarkovBlanket'><a class='paper' href='http://ilpubs.stanford.edu:8090/208/' target='_blank' rel='noopener'>MarkovBlanket</a></td><td class='' data-sort='Search'><span class='pill cat-search'>Search</span></td><td class='num' data-sort='1398.0'>1398<span class='sub'>+134 / −105</span></td><td class='num' data-sort='31.7'>31.7</td><td class='num shaded' data-sort='0.463' style='background:rgba(0,114,178,0.39)'>0.463</td><td class='num shaded' data-sort='0.496' style='background:rgba(213,94,0,0.41)'>0.496</td><td class='num' data-sort='0.1'>0.1</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='5'><span class='medal'></span>5</td><td class='method' data-sort='CART'><a class='paper' href='https://doi.org/10.1201/9781315139470' target='_blank' rel='noopener'>CART</a></td><td class='' data-sort='Tree'><span class='pill cat-non-search'>Tree</span></td><td class='num' data-sort='1380.0'>1380<span class='sub'>+118 / −89</span></td><td class='num' data-sort='28.5'>28.5</td><td class='num shaded' data-sort='0.46' style='background:rgba(0,114,178,0.39)'>0.460</td><td class='num shaded' data-sort='0.693' style='background:rgba(213,94,0,0.54)'>0.693</td><td class='num' data-sort='0.0'>0.0</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='6'><span class='medal'></span>6</td><td class='method' data-sort='ElasticNet'><a class='paper' href='https://doi.org/10.1111/j.1467-9868.2005.00503.x' target='_blank' rel='noopener'>ElasticNet</a></td><td class='' data-sort='Regularization'><span class='pill cat-non-search'>Regularization</span></td><td class='num' data-sort='1328.0'>1328<span class='sub'>+160 / −133</span></td><td class='num' data-sort='23.3'>23.3</td><td class='num shaded' data-sort='0.602' style='background:rgba(0,114,178,0.48)'>0.602</td><td class='num shaded' data-sort='0.959' style='background:rgba(213,94,0,0.72)'>0.959</td><td class='num' data-sort='13.0'>13.0</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='7'><span class='medal'></span>7</td><td class='method' data-sort='GainRatio'><a class='paper' href='https://doi.org/10.1007/BF00116251' target='_blank' rel='noopener'>GainRatio</a></td><td class='' data-sort='Information theory'><span class='pill cat-non-search'>Information theory</span></td><td class='num' data-sort='1307.0'>1307<span class='sub'>+117 / −133</span></td><td class='num' data-sort='27.7'>27.7</td><td class='num shaded' data-sort='0.697' style='background:rgba(0,114,178,0.55)'>0.697</td><td class='num shaded' data-sort='0.976' style='background:rgba(213,94,0,0.73)'>0.976</td><td class='num' data-sort='0.1'>0.1</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='8'><span class='medal'></span>8</td><td class='method' data-sort='mRMR'><a class='paper' href='https://doi.org/10.1109/TPAMI.2005.159' target='_blank' rel='noopener'>mRMR</a></td><td class='' data-sort='Information theory'><span class='pill cat-non-search'>Information theory</span></td><td class='num' data-sort='1294.0'>1294<span class='sub'>+131 / −120</span></td><td class='num' data-sort='21.7'>21.7</td><td class='num shaded' data-sort='0.678' style='background:rgba(0,114,178,0.53)'>0.678</td><td class='num shaded' data-sort='0.874' style='background:rgba(213,94,0,0.67)'>0.874</td><td class='num' data-sort='0.3'>0.3</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='9'><span class='medal'></span>9</td><td class='method' data-sort='(R)ReliefF'><a class='paper' href='https://doi.org/10.1023/A:1008280620621' target='_blank' rel='noopener'>(R)ReliefF</a></td><td class='' data-sort='Distance'><span class='pill cat-non-search'>Distance</span></td><td class='num' data-sort='1286.0'>1286<span class='sub'>+93 / −96</span></td><td class='num' data-sort='23.6'>23.6</td><td class='num shaded' data-sort='0.695' style='background:rgba(0,114,178,0.55)'>0.695</td><td class='num shaded' data-sort='0.966' style='background:rgba(213,94,0,0.73)'>0.966</td><td class='num' data-sort='1.6'>1.6</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='10'><span class='medal'></span>10</td><td class='method' data-sort='F-Test'><a class='paper' href='https://doi.org/10.1016/0169-7439(89)80095-4' target='_blank' rel='noopener'>F-Test</a></td><td class='' data-sort='Correlation'><span class='pill cat-non-search'>Correlation</span></td><td class='num' data-sort='1282.0'>1282<span class='sub'>+107 / −94</span></td><td class='num' data-sort='25.3'>25.3</td><td class='num shaded' data-sort='0.785' style='background:rgba(0,114,178,0.61)'>0.785</td><td class='num shaded' data-sort='0.986' style='background:rgba(213,94,0,0.74)'>0.986</td><td class='num' data-sort='0.0'>0.0</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='11'><span class='medal'></span>11</td><td class='method' data-sort='SBE'><a class='paper' href='https://doi.org/10.1023/A:1012487302797' target='_blank' rel='noopener'>SBE</a></td><td class='' data-sort='Search'><span class='pill cat-search'>Search</span></td><td class='num' data-sort='1248.0'>1248<span class='sub'>+114 / −142</span></td><td class='num' data-sort='18.6'>18.6</td><td class='num shaded' data-sort='0.139' style='background:rgba(0,114,178,0.17)'>0.139</td><td class='num shaded' data-sort='0.592' style='background:rgba(213,94,0,0.48)'>0.592</td><td class='num' data-sort='3601.1'>3,601.1</td><td class='num' data-sort='61.1'>61.1</td></tr><tr><td class='num' data-sort='12'><span class='medal'></span>12</td><td class='method' data-sort='LOCO'><a class='paper' href='https://arxiv.org/abs/1604.04173' target='_blank' rel='noopener'>LOCO</a></td><td class='' data-sort='Search'><span class='pill cat-search'>Search</span></td><td class='num' data-sort='1221.0'>1221<span class='sub'>+119 / −139</span></td><td class='num' data-sort='11.4'>11.4</td><td class='num shaded' data-sort='0.206' style='background:rgba(0,114,178,0.22)'>0.206</td><td class='num shaded' data-sort='0.654' style='background:rgba(213,94,0,0.52)'>0.654</td><td class='num' data-sort='374.0'>374.0</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='13'><span class='medal'></span>13</td><td class='method' data-sort='LaplacianScore'><a class='paper' href='https://proceedings.neurips.cc/paper_files/paper/2005/file/b5b03f06271f8917685d14cea7c6c50a-Paper.pdf' target='_blank' rel='noopener'>LaplacianScore</a></td><td class='' data-sort='Distance'><span class='pill cat-non-search'>Distance</span></td><td class='num' data-sort='1208.0'>1208<span class='sub'>+168 / −241</span></td><td class='num' data-sort='-30.1'>-30.1</td><td class='num shaded' data-sort='0.557' style='background:rgba(0,114,178,0.45)'>0.557</td><td class='num shaded' data-sort='0.843' style='background:rgba(213,94,0,0.64)'>0.843</td><td class='num' data-sort='0.2'>0.2</td><td class='num' data-sort='0.0'>0.0</td></tr><tr><td class='num' data-sort='14'><span class='medal'></span>14</td><td class='method' data-sort='SFS'><a class='paper' href='https://doi.org/10.1109/TSMC.1977.4309803' target='_blank' rel='noopener'>SFS</a></td><td class='' data-sort='Search'><span class='pill cat-search'>Search</span></td><td class='num' data-sort='1185.0'>1185<span class='sub'>+128 / −171</span></td><td class='num' data-sort='17.6'>17.6</td><td class='num shaded' data-sort='0.324' style='background:rgba(0,114,178,0.30)'>0.324</td><td class='num shaded' data-sort='0.654' style='background:rgba(213,94,0,0.52)'>0.654</td><td class='num' data-sort='3600.1'>3,600.1</td><td class='num' data-sort='52.8'>52.8</td></tr><tr><td class='num' data-sort='15'><span class='medal'></span>15</td><td class='method' data-sort='Random'>Random</td><td class='' data-sort='Baseline'><span class='pill cat-baseline'>Baseline</span></td><td class='num' data-sort='1000.0'>1000<span class='sub'>+106 / −168</span></td><td class='num' data-sort='0.0'>0.0</td><td class='num shaded' data-sort='0.002' style='background:rgba(0,114,178,0.08)'>0.002</td><td class='num shaded' data-sort='0.485' style='background:rgba(213,94,0,0.40)'>0.485</td><td class='num' data-sort='0.0'>0.0</td><td class='num' data-sort='0.0'>0.0</td></tr></tbody></table></div><script type='text/plain' id='sa-csv'>Rank,Method,Type,Elo,Elo CI low,Elo CI high,Improvement over Random (%),Stability,Validity,Selection time (s),Fallback rate (%)
+1,RFImportance,Tree,1505.0,1382.0,1693.0,34.9,0.691,0.874,0.1,0.0
+2,MI,Information theory,1402.0,1341.0,1476.0,32.2,0.725,0.978,0.2,0.0
+3,Lasso,Regularization,1402.0,1262.0,1583.0,25.5,0.508,0.915,4.9,0.0
+4,MarkovBlanket,Search,1398.0,1293.0,1532.0,31.7,0.463,0.496,0.1,0.0
+5,CART,Tree,1380.0,1291.0,1498.0,28.5,0.46,0.693,0.0,0.0
+6,ElasticNet,Regularization,1328.0,1195.0,1488.0,23.3,0.602,0.959,13.0,0.0
+7,GainRatio,Information theory,1307.0,1174.0,1424.0,27.7,0.697,0.976,0.1,0.0
+8,mRMR,Information theory,1294.0,1174.0,1425.0,21.7,0.678,0.874,0.3,0.0
+9,(R)ReliefF,Distance,1286.0,1190.0,1379.0,23.6,0.695,0.966,1.6,0.0
+10,F-Test,Correlation,1282.0,1188.0,1389.0,25.3,0.785,0.986,0.0,0.0
+11,SBE,Search,1248.0,1106.0,1362.0,18.6,0.139,0.592,3601.1,61.1
+12,LOCO,Search,1221.0,1082.0,1340.0,11.4,0.206,0.654,374.0,0.0
+13,LaplacianScore,Distance,1208.0,967.0,1376.0,-30.1,0.557,0.843,0.2,0.0
+14,SFS,Search,1185.0,1014.0,1313.0,17.6,0.324,0.654,3600.1,52.8
+15,Random,Baseline,1000.0,832.0,1106.0,0.0,0.002,0.485,0.0,0.0
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+(function () {
+  var table = document.getElementById('sa-table');
+  var headers = table.querySelectorAll('th');
+  headers.forEach(function (th, col) {
+    th.addEventListener('click', function () {
+      var asc = th.getAttribute('aria-sort') !== 'ascending';
+      headers.forEach(function (h) { h.removeAttribute('aria-sort'); });
+      th.setAttribute('aria-sort', asc ? 'ascending' : 'descending');
+      var numeric = th.classList.contains('num');
+      var rows = Array.prototype.slice.call(table.tBodies[0].rows);
+      rows.sort(function (a, b) {
+        var x = a.cells[col].getAttribute('data-sort'), y = b.cells[col].getAttribute('data-sort');
+        if (numeric) {
+          x = x === '' ? NaN : parseFloat(x); y = y === '' ? NaN : parseFloat(y);
+          if (isNaN(x)) return 1;
+          if (isNaN(y)) return -1;
+          return asc ? x - y : y - x;
+        }
+        return asc ? x.localeCompare(y) : y.localeCompare(x);
+      });
+      rows.forEach(function (r) { table.tBodies[0].appendChild(r); });
+    });
+  });
+})();
+</script></body></html>

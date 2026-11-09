@@ -276,7 +276,7 @@ def dataset_name(task, known: Mapping[int, str] | None = None) -> str:
 
 #: Hugging Face dataset repository holding the suite's containers, in the warehouse layout
 #: ``<dataset>/<container uuid>/`` (as ``TabArena/BeyondArena`` holds BeyondArena's).
-HF_REPO_ID = "SelectArena/SelectArena_Datasets"
+HF_REPO_ID = "ANONYMIZED/SelectArena_Datasets"
 #: Commit of :data:`HF_REPO_ID` the containers are read from (2026-11-05). Pinned so the files behind a
 #: container path cannot change, as ``data_foundry.collections`` pins BeyondArena's; update it whenever
 #: the repository gets new containers. ``None`` reads ``main``.

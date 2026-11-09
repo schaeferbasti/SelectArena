@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <!-- Bumped with every data refresh (shown in the header). -->
+  <meta name="selectarena-version" content="0.9.0">
+  <title>SelectArena Leaderboard</title>
+  <meta name="description" content="Leaderboard of feature selection methods on real-world tabular data.">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <script>
+    // Apply a saved theme before the page paints (no flash of the wrong theme).
+    try {
+      var saTheme = localStorage.getItem('selectarena-theme');
+      if (saTheme === 'light' || saTheme === 'dark') document.documentElement.setAttribute('data-theme', saTheme);
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="brand">
+      <img class="logo" src="assets/logo.svg" alt="" width="120" height="84">
+      <div>
+        <h1><span class="mark">Select</span>Arena</h1>
+        <p class="subtitle">A modern benchmark for feature selection on real-world tabular data</p>
+      </div>
+      <div class="header-actions">
+        <a class="cite-button add-button" href="https://anonymous.4open.science/r/selectarena" target="_blank" rel="noopener" aria-label="Add your method (anonymized code repository)"><span class="label-long">Add your method</span><span class="label-short">Add method</span></a>
+        <button type="button" class="theme-button" id="theme-button" aria-label="Switch to dark mode" title="Switch to dark mode">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <p class="intro">
+    Which feature selection method should I use? SelectArena compares them on predictive performance, stability and validity. It is a living benchmark: your method can be added!
+  </p>
+
+  <div class="tabs" role="tablist" aria-label="Leaderboard sections">
+    <button role="tab" id="tab-leaderboard" aria-controls="panel-leaderboard" aria-selected="true" data-tab="leaderboard">Leaderboard</button>
+    <button role="tab" id="tab-tradeoffs" aria-controls="panel-tradeoffs" aria-selected="false" data-tab="tradeoffs">Performance</button>
+    <button role="tab" id="tab-stability" aria-controls="panel-stability" aria-selected="false" data-tab="stability">Stability</button>
+    <button role="tab" id="tab-validity" aria-controls="panel-validity" aria-selected="false" data-tab="validity">Validity</button>
+  </div>
+
+  <!-- Leaderboard: Elo figure above the table; both combine performance, stability and validity -->
+  <section role="tabpanel" id="panel-leaderboard" aria-labelledby="tab-leaderboard">
+    <h2 class="tab-title">Elo Leaderboard</h2>
+    <div id="lb-no-results" class="notice" hidden>
+      <strong>No results published yet.</strong>
+    </div>
+    <div id="lb-root" hidden>
+      <details class="config">
+        <summary class="config-button"><span class="config-title">Customize</span><span class="config-state"></span></summary>
+        <div class="controls">
+          <div class="control"><span class="control-label" id="lb-label-tasks">Tasks</span>
+            <div class="chips" id="lb-chips-tasks" role="group" aria-labelledby="lb-label-tasks"></div></div>
+          <div class="control"><span class="control-label" id="lb-label-model">Model</span>
+            <div class="chips" id="lb-chips-model" role="group" aria-labelledby="lb-label-model"></div></div>
+          <div class="control"><span class="control-label" id="lb-label-budget">Budget</span>
+            <div class="chips" id="lb-chips-budget" role="group" aria-labelledby="lb-label-budget"></div></div>
+        </div>
+      </details>
+      <p class="summary" id="lb-summary" aria-live="polite"></p>
+      <div id="lb-missing" class="notice" hidden>
+        No leaderboard for this selection: fewer than two methods have results.
+      </div>
+      <div id="lb-content">
+        <div id="lb-figure">
+          <iframe class="frame sa-frame" id="frame-figure" title="Elo rating with stability and validity" style="height:480px"></iframe>
+          <p class="caption">
+            <strong>Elo rating of each feature selection method, from worst to best.</strong> A
+            Bradley-Terry (see <a href="https://arxiv.org/abs/2403.04132" target="_blank" rel="noopener">Chatbot Arena</a>)
+            rating fit on pairwise matches: within each dataset, every combination of budget
+            and downstream model (errors averaged over splits) is a setting in which every pair of methods
+            plays a match, won by the lower downstream error; ties are skipped. Random is anchored at 1000
+            (dashed line), and a gap of 150 points means about 70% win probability. Error bars are 95%
+            intervals from cluster-bootstrap resamples of the datasets. The left bar of each method is
+            shaded by <span class="stab">stability</span> (how little the selected subset changes across
+            bootstrap resamples of the data), the right bar by <span class="val">validity</span> (how well
+            injected noise features are rejected); darker is better for both. For details, see the Stability and
+            Validity tabs.
+          </p>
+        </div>
+        <div id="lb-table">
+        <h2>Leaderboard Table</h2>
+        <iframe class="frame sa-frame" id="frame-table" title="Leaderboard table" style="height:640px"></iframe>
+        <div class="caption">
+          <p>Methods are compared within a <em>comparison group</em>: one dataset split, one downstream
+            model configuration and one feature budget. The selection is shared with the Performance Trade-offs tab.</p>
+          <ul>
+            <li><strong>Type</strong>: the method type following the paper's functional taxonomy (Appendix A)
+            <li><strong>Elo</strong>: rank by Elo, +/− give the 95% interval (Elo rating is explained under the figure above).</li>
+            <li><strong>Improvement over Random</strong>: mean reduction of the downstream error compared with random
+              selection on the same dataset, in % (as in the Pareto figure in the Performance tab; Random is 0).</li>
+            <li><strong>Stability</strong> and <strong>Validity</strong>: means over datasets and budgets,
+              shaded in <span class="stab">blue</span> and <span class="val">orange</span> as the bars of the
+              Elo figure (darker is better); see their tabs.</li>
+            <li><strong>Budgets</strong>: budget <em>i</em> of <em>b</em> keeps <code>ceil(d · i / (b + 1))</code>
+              of a dataset's <code>d</code> features when <code>d ≤ 100</code>, and <code>ceil(d ^ (i / (b + 1)))</code>
+              otherwise.</li>
+            <li><strong>Time</strong>: median wall-clock time of the selection.</li>
+            <li><strong>Fallback</strong>: share of runs in which the method ran out of time and random features filled the budget.</li>
+          </ul>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trade-offs: performance vs. selection time, and the complete results -->
+  <section role="tabpanel" id="panel-tradeoffs" aria-labelledby="tab-tradeoffs" hidden>
+    <h2 class="tab-title">Performance Trade-Offs</h2>
+    <div id="no-results" class="notice" hidden>
+      <strong>No results published yet.</strong> The leaderboard fills in once the first benchmark
+      results are published from the
+      <a href="https://anonymous.4open.science/r/selectarena" target="_blank" rel="noopener">anonymized code repository</a>.
+    </div>
+    <div id="leaderboard-content" hidden>
+      <details class="config">
+        <summary class="config-button"><span class="config-title">Customize</span><span class="config-state"></span></summary>
+        <div class="controls">
+          <div class="control"><span class="control-label" id="label-tasks">Tasks</span>
+            <div class="chips" id="chips-tasks" role="group" aria-labelledby="label-tasks"></div></div>
+          <div class="control"><span class="control-label" id="label-model">Model</span>
+            <div class="chips" id="chips-model" role="group" aria-labelledby="label-model"></div></div>
+          <div class="control"><span class="control-label" id="label-budget">Budget</span>
+            <div class="chips" id="chips-budget" role="group" aria-labelledby="label-budget"></div></div>
+        </div>
+      </details>
+      <p class="summary" id="summary" aria-live="polite"></p>
+      <div id="subset-missing" class="notice" hidden>
+        No leaderboard for this selection: fewer than two methods have results.
+      </div>
+      <div id="subset-content">
+        <div id="pareto-missing" class="notice" hidden>No Pareto front for this selection.</div>
+        <figure class="plot" id="pareto-figure">
+          <iframe class="frame sa-frame fig-frame" id="plot-pareto" title="Pareto front of improvement over Random against feature selection time per 1k features" style="height:470px"></iframe>
+          <figcaption class="caption">
+            <strong>Predictive performance against selection time.</strong> Improvement of the
+            downstream model error over Random (%, higher is better) against the feature selection time per
+            1,000 features (log scale, left is faster), averaged over budgets, downstream models and
+            splits per dataset, then over datasets. Orange methods are on the Pareto front: no other
+            method is both faster and better. LaplacianScore is left out of the
+            figure (far below Random); its values are in the CSV.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div id="analysis-content" hidden>
+        <h2 id="where-methods-win">Where Methods Win</h2>
+        <details class="config">
+          <summary class="config-button"><span class="config-title">Customize</span><span class="config-state"></span></summary>
+          <div class="controls">
+            <div class="control"><span class="control-label" id="label-group">Group by</span>
+              <div class="chips" id="chips-group" role="group" aria-labelledby="label-group"></div></div>
+          </div>
+        </details>
+        <figure class="plot" id="group-figure">
+          <iframe class="frame sa-frame fig-frame" id="plot-group" title="Improvement over Random of each method per group of datasets" style="height:540px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per group of datasets.</strong> Each cell is a method's
+            improvement of the downstream error over Random (%, as in the leaderboard): per dataset,
+            of the errors averaged over budgets, downstream models and splits, then averaged over the
+            datasets of the group. Darker is better, and the best method of each group is outlined.
+            <em>All</em> is the overall improvement, as in the leaderboard.
+            <em>Group by</em> splits the datasets by task type, number of samples, number of features
+            or samples per feature (samples of the smallest class, or all samples for regression, per
+            feature), or the results by downstream model or budget. The figures of this section use
+            all results, whatever is selected above.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="model-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-model" title="Improvement over Random of each method per downstream model" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per downstream model.</strong> For each method, the
+            improvement of the downstream error over Random (%, as in the leaderboard) with each
+            downstream model (markers) and with all of them (black bar). The grey line spans the
+            models, so a short line means the method helps every model about equally. The number
+            below the figure is the mean rank correlation (Spearman) between the method rankings of
+            every pair of downstream models; 1 means all models rank the methods the same. SBE and
+            LOCO, which judge features with a LightGBM model, help the linear model least.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="task-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-task" title="Improvement over Random of each method per task type" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per task type.</strong> As the figure above, for binary
+            classification, multiclass classification and regression (markers) and for all of them
+            (black bar): the improvement of the downstream error over Random (%) of each method on the
+            datasets of each task type. The number below the figure is the mean rank correlation
+            (Spearman) between the method rankings of every pair of task types. The errors differ
+            between task types (ROC AUC, log-loss, RMSE), so compare the methods within a task type
+            rather than the size of the gains across task types.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="domain-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-domain" title="Improvement over Random of each method per application domain" style="height:560px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per domain.</strong> As the figures above, for the
+            application domains of the datasets in the paper (markers; the number of datasets in
+            brackets) and for all of them (black bar). Most datasets are biomedical or financial; the
+            technological, scientific and environmental domains hold only a few datasets (the
+            environmental one a single dataset), so their values vary more. The number below the
+            figure is the mean rank correlation (Spearman) between the method rankings of every pair
+            of domains.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="dfdomain-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-dfdomain" title="Improvement over Random of each method per Data Foundry domain" style="height:600px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per Data Foundry domain.</strong> As the figure above,
+            with the finer domains of the datasets' metadata in Data Foundry (the number of datasets
+            in brackets), which the paper's domains group together: medical &amp; healthcare and
+            biology &amp; life sciences are biomedical; finance, insurance and business &amp;
+            marketing financial; technology &amp; internet and industry &amp; manufacturing
+            technological; physics &amp; astronomy, chemistry &amp; material science and education
+            scientific. Domains with one or two datasets vary most.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="size-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-size" title="Rank correlation of each method with the size of the datasets" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Which methods gain or lose on larger datasets.</strong> Rank correlation
+            (Spearman) between a method's mean rank on a dataset and the dataset's number of samples,
+            number of features and samples per feature; positive values mean the method ranks
+            better on larger values. Lines are 95% bootstrap intervals over the datasets. Filled
+            dots mark a clear trend (the interval excludes 0): blue, better with more; orange, worse
+            with more.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="time-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-time" title="Feature selection time against the number of features" style="height:460px"></iframe>
+          <figcaption class="caption">
+            <strong>Selection time against the number of features.</strong> Median feature selection
+            time of each method for groups of datasets with a similar number of features (about as
+            many datasets per group; both axes on a log scale). The dashed line is the time limit of
+            the selection. Search methods (orange) fit a model for every feature subset they try and
+            reach the limit on datasets with more than about a hundred features, where their search
+            stops before it is complete.
+          </figcaption>
+        </figure>
+      </div>
+
+      <h2 id="results">Complete Results</h2>
+      <iframe class="frame sa-frame" id="frame-results" loading="lazy" title="Complete results" style="height:900px"></iframe>
+      <p class="caption">The results behind the leaderboard, for all task types, downstream models and budgets:
+        one row per dataset, feature selection method, downstream model and budget, averaged over the
+        splits (<em>All features</em> is the downstream model without feature selection). Filter, sort and
+        download the rows you need, or get all of them as <a href="data/results.csv" download>results.csv</a>.</p>
+    </div>
+  </section>
+
+  <!-- Stability -->
+  <section role="tabpanel" id="panel-stability" aria-labelledby="tab-stability" hidden>
+    <h2 class="tab-title">Stability</h2>
+    <div id="stability-missing" class="notice" hidden>No stability results published yet.</div>
+    <div id="stability-content">
+      <details class="config">
+        <summary class="config-button"><span class="config-title">Customize</span><span class="config-state"></span></summary>
+        <div class="controls">
+          <div class="control"><span class="control-label" id="label-stab-tasks">Tasks</span>
+            <div class="chips" id="chips-stab-tasks" role="group" aria-labelledby="label-stab-tasks"></div></div>
+          <div class="control"><span class="control-label" id="label-stab-variant">View</span>
+            <div class="chips" id="chips-stab-variant" role="group" aria-labelledby="label-stab-variant"></div></div>
+        </div>
+      </details>
+      <figure class="plot">
+        <iframe class="frame sa-frame fig-frame" id="plot-stability" title="Lasagna plot of stability per method and events per variable" style="height:440px"></iframe>
+        <figcaption class="caption">
+          <strong>Stability per method and events per variable.</strong> Stability is whether a method selects similar features for similar data,
+          measured with the Nogueira metric (<a href="https://doi.org/10.1007/978-3-319-46227-1_28" target="_blank" rel="noopener">Nogueira &amp; Brown, 2016</a>)
+          across bootstrap resamples.
+          Each column is a dataset,
+          placed by its events per variable (EPV: samples of the smallest class, or all samples for
+          regression, per feature; datasets with few samples per feature are on the right). A cell is
+          the method's mean stability over the budgets; methods are sorted by their mean, most stable
+          on top. <em>Top-3 outlined</em> marks the three most stable methods per EPV; <em>Within 0.03
+          of the best</em> shows only the methods at most 0.03 below the best one.
+        </figcaption>
+      </figure>
+      <h2>Mean stability per method and budget</h2>
+      <iframe class="frame sa-frame" id="frame-stability" title="Stability per method" style="height:640px"></iframe>
+      <div id="stab-analysis" hidden>
+        <h2>Stability by Domain and Dataset Size</h2>
+        <figure class="plot domain-measure" id="stab-domain-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-stab-domain" title="Stability of each method per domain" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Stability per domain.</strong> Each method's mean stability (per dataset, over the
+            budgets, then over the datasets of the domain) for the application domains of the
+            datasets in the paper (markers; the number of datasets in brackets) and for all datasets
+            (black bar). The grey line spans the domains. The number below the figure is the mean rank
+            correlation (Spearman) between the method rankings of every pair of domains. All task types, whatever is selected above.
+          </figcaption>
+        </figure>
+        <figure class="plot size-measure" id="stab-size-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-stab-size" title="Rank correlation of each method's stability with the size of the datasets" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Which methods become more or less stable on larger datasets.</strong> Rank
+            correlation (Spearman) between a method's stability on a dataset and the dataset's number of
+            samples, number of features and samples per feature; positive values mean a higher
+            stability on larger values. Lines are 95% bootstrap intervals over the datasets; filled
+            dots mark a clear trend (the interval excludes 0). All task types, whatever is selected above.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- Validity -->
+  <section role="tabpanel" id="panel-validity" aria-labelledby="tab-validity" hidden>
+    <h2 class="tab-title">Validity</h2>
+    <div id="validity-missing" class="notice" hidden>No validity results published yet.</div>
+    <div id="validity-content">
+      <details class="config">
+        <summary class="config-button"><span class="config-title">Customize</span><span class="config-state"></span></summary>
+        <div class="controls">
+          <div class="control"><span class="control-label" id="label-val-noise">Noise</span>
+            <div class="chips" id="chips-val-noise" role="group" aria-labelledby="label-val-noise"></div></div>
+          <div class="control"><span class="control-label" id="label-val-tasks">Tasks</span>
+            <div class="chips" id="chips-val-tasks" role="group" aria-labelledby="label-val-tasks"></div></div>
+          <div class="control"><span class="control-label" id="label-val-variant">View</span>
+            <div class="chips" id="chips-val-variant" role="group" aria-labelledby="label-val-variant"></div></div>
+        </div>
+      </details>
+      <figure class="plot">
+        <iframe class="frame sa-frame fig-frame" id="plot-validity" title="Lasagna plot of validity per method and events per variable" style="height:440px"></iframe>
+        <figcaption class="caption">
+          <strong>Validity per method and events per variable.</strong> Validity is the share of original features that are selected after uninformative Gaussian noise
+          features are added, as in prior work
+          (<a href="https://arxiv.org/abs/2311.05877" target="_blank" rel="noopener">Cherepanova et al., 2023</a>;
+          <a href="https://doi.org/10.1016/j.patrec.2007.02.014" target="_blank" rel="noopener">Guyon et al., 2007</a>). The noise level is the share of noise
+          features in relation to the number of original features.
+          Each column is a dataset,
+          placed by its events per variable (EPV: samples of the smallest class, or all samples for
+          regression, per original feature). A cell is the method's mean validity over the budgets;
+          methods are sorted by their mean, most valid on top. <em>Top-3 outlined</em> marks the three
+          best methods per EPV; <em>Within 0.03 of the best</em> shows only the methods at most 0.03
+          below the best one.
+        </figcaption>
+      </figure>
+      <h2>Mean validity per method and budget</h2>
+      <iframe class="frame sa-frame" id="frame-validity" title="Validity per method" style="height:640px"></iframe>
+      <div id="val-analysis" hidden>
+        <h2>Validity by Domain and Dataset Size</h2>
+        <figure class="plot domain-measure" id="val-domain-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-val-domain" title="Validity of each method per domain" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Validity per domain.</strong> Each method's mean validity (per dataset, over the
+            budgets, then over the datasets of the domain) for the application domains of the
+            datasets in the paper (markers; the number of datasets in brackets) and for all datasets
+            (black bar). The grey line spans the domains. The number below the figure is the mean rank
+            correlation (Spearman) between the method rankings of every pair of domains. For the noise level selected above, all task types.
+          </figcaption>
+        </figure>
+        <figure class="plot size-measure" id="val-size-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-val-size" title="Rank correlation of each method's validity with the size of the datasets" style="height:520px"></iframe>
+          <figcaption class="caption">
+            <strong>Which methods become more or less valid on larger datasets.</strong> Rank
+            correlation (Spearman) between a method's validity on a dataset and the dataset's number of
+            samples, number of features and samples per feature; positive values mean a higher
+            validity on larger values. Lines are 95% bootstrap intervals over the datasets; filled
+            dots mark a clear trend (the interval excludes 0). For the noise level selected above, all task types.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="note">Anonymized version of the SelectArena leaderboard for double-blind review.</p>
+  </footer>
+</div>
+<script>window.SA_META = {"benchmark_name":"feature_selection_benchmark_2026_all","generated_at":"2026-11-08 10:26 UTC","selectarena_version":"0.1.0","n_results":79873,"n_datasets":71,"n_methods":15,"methods":["(R)ReliefF","CART","ElasticNet","F-Test","GainRatio","LOCO","LaplacianScore","Lasso","MI","MarkovBlanket","RFImportance","Random","SBE","SFS","mRMR"],"models":{"lightgbm":"LightGBM","linearmodel":"LinearModel","randomforest":"RandomForest","realmlp":"RealMLP","tabiclv2":"TabICLv2"},"budgets":[0,1,2,3,4],"total_budget":5,"task_types":["all","binary","classification","multiclass","regression"],"elo_bootstrap_rounds":1000,"validity_noise":1.0,"has_stability":true,"has_validity":true,"validity_tables":[{"noise":0.5,"path":"validity_noise_0.5_table.html"},{"noise":0.75,"path":"validity_noise_0.75_table.html"},{"noise":1.0,"path":"validity_noise_1_table.html"}],"lasagna":{"variants":["plain","overlay_top_3","binary_thr_003"],"variant_labels":{"plain":"Heat map","overlay_top_3":"Top-3 outlined","overlay_thr_003":"Within 0.03 of the best outlined","binary_top_3":"Top-3 only","binary_thr_003":"Within 0.03 of the best"},"stability":{"path":"lasagna/stability","task_types":["all","classification","binary","multiclass","regression"]},"validity":[{"noise":0.5,"path":"lasagna/validity/noise_0.5","task_types":["all","classification","binary","multiclass","regression"]},{"noise":0.75,"path":"lasagna/validity/noise_0.75","task_types":["all","classification","binary","multiclass","regression"]},{"noise":1.0,"path":"lasagna/validity/noise_1","task_types":["all","classification","binary","multiclass","regression"]}]},"analysis":{"path":"analysis","groupings":[{"key":"task_type","label":"Task type"},{"key":"samples","label":"Samples"},{"key":"features","label":"Features"},{"key":"epv","label":"Samples per feature"},{"key":"model","label":"Downstream model"},{"key":"budget","label":"Budget"}],"improvement_by_model":true,"improvement_by_task_type":true,"improvement_by_domain":true,"improvement_by_data_foundry_domain":true,"rank_by_size":true,"selection_time":true,"stability":{"path":"analysis/stability","by_domain":true,"by_size":true},"validity":[{"noise":0.5,"path":"analysis/validity/noise_0.5","by_domain":true,"by_size":true},{"noise":0.75,"path":"analysis/validity/noise_0.75","by_domain":true,"by_size":true},{"noise":1.0,"path":"analysis/validity/noise_1","by_domain":true,"by_size":true}]},"has_results_explorer":true,"subsets":[{"tasks":"all","model":"all","budget":"all","path":"subsets/tasks_all/models_all/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":79873,"pareto":true,"per_model":true},{"tasks":"all","model":"all","budget":"0","path":"subsets/tasks_all/models_all/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true,"per_model":true},{"tasks":"all","model":"all","budget":"1","path":"subsets/tasks_all/models_all/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true,"per_model":true},{"tasks":"all","model":"all","budget":"2","path":"subsets/tasks_all/models_all/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true,"per_model":true},{"tasks":"all","model":"all","budget":"3","path":"subsets/tasks_all/models_all/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true,"per_model":true},{"tasks":"all","model":"all","budget":"4","path":"subsets/tasks_all/models_all/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":15973,"pareto":true,"per_model":true},{"tasks":"all","model":"lightgbm","budget":"all","path":"subsets/tasks_all/models_lightgbm/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true},{"tasks":"all","model":"lightgbm","budget":"0","path":"subsets/tasks_all/models_lightgbm/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"lightgbm","budget":"1","path":"subsets/tasks_all/models_lightgbm/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"lightgbm","budget":"2","path":"subsets/tasks_all/models_lightgbm/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"lightgbm","budget":"3","path":"subsets/tasks_all/models_lightgbm/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"lightgbm","budget":"4","path":"subsets/tasks_all/models_lightgbm/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"all","path":"subsets/tasks_all/models_linearmodel/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"0","path":"subsets/tasks_all/models_linearmodel/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"1","path":"subsets/tasks_all/models_linearmodel/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"2","path":"subsets/tasks_all/models_linearmodel/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"3","path":"subsets/tasks_all/models_linearmodel/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"linearmodel","budget":"4","path":"subsets/tasks_all/models_linearmodel/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"randomforest","budget":"all","path":"subsets/tasks_all/models_randomforest/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true},{"tasks":"all","model":"randomforest","budget":"0","path":"subsets/tasks_all/models_randomforest/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"randomforest","budget":"1","path":"subsets/tasks_all/models_randomforest/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"randomforest","budget":"2","path":"subsets/tasks_all/models_randomforest/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"randomforest","budget":"3","path":"subsets/tasks_all/models_randomforest/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"randomforest","budget":"4","path":"subsets/tasks_all/models_randomforest/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"realmlp","budget":"all","path":"subsets/tasks_all/models_realmlp/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":15975,"pareto":true},{"tasks":"all","model":"realmlp","budget":"0","path":"subsets/tasks_all/models_realmlp/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"realmlp","budget":"1","path":"subsets/tasks_all/models_realmlp/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"realmlp","budget":"2","path":"subsets/tasks_all/models_realmlp/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"realmlp","budget":"3","path":"subsets/tasks_all/models_realmlp/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"realmlp","budget":"4","path":"subsets/tasks_all/models_realmlp/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"all","path":"subsets/tasks_all/models_tabiclv2/budgets_all","n_datasets":71,"n_methods":15,"n_comparisons":15973,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"0","path":"subsets/tasks_all/models_tabiclv2/budgets_0","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"1","path":"subsets/tasks_all/models_tabiclv2/budgets_1","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"2","path":"subsets/tasks_all/models_tabiclv2/budgets_2","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"3","path":"subsets/tasks_all/models_tabiclv2/budgets_3","n_datasets":71,"n_methods":15,"n_comparisons":3195,"pareto":true},{"tasks":"all","model":"tabiclv2","budget":"4","path":"subsets/tasks_all/models_tabiclv2/budgets_4","n_datasets":71,"n_methods":15,"n_comparisons":3193,"pareto":true},{"tasks":"classification","model":"all","budget":"all","path":"subsets/tasks_classification/models_all/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":68623,"pareto":true,"per_model":true},{"tasks":"classification","model":"all","budget":"0","path":"subsets/tasks_classification/models_all/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true,"per_model":true},{"tasks":"classification","model":"all","budget":"1","path":"subsets/tasks_classification/models_all/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true,"per_model":true},{"tasks":"classification","model":"all","budget":"2","path":"subsets/tasks_classification/models_all/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true,"per_model":true},{"tasks":"classification","model":"all","budget":"3","path":"subsets/tasks_classification/models_all/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true,"per_model":true},{"tasks":"classification","model":"all","budget":"4","path":"subsets/tasks_classification/models_all/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":13723,"pareto":true,"per_model":true},{"tasks":"classification","model":"lightgbm","budget":"all","path":"subsets/tasks_classification/models_lightgbm/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true},{"tasks":"classification","model":"lightgbm","budget":"0","path":"subsets/tasks_classification/models_lightgbm/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"lightgbm","budget":"1","path":"subsets/tasks_classification/models_lightgbm/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"lightgbm","budget":"2","path":"subsets/tasks_classification/models_lightgbm/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"lightgbm","budget":"3","path":"subsets/tasks_classification/models_lightgbm/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"lightgbm","budget":"4","path":"subsets/tasks_classification/models_lightgbm/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"all","path":"subsets/tasks_classification/models_linearmodel/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"0","path":"subsets/tasks_classification/models_linearmodel/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"1","path":"subsets/tasks_classification/models_linearmodel/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"2","path":"subsets/tasks_classification/models_linearmodel/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"3","path":"subsets/tasks_classification/models_linearmodel/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"linearmodel","budget":"4","path":"subsets/tasks_classification/models_linearmodel/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"all","path":"subsets/tasks_classification/models_randomforest/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"0","path":"subsets/tasks_classification/models_randomforest/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"1","path":"subsets/tasks_classification/models_randomforest/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"2","path":"subsets/tasks_classification/models_randomforest/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"3","path":"subsets/tasks_classification/models_randomforest/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"randomforest","budget":"4","path":"subsets/tasks_classification/models_randomforest/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"all","path":"subsets/tasks_classification/models_realmlp/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":13725,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"0","path":"subsets/tasks_classification/models_realmlp/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"1","path":"subsets/tasks_classification/models_realmlp/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"2","path":"subsets/tasks_classification/models_realmlp/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"3","path":"subsets/tasks_classification/models_realmlp/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"realmlp","budget":"4","path":"subsets/tasks_classification/models_realmlp/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"all","path":"subsets/tasks_classification/models_tabiclv2/budgets_all","n_datasets":61,"n_methods":15,"n_comparisons":13723,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"0","path":"subsets/tasks_classification/models_tabiclv2/budgets_0","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"1","path":"subsets/tasks_classification/models_tabiclv2/budgets_1","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"2","path":"subsets/tasks_classification/models_tabiclv2/budgets_2","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"3","path":"subsets/tasks_classification/models_tabiclv2/budgets_3","n_datasets":61,"n_methods":15,"n_comparisons":2745,"pareto":true},{"tasks":"classification","model":"tabiclv2","budget":"4","path":"subsets/tasks_classification/models_tabiclv2/budgets_4","n_datasets":61,"n_methods":15,"n_comparisons":2743,"pareto":true},{"tasks":"binary","model":"all","budget":"all","path":"subsets/tasks_binary/models_all/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":55123,"pareto":true,"per_model":true},{"tasks":"binary","model":"all","budget":"0","path":"subsets/tasks_binary/models_all/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true,"per_model":true},{"tasks":"binary","model":"all","budget":"1","path":"subsets/tasks_binary/models_all/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true,"per_model":true},{"tasks":"binary","model":"all","budget":"2","path":"subsets/tasks_binary/models_all/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true,"per_model":true},{"tasks":"binary","model":"all","budget":"3","path":"subsets/tasks_binary/models_all/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true,"per_model":true},{"tasks":"binary","model":"all","budget":"4","path":"subsets/tasks_binary/models_all/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":11023,"pareto":true,"per_model":true},{"tasks":"binary","model":"lightgbm","budget":"all","path":"subsets/tasks_binary/models_lightgbm/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true},{"tasks":"binary","model":"lightgbm","budget":"0","path":"subsets/tasks_binary/models_lightgbm/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"lightgbm","budget":"1","path":"subsets/tasks_binary/models_lightgbm/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"lightgbm","budget":"2","path":"subsets/tasks_binary/models_lightgbm/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"lightgbm","budget":"3","path":"subsets/tasks_binary/models_lightgbm/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"lightgbm","budget":"4","path":"subsets/tasks_binary/models_lightgbm/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"all","path":"subsets/tasks_binary/models_linearmodel/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"0","path":"subsets/tasks_binary/models_linearmodel/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"1","path":"subsets/tasks_binary/models_linearmodel/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"2","path":"subsets/tasks_binary/models_linearmodel/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"3","path":"subsets/tasks_binary/models_linearmodel/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"linearmodel","budget":"4","path":"subsets/tasks_binary/models_linearmodel/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"all","path":"subsets/tasks_binary/models_randomforest/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"0","path":"subsets/tasks_binary/models_randomforest/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"1","path":"subsets/tasks_binary/models_randomforest/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"2","path":"subsets/tasks_binary/models_randomforest/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"3","path":"subsets/tasks_binary/models_randomforest/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"randomforest","budget":"4","path":"subsets/tasks_binary/models_randomforest/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"all","path":"subsets/tasks_binary/models_realmlp/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":11025,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"0","path":"subsets/tasks_binary/models_realmlp/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"1","path":"subsets/tasks_binary/models_realmlp/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"2","path":"subsets/tasks_binary/models_realmlp/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"3","path":"subsets/tasks_binary/models_realmlp/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"realmlp","budget":"4","path":"subsets/tasks_binary/models_realmlp/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"all","path":"subsets/tasks_binary/models_tabiclv2/budgets_all","n_datasets":49,"n_methods":15,"n_comparisons":11023,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"0","path":"subsets/tasks_binary/models_tabiclv2/budgets_0","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"1","path":"subsets/tasks_binary/models_tabiclv2/budgets_1","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"2","path":"subsets/tasks_binary/models_tabiclv2/budgets_2","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"3","path":"subsets/tasks_binary/models_tabiclv2/budgets_3","n_datasets":49,"n_methods":15,"n_comparisons":2205,"pareto":true},{"tasks":"binary","model":"tabiclv2","budget":"4","path":"subsets/tasks_binary/models_tabiclv2/budgets_4","n_datasets":49,"n_methods":15,"n_comparisons":2203,"pareto":true},{"tasks":"multiclass","model":"all","budget":"all","path":"subsets/tasks_multiclass/models_all/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":13500,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"all","budget":"0","path":"subsets/tasks_multiclass/models_all/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"all","budget":"1","path":"subsets/tasks_multiclass/models_all/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"all","budget":"2","path":"subsets/tasks_multiclass/models_all/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"all","budget":"3","path":"subsets/tasks_multiclass/models_all/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"all","budget":"4","path":"subsets/tasks_multiclass/models_all/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true,"per_model":true},{"tasks":"multiclass","model":"lightgbm","budget":"all","path":"subsets/tasks_multiclass/models_lightgbm/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true},{"tasks":"multiclass","model":"lightgbm","budget":"0","path":"subsets/tasks_multiclass/models_lightgbm/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"lightgbm","budget":"1","path":"subsets/tasks_multiclass/models_lightgbm/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"lightgbm","budget":"2","path":"subsets/tasks_multiclass/models_lightgbm/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"lightgbm","budget":"3","path":"subsets/tasks_multiclass/models_lightgbm/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"lightgbm","budget":"4","path":"subsets/tasks_multiclass/models_lightgbm/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"all","path":"subsets/tasks_multiclass/models_linearmodel/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"0","path":"subsets/tasks_multiclass/models_linearmodel/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"1","path":"subsets/tasks_multiclass/models_linearmodel/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"2","path":"subsets/tasks_multiclass/models_linearmodel/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"3","path":"subsets/tasks_multiclass/models_linearmodel/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"linearmodel","budget":"4","path":"subsets/tasks_multiclass/models_linearmodel/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"all","path":"subsets/tasks_multiclass/models_randomforest/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"0","path":"subsets/tasks_multiclass/models_randomforest/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"1","path":"subsets/tasks_multiclass/models_randomforest/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"2","path":"subsets/tasks_multiclass/models_randomforest/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"3","path":"subsets/tasks_multiclass/models_randomforest/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"randomforest","budget":"4","path":"subsets/tasks_multiclass/models_randomforest/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"all","path":"subsets/tasks_multiclass/models_realmlp/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"0","path":"subsets/tasks_multiclass/models_realmlp/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"1","path":"subsets/tasks_multiclass/models_realmlp/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"2","path":"subsets/tasks_multiclass/models_realmlp/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"3","path":"subsets/tasks_multiclass/models_realmlp/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"realmlp","budget":"4","path":"subsets/tasks_multiclass/models_realmlp/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"all","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_all","n_datasets":12,"n_methods":15,"n_comparisons":2700,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"0","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_0","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"1","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_1","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"2","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_2","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"3","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_3","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"multiclass","model":"tabiclv2","budget":"4","path":"subsets/tasks_multiclass/models_tabiclv2/budgets_4","n_datasets":12,"n_methods":15,"n_comparisons":540,"pareto":true},{"tasks":"regression","model":"all","budget":"all","path":"subsets/tasks_regression/models_all/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":11250,"pareto":true,"per_model":true},{"tasks":"regression","model":"all","budget":"0","path":"subsets/tasks_regression/models_all/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true,"per_model":true},{"tasks":"regression","model":"all","budget":"1","path":"subsets/tasks_regression/models_all/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true,"per_model":true},{"tasks":"regression","model":"all","budget":"2","path":"subsets/tasks_regression/models_all/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true,"per_model":true},{"tasks":"regression","model":"all","budget":"3","path":"subsets/tasks_regression/models_all/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true,"per_model":true},{"tasks":"regression","model":"all","budget":"4","path":"subsets/tasks_regression/models_all/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true,"per_model":true},{"tasks":"regression","model":"lightgbm","budget":"all","path":"subsets/tasks_regression/models_lightgbm/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true},{"tasks":"regression","model":"lightgbm","budget":"0","path":"subsets/tasks_regression/models_lightgbm/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"lightgbm","budget":"1","path":"subsets/tasks_regression/models_lightgbm/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"lightgbm","budget":"2","path":"subsets/tasks_regression/models_lightgbm/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"lightgbm","budget":"3","path":"subsets/tasks_regression/models_lightgbm/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"lightgbm","budget":"4","path":"subsets/tasks_regression/models_lightgbm/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"all","path":"subsets/tasks_regression/models_linearmodel/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"0","path":"subsets/tasks_regression/models_linearmodel/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"1","path":"subsets/tasks_regression/models_linearmodel/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"2","path":"subsets/tasks_regression/models_linearmodel/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"3","path":"subsets/tasks_regression/models_linearmodel/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"linearmodel","budget":"4","path":"subsets/tasks_regression/models_linearmodel/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"all","path":"subsets/tasks_regression/models_randomforest/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"0","path":"subsets/tasks_regression/models_randomforest/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"1","path":"subsets/tasks_regression/models_randomforest/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"2","path":"subsets/tasks_regression/models_randomforest/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"3","path":"subsets/tasks_regression/models_randomforest/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"randomforest","budget":"4","path":"subsets/tasks_regression/models_randomforest/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"all","path":"subsets/tasks_regression/models_realmlp/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"0","path":"subsets/tasks_regression/models_realmlp/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"1","path":"subsets/tasks_regression/models_realmlp/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"2","path":"subsets/tasks_regression/models_realmlp/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"3","path":"subsets/tasks_regression/models_realmlp/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"realmlp","budget":"4","path":"subsets/tasks_regression/models_realmlp/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"all","path":"subsets/tasks_regression/models_tabiclv2/budgets_all","n_datasets":10,"n_methods":15,"n_comparisons":2250,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"0","path":"subsets/tasks_regression/models_tabiclv2/budgets_0","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"1","path":"subsets/tasks_regression/models_tabiclv2/budgets_1","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"2","path":"subsets/tasks_regression/models_tabiclv2/budgets_2","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"3","path":"subsets/tasks_regression/models_tabiclv2/budgets_3","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true},{"tasks":"regression","model":"tabiclv2","budget":"4","path":"subsets/tasks_regression/models_tabiclv2/budgets_4","n_datasets":10,"n_methods":15,"n_comparisons":450,"pareto":true}]};</script>
+<script src="assets/app.js"></script>
+</body>
+</html>

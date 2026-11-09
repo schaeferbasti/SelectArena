@@ -1,0 +1,181 @@
+data_foundry_domain,method,improvement
+All,(R)ReliefF,18.5678
+All,CART,23.781
+All,ElasticNet,21.875
+All,F-Test,22.7574
+All,GainRatio,19.528
+All,LOCO,12.9833
+All,LaplacianScore,-18.5819
+All,Lasso,20.9045
+All,MI,23.7998
+All,MarkovBlanket,21.2405
+All,RFImportance,26.2289
+All,Random,0.0
+All,SBE,11.3964
+All,SFS,18.1824
+All,mRMR,21.6681
+Medical & healthcare (22),(R)ReliefF,31.9043
+Medical & healthcare (22),CART,25.8568
+Medical & healthcare (22),ElasticNet,28.2928
+Medical & healthcare (22),F-Test,30.0974
+Medical & healthcare (22),GainRatio,30.1367
+Medical & healthcare (22),LOCO,7.3046
+Medical & healthcare (22),LaplacianScore,-27.2228
+Medical & healthcare (22),Lasso,26.5677
+Medical & healthcare (22),MI,31.0924
+Medical & healthcare (22),MarkovBlanket,27.0531
+Medical & healthcare (22),RFImportance,32.6537
+Medical & healthcare (22),Random,0.0
+Medical & healthcare (22),SBE,8.5597
+Medical & healthcare (22),SFS,13.1871
+Medical & healthcare (22),mRMR,29.6576
+Business & marketing (12),(R)ReliefF,18.0356
+Business & marketing (12),CART,25.1127
+Business & marketing (12),ElasticNet,19.4637
+Business & marketing (12),F-Test,23.0232
+Business & marketing (12),GainRatio,23.3221
+Business & marketing (12),LOCO,23.5186
+Business & marketing (12),LaplacianScore,2.252
+Business & marketing (12),Lasso,18.2041
+Business & marketing (12),MI,24.5247
+Business & marketing (12),MarkovBlanket,27.1484
+Business & marketing (12),RFImportance,25.4354
+Business & marketing (12),Random,0.0
+Business & marketing (12),SBE,21.5358
+Business & marketing (12),SFS,25.7832
+Business & marketing (12),mRMR,24.4287
+Finance (11),(R)ReliefF,6.6067
+Finance (11),CART,18.1714
+Finance (11),ElasticNet,15.1203
+Finance (11),F-Test,15.8782
+Finance (11),GainRatio,13.4834
+Finance (11),LOCO,14.0608
+Finance (11),LaplacianScore,-8.7386
+Finance (11),Lasso,15.5975
+Finance (11),MI,13.7705
+Finance (11),MarkovBlanket,15.7038
+Finance (11),RFImportance,17.7651
+Finance (11),Random,0.0
+Finance (11),SBE,13.404
+Finance (11),SFS,14.6661
+Finance (11),mRMR,17.0798
+Biology & life sciences (10),(R)ReliefF,8.1436
+Biology & life sciences (10),CART,18.0638
+Biology & life sciences (10),ElasticNet,12.644
+Biology & life sciences (10),F-Test,12.7079
+Biology & life sciences (10),GainRatio,8.7953
+Biology & life sciences (10),LOCO,5.4547
+Biology & life sciences (10),LaplacianScore,-9.9371
+Biology & life sciences (10),Lasso,11.8119
+Biology & life sciences (10),MI,15.8052
+Biology & life sciences (10),MarkovBlanket,14.0869
+Biology & life sciences (10),RFImportance,17.6426
+Biology & life sciences (10),Random,0.0
+Biology & life sciences (10),SBE,6.9796
+Biology & life sciences (10),SFS,14.8395
+Biology & life sciences (10),mRMR,11.2198
+Chemistry & material science (3),(R)ReliefF,7.0083
+Chemistry & material science (3),CART,7.1389
+Chemistry & material science (3),ElasticNet,9.7037
+Chemistry & material science (3),F-Test,3.7412
+Chemistry & material science (3),GainRatio,-1.4391
+Chemistry & material science (3),LOCO,-0.5076
+Chemistry & material science (3),LaplacianScore,-3.3349
+Chemistry & material science (3),Lasso,8.0651
+Chemistry & material science (3),MI,4.9483
+Chemistry & material science (3),MarkovBlanket,-0.1831
+Chemistry & material science (3),RFImportance,10.7355
+Chemistry & material science (3),Random,0.0
+Chemistry & material science (3),SBE,0.1682
+Chemistry & material science (3),SFS,6.6171
+Chemistry & material science (3),mRMR,-1.8286
+Industry & manufacturing (3),(R)ReliefF,-10.2412
+Industry & manufacturing (3),CART,37.7285
+Industry & manufacturing (3),ElasticNet,25.7397
+Industry & manufacturing (3),F-Test,28.5932
+Industry & manufacturing (3),GainRatio,11.082
+Industry & manufacturing (3),LOCO,13.8128
+Industry & manufacturing (3),LaplacianScore,-55.2558
+Industry & manufacturing (3),Lasso,32.5978
+Industry & manufacturing (3),MI,37.3646
+Industry & manufacturing (3),MarkovBlanket,36.5431
+Industry & manufacturing (3),RFImportance,43.2883
+Industry & manufacturing (3),Random,0.0
+Industry & manufacturing (3),SBE,7.1541
+Industry & manufacturing (3),SFS,31.817
+Industry & manufacturing (3),mRMR,28.5662
+Insurance (3),(R)ReliefF,25.01
+Insurance (3),CART,30.0869
+Insurance (3),ElasticNet,27.5827
+Insurance (3),F-Test,24.8205
+Insurance (3),GainRatio,17.2954
+Insurance (3),LOCO,18.842
+Insurance (3),LaplacianScore,-22.0467
+Insurance (3),Lasso,26.876
+Insurance (3),MI,26.2254
+Insurance (3),MarkovBlanket,24.5137
+Insurance (3),RFImportance,28.9374
+Insurance (3),Random,0.0
+Insurance (3),SBE,-0.7552
+Insurance (3),SFS,18.9729
+Insurance (3),mRMR,23.7544
+Physics & astronomy (3),(R)ReliefF,22.4405
+Physics & astronomy (3),CART,28.3532
+Physics & astronomy (3),ElasticNet,27.497
+Physics & astronomy (3),F-Test,25.1646
+Physics & astronomy (3),GainRatio,26.9611
+Physics & astronomy (3),LOCO,24.9792
+Physics & astronomy (3),LaplacianScore,-13.8778
+Physics & astronomy (3),Lasso,23.4268
+Physics & astronomy (3),MI,23.3263
+Physics & astronomy (3),MarkovBlanket,29.1098
+Physics & astronomy (3),RFImportance,29.4755
+Physics & astronomy (3),Random,0.0
+Physics & astronomy (3),SBE,25.7321
+Physics & astronomy (3),SFS,28.4175
+Physics & astronomy (3),mRMR,25.9073
+Technology & internet (2),(R)ReliefF,51.8478
+Technology & internet (2),CART,58.9685
+Technology & internet (2),ElasticNet,61.6072
+Technology & internet (2),F-Test,60.6619
+Technology & internet (2),GainRatio,20.3774
+Technology & internet (2),LOCO,44.9771
+Technology & internet (2),LaplacianScore,-124.6934
+Technology & internet (2),Lasso,54.7249
+Technology & internet (2),MI,58.3668
+Technology & internet (2),MarkovBlanket,-1.4687
+Technology & internet (2),RFImportance,60.8611
+Technology & internet (2),Random,0.0
+Technology & internet (2),SBE,22.6505
+Technology & internet (2),SFS,59.9819
+Technology & internet (2),mRMR,31.2914
+Education (1),(R)ReliefF,9.79
+Education (1),CART,9.8919
+Education (1),ElasticNet,9.852
+Education (1),F-Test,8.4121
+Education (1),GainRatio,5.0697
+Education (1),LOCO,8.5689
+Education (1),LaplacianScore,-19.1736
+Education (1),Lasso,9.5224
+Education (1),MI,9.7106
+Education (1),MarkovBlanket,6.5617
+Education (1),RFImportance,7.879
+Education (1),Random,0.0
+Education (1),SBE,2.8343
+Education (1),SFS,4.1719
+Education (1),mRMR,1.115
+Environmental science & climate (1),(R)ReliefF,-0.257
+Environmental science & climate (1),CART,-0.027
+Environmental science & climate (1),ElasticNet,-0.2779
+Environmental science & climate (1),F-Test,-1.0779
+Environmental science & climate (1),GainRatio,-0.1798
+Environmental science & climate (1),LOCO,-0.2317
+Environmental science & climate (1),LaplacianScore,0.1608
+Environmental science & climate (1),Lasso,-0.2779
+Environmental science & climate (1),MI,-0.1063
+Environmental science & climate (1),MarkovBlanket,-0.0625
+Environmental science & climate (1),RFImportance,-0.1107
+Environmental science & climate (1),Random,0.0
+Environmental science & climate (1),SBE,0.1318
+Environmental science & climate (1),SFS,0.1033
+Environmental science & climate (1),mRMR,-0.1507

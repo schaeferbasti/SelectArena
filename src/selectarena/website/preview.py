@@ -14,7 +14,7 @@ import shutil
 from collections.abc import Callable
 from pathlib import Path
 
-SPACE_REPO_ID = "SelectArena/Leaderboard"
+SPACE_REPO_ID = "ANONYMIZED/Leaderboard"
 #: The Space's page files (everything but its data/ folder).
 SITE_PATTERNS = ["index.html", "assets/*"]
 

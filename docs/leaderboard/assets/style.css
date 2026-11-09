@@ -1,0 +1,257 @@
+/* SelectArena leaderboard. Colors are tokens so light and dark mode stay in sync with the
+   generated pages in data/ (they use the same palette). */
+:root {
+  --fg: #1f2328;
+  --muted: #59636e;
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --line: #d1d9e0;
+  --accent: #0072b2;
+  --accent-soft: #e6f1f8;
+  --validity: #d55e00;
+  --on-accent: #ffffff;
+  --radius: 10px;
+}
+/* Dark mode: follows the system unless the theme button chose one (data-theme on <html>). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --fg: #e6edf3;
+    --muted: #9198a1;
+    --bg: #0d1117;
+    --surface: #151b23;
+    --line: #3d444d;
+    --accent: #4aa3df;
+    --accent-soft: #10273a;
+    --validity: #f08a4b;
+    --on-accent: #0d1117;
+  }
+}
+:root[data-theme="dark"] {
+  --fg: #e6edf3;
+  --muted: #9198a1;
+  --bg: #0d1117;
+  --surface: #151b23;
+  --line: #3d444d;
+  --accent: #4aa3df;
+  --accent-soft: #10273a;
+  --validity: #f08a4b;
+  --on-accent: #0d1117;
+}
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+a { color: var(--accent); }
+.page { max-width: 1200px; margin: 0 auto; padding: 16px 16px 48px; }
+
+/* Header */
+.brand { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.brand .logo { width: 64px; height: auto; flex: none; }
+.brand > div { min-width: 0; flex: 1; }
+.brand .subtitle { margin: 2px 0 0; overflow-wrap: anywhere; }
+.header h1 { font-size: 1.75rem; line-height: 1.15; margin: 0; letter-spacing: -0.015em; }
+@media (max-width: 640px) {
+  .brand { gap: 10px; }
+  .brand .logo { width: 44px; }
+  .header h1 { font-size: 1.4rem; }
+  .brand .subtitle { font-size: 0.85rem; }
+}
+.header h1 .mark { color: var(--accent); }
+.subtitle { margin: 2px 0 8px; color: var(--muted); font-size: 0.95rem; }
+.intro { color: var(--fg); margin: 8px 0 4px; font-size: 0.92rem; }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 2px; margin: 10px 0 12px; border-bottom: 1px solid var(--line);
+  overflow-x: auto; scrollbar-width: none;
+}
+.tabs button {
+  font: inherit; font-weight: 600; color: var(--muted); background: none; border: 0;
+  padding: 8px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  cursor: pointer; white-space: nowrap;
+}
+.tabs button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+
+/* Larger screens: the header and the tabs stay at the top while the page scrolls (the intro scrolls away
+   under the header). --header-h is the header's height, measured in app.js (initStickyHeader). Phones
+   scroll everything, so the small screen is left to the content. */
+@media (min-width: 641px) {
+  .header {
+    position: sticky; top: 0; z-index: 20; background: var(--bg);
+    margin-top: -16px; padding-top: 16px;
+  }
+  .tabs {
+    position: sticky; top: calc(var(--header-h, 100px) - 1px); z-index: 19; /* 1px overlap: no gap from rounding */ background: var(--bg);
+    margin-bottom: 0; padding-top: 2px;
+  }
+  .tabs ~ [role="tabpanel"] { padding-top: 12px; }
+  /* Anchors (e.g. "Cite" -> #citation) land below the header and the tabs, not behind them. */
+  [id] { scroll-margin-top: calc(var(--header-h, 100px) + 56px); }
+}
+.tabs button:hover { color: var(--fg); }
+.tabs button:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[role="tabpanel"][hidden] { display: none; }
+
+/* Selection controls */
+.controls {
+  display: grid; gap: 5px; padding: 8px 12px; margin-bottom: 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.control { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 8px; }
+.control-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  font: inherit; font-size: 0.78rem; line-height: 1.5; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0 9px; cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.chip:disabled { opacity: 0.4; cursor: not-allowed; }
+@media (max-width: 640px) {
+  /* One line per control on phones: the chips scroll sideways instead of wrapping. */
+  .controls { padding: 6px 8px; gap: 4px; }
+  .control { grid-template-columns: 48px minmax(0, 1fr); gap: 6px; }
+  .control-label { font-size: 0.72rem; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 1px 0; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip { flex: none; }
+}
+
+.summary { margin: 0 0 6px; color: var(--muted); font-size: 0.85rem; }
+.summary strong { color: var(--fg); }
+.caption { font-size: 0.88rem; color: var(--muted); margin: 6px 0 22px; }
+.caption .stab { color: var(--accent); font-weight: 600; }
+.caption .val { color: var(--validity); font-weight: 600; }
+
+.frame { width: 100%; border: 0; display: block; }
+.notice {
+  padding: 18px; border: 1px dashed var(--line); border-radius: var(--radius);
+  color: var(--muted); margin: 8px 0 16px;
+}
+h2 { font-size: 1.1rem; margin: 18px 0 6px; }
+.tab-title + .prose { margin-top: 0; font-size: 0.92rem; }
+h3 { font-size: 1rem; margin: 20px 0 6px; color: var(--muted); }
+.note { font-size: 0.85rem; color: var(--muted); margin: 8px 0; }
+.caption p { margin: 0 0 6px; }
+.caption ul { margin: 0; padding-left: 20px; }
+.caption li { margin: 3px 0; }
+.prose li { margin: 4px 0; }
+code { font-size: 0.88em; background: var(--surface); padding: 1px 5px; border-radius: 4px; }
+
+/* Footer */
+footer { margin-top: 36px; border-top: 1px solid var(--line); padding-top: 12px; }
+pre {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px; overflow-x: auto; font-size: 0.82rem;
+}
+
+/* Interactive figures (Pareto front, lasagna plots), embedded like the Elo figure. */
+.plot { margin: 4px auto 22px; }
+.plot[hidden] { display: none; }
+.plot figcaption { margin-top: 8px; }
+
+/* Elements with display rules (e.g. .control) must still disappear when hidden. */
+[hidden] { display: none !important; }
+
+/* Keep the figures on screen without scrolling: on short screens they shrink with the window
+   height (the Elo figure is about 2.6 times as wide as high, plus its toolbar). */
+/* Each figure and its caption form one centred column: the Elo figure up to the page width (its
+   natural size), the Pareto front and lasagna plots up to 960 px (slightly above their natural
+   864 px, so they do not look zoomed). Texts take the width of their figure or table. */
+#lb-figure { max-width: max(560px, calc((100vh - 330px) * 2.6)); margin: 0 auto; }
+.plot { max-width: min(960px, max(560px, calc((100vh - 330px) * 2.1))); }
+#pareto-figure { max-width: min(960px, max(560px, calc((100vh - 330px) * 1.75))); }
+/* Where Methods Win: the figures keep about their natural width (the heat map is narrow). */
+#group-figure { max-width: 780px; }
+#model-figure, #task-figure, #domain-figure, #dfdomain-figure, .domain-measure { max-width: 840px; }
+.size-measure { max-width: 900px; }
+#size-figure { max-width: 900px; }
+#time-figure { max-width: 840px; }
+
+/* Heading at the top of a tab (Elo, Stability, Validity). */
+.tab-title { margin: 4px 0 2px; }
+
+/* Collapsed controls: a small "Customize" button showing the current selection; the panel with
+   the chips opens below it. */
+.config { margin-bottom: 6px; }
+.config-button {
+  display: inline-flex; align-items: baseline; gap: 8px; max-width: 100%;
+  list-style: none; cursor: pointer; user-select: none;
+  padding: 3px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--surface); font-size: 0.8rem; color: var(--fg);
+}
+.config-button::-webkit-details-marker { display: none; }
+.config-button::before { content: "\25B8"; color: var(--muted); }
+.config[open] > .config-button::before { content: "\25BE"; }
+.config-button:hover { border-color: var(--accent); }
+.config-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.config-title { font-weight: 600; }
+.config-state { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.config[open] > .controls { margin-top: 6px; }
+
+/* Top-right buttons at the height of the title: "Paper" (arXiv), "Cite" (jumps to the BibTeX entry),
+   "Add your method" (the README section on GitHub), all with class cite-button, and the theme toggle. */
+.brand > .header-actions { display: flex; gap: 8px; align-self: flex-start; margin: 3px 0 0 auto; flex: none; }
+.theme-button {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 28px; padding: 0;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--fg); cursor: pointer;
+}
+.theme-button:hover { border-color: var(--accent); color: var(--accent); }
+.theme-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-button svg { width: 16px; height: 16px; }
+.theme-button .icon-sun { display: none; }
+.theme-button.is-dark .icon-sun { display: block; }
+.theme-button.is-dark .icon-moon { display: none; }
+.cite-button {
+  display: inline-flex; align-items: center; flex: none;
+  padding: 4px 14px; border: 1px solid var(--accent); border-radius: 999px;
+  color: var(--accent); background: var(--bg); font-size: 0.85rem; font-weight: 600; text-decoration: none;
+}
+.cite-button:hover { background: var(--accent); color: var(--on-accent); }
+.cite-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Phones: the logo, title and subtitle take two thirds of the header width and the four buttons are
+   stacked in the remaining third; the four tabs share the full width (no sideways scrolling to reach
+   Validity). Larger screens keep the buttons in one row. */
+.label-short { display: none; }
+@media (max-width: 640px) {
+  .label-long { display: none; }
+  .label-short { display: inline; }
+  .brand { align-items: flex-start; }
+  .brand > div { flex: 2 1 0; }
+  .brand > .header-actions {
+    flex: 0 0 auto; width: 31%; min-width: 108px; margin: 0; flex-direction: column; align-items: stretch; gap: 5px;
+  }
+  .header-actions .cite-button, .header-actions .theme-button {
+    justify-content: center; width: 100%; height: 26px; padding: 0 6px; font-size: 0.8rem; white-space: nowrap;
+  }
+  .tabs { gap: 0; overflow-x: visible; }
+  .tabs button { flex: 1 1 auto; padding: 8px 4px; font-size: 0.86rem; text-align: center; }
+}
+@media (max-width: 360px) {
+  .tabs button { font-size: 0.8rem; padding: 8px 2px; }
+}
+
+/* Copy button in the top-right corner of the BibTeX entry. */
+.citation-box { position: relative; }
+.citation-box pre { padding-right: 84px; }
+.copy-button {
+  position: absolute; top: 8px; right: 8px;
+  font: inherit; font-size: 0.78rem; font-weight: 600; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; cursor: pointer;
+}
+.copy-button:hover { border-color: var(--accent); color: var(--accent); }
+.copy-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.copy-button.is-copied { border-color: var(--accent); color: var(--accent); }
+
+/* Justified text (Blocksatz) for the running texts; hyphenation keeps narrow columns free of gaps. */
+.intro, .prose, .caption, .note, footer > p {
+  text-align: justify; hyphens: auto; -webkit-hyphens: auto;
+}

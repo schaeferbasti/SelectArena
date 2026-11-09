@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena leaderboard: classification, all models, budget 4</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+#sa-tip { position:fixed; z-index:10; pointer-events:none; display:none; max-width:280px;
+  padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  font-size:12px; line-height:1.45; white-space:pre-line; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#sa-tip b { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Hover or tap a method for its values.</span><button onclick="saSvg('selectarena_elo')">SVG</button><button onclick="saPng('selectarena_elo')">PNG</button><button onclick="saCsv('selectarena_elo.csv')">CSV</button></div><svg id='sa-figure' viewBox='0 0 1156 440' role='img' aria-label='Elo rating of each feature selection method, shaded by stability and validity'><style>
+svg { display:block; width:100%; height:auto; }
+.sa-text { fill:var(--fg); }
+.sa-muted { fill:var(--muted); }
+.sa-grid { stroke:var(--line); }
+.sa-ink { stroke:var(--fg); }
+.sa-hit { fill:transparent; cursor:default; }
+.sa-hit:hover, .sa-hit.sa-on { fill:var(--fg); fill-opacity:0.06; }
+</style><defs><pattern id='sa-na' width='6' height='6' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'><rect width='6' height='6' fill='#e5e7eb'/><line x1='0' y1='0' x2='0' y2='6' stroke='#9ca3af' stroke-width='2'/></pattern><linearGradient id='sa-g-stab' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='#ffffff'/><stop offset='1' stop-color='#0072B2'/></linearGradient><linearGradient id='sa-g-val' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='#ffffff'/><stop offset='1' stop-color='#D55E00'/></linearGradient></defs><line class='sa-grid' x1='64' x2='1024' y1='315.6' y2='315.6' stroke-width='1'/><text class='sa-muted' x='56' y='319.6' text-anchor='end' font-size='12'>800</text><line class='sa-grid' x1='64' x2='1024' y1='266.0' y2='266.0' stroke-width='1'/><text class='sa-muted' x='56' y='270.0' text-anchor='end' font-size='12'>900</text><line class='sa-grid' x1='64' x2='1024' y1='216.4' y2='216.4' stroke-width='1'/><text class='sa-muted' x='56' y='220.4' text-anchor='end' font-size='12'>1000</text><line class='sa-grid' x1='64' x2='1024' y1='166.8' y2='166.8' stroke-width='1'/><text class='sa-muted' x='56' y='170.8' text-anchor='end' font-size='12'>1100</text><line class='sa-grid' x1='64' x2='1024' y1='117.2' y2='117.2' stroke-width='1'/><text class='sa-muted' x='56' y='121.2' text-anchor='end' font-size='12'>1200</text><line class='sa-grid' x1='64' x2='1024' y1='67.6' y2='67.6' stroke-width='1'/><text class='sa-muted' x='56' y='71.6' text-anchor='end' font-size='12'>1300</text><line class='sa-grid' x1='64' x2='1024' y1='18.0' y2='18.0' stroke-width='1'/><text class='sa-muted' x='56' y='22.0' text-anchor='end' font-size='12'>1400</text><text class='sa-text' transform='translate(16 173) rotate(-90)' text-anchor='middle' font-size='13'>Elo</text><line class='sa-ink' x1='64' x2='1024' y1='216.4' y2='216.4' stroke-width='1' stroke-dasharray='4 4' opacity='0.5'/><rect x='73.6' y='255.1' width='22.4' height='72.9' fill='#529fcb' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='96.0' y='255.1' width='22.4' height='72.9' fill='#df843c' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='96.0' x2='96.0' y1='224.8' y2='291.8'/><line x1='91.0' x2='101.0' y1='224.8' y2='224.8'/><line x1='91.0' x2='101.0' y1='291.8' y2='291.8'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(100.0 342.0) rotate(-35)'>LaplacianScore</text><rect class='sa-hit' x='64.0' y='18' width='64' height='414' data-tip='LaplacianScore (Distance, non-search)&#10;Elo 922  [95% CI 848–983]&#10;Stability 0.679&#10;Validity 0.763' aria-label='LaplacianScore (Distance, non-search)&#10;Elo 922  [95% CI 848–983]&#10;Stability 0.679&#10;Validity 0.763'/><rect x='137.6' y='216.4' width='22.4' height='111.6' fill='#feffff' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='160.0' y='216.4' width='22.4' height='111.6' fill='#eab082' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='160.0' x2='160.0' y1='193.6' y2='238.7'/><line x1='155.0' x2='165.0' y1='193.6' y2='193.6'/><line x1='155.0' x2='165.0' y1='238.7' y2='238.7'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(164.0 342.0) rotate(-35)'>Random</text><rect class='sa-hit' x='128.0' y='18' width='64' height='414' data-tip='Random (Baseline, baseline)&#10;Elo 1000  [95% CI 955–1046]&#10;Stability 0.002&#10;Validity 0.490' aria-label='Random (Baseline, baseline)&#10;Elo 1000  [95% CI 955–1046]&#10;Stability 0.002&#10;Validity 0.490'/><rect x='201.6' y='163.3' width='22.4' height='164.7' fill='#e1eff6' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='224.0' y='163.3' width='22.4' height='164.7' fill='#e9aa78' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='224.0' x2='224.0' y1='143.0' y2='183.7'/><line x1='219.0' x2='229.0' y1='143.0' y2='143.0'/><line x1='219.0' x2='229.0' y1='183.7' y2='183.7'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(228.0 342.0) rotate(-35)'>LOCO</text><rect class='sa-hit' x='192.0' y='18' width='64' height='414' data-tip='LOCO (Leave-one-out, search)&#10;Elo 1107  [95% CI 1066–1148]&#10;Stability 0.117&#10;Validity 0.531' aria-label='LOCO (Leave-one-out, search)&#10;Elo 1107  [95% CI 1066–1148]&#10;Stability 0.117&#10;Validity 0.531'/><rect x='265.6' y='159.9' width='22.4' height='168.1' fill='#c5dfee' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='288.0' y='159.9' width='22.4' height='168.1' fill='#e7a46f' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='288.0' x2='288.0' y1='142.0' y2='180.2'/><line x1='283.0' x2='293.0' y1='142.0' y2='142.0'/><line x1='283.0' x2='293.0' y1='180.2' y2='180.2'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(292.0 342.0) rotate(-35)'>SFS</text><rect class='sa-hit' x='256.0' y='18' width='64' height='414' data-tip='SFS (Forward search, search)&#10;Elo 1114  [95% CI 1073–1150]&#10;Stability 0.226&#10;Validity 0.563' aria-label='SFS (Forward search, search)&#10;Elo 1114  [95% CI 1073–1150]&#10;Stability 0.226&#10;Validity 0.563'/><rect x='329.6' y='150.9' width='22.4' height='177.1' fill='#59a3cd' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='352.0' y='150.9' width='22.4' height='177.1' fill='#df843c' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='352.0' x2='352.0' y1='133.1' y2='168.8'/><line x1='347.0' x2='357.0' y1='133.1' y2='133.1'/><line x1='347.0' x2='357.0' y1='168.8' y2='168.8'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(356.0 342.0) rotate(-35)'>GainRatio</text><rect class='sa-hit' x='320.0' y='18' width='64' height='414' data-tip='GainRatio (Information theory, non-search)&#10;Elo 1132  [95% CI 1096–1168]&#10;Stability 0.652&#10;Validity 0.766' aria-label='GainRatio (Information theory, non-search)&#10;Elo 1132  [95% CI 1096–1168]&#10;Stability 0.652&#10;Validity 0.766'/><rect x='393.6' y='142.0' width='22.4' height='186.0' fill='#5aa4cd' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='416.0' y='142.0' width='22.4' height='186.0' fill='#e39557' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='416.0' x2='416.0' y1='122.7' y2='162.3'/><line x1='411.0' x2='421.0' y1='122.7' y2='122.7'/><line x1='411.0' x2='421.0' y1='162.3' y2='162.3'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(420.0 342.0) rotate(-35)'>(R)ReliefF</text><rect class='sa-hit' x='384.0' y='18' width='64' height='414' data-tip='(R)ReliefF (Distance, non-search)&#10;Elo 1150  [95% CI 1109–1189]&#10;Stability 0.646&#10;Validity 0.657' aria-label='(R)ReliefF (Distance, non-search)&#10;Elo 1150  [95% CI 1109–1189]&#10;Stability 0.646&#10;Validity 0.657'/><rect x='457.6' y='140.0' width='22.4' height='188.0' fill='#54a0cb' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='480.0' y='140.0' width='22.4' height='188.0' fill='#e69e66' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='480.0' x2='480.0' y1='121.2' y2='158.9'/><line x1='475.0' x2='485.0' y1='121.2' y2='121.2'/><line x1='475.0' x2='485.0' y1='158.9' y2='158.9'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(484.0 342.0) rotate(-35)'>mRMR</text><rect class='sa-hit' x='448.0' y='18' width='64' height='414' data-tip='mRMR (Information theory, non-search)&#10;Elo 1154  [95% CI 1116–1192]&#10;Stability 0.671&#10;Validity 0.600' aria-label='mRMR (Information theory, non-search)&#10;Elo 1154  [95% CI 1116–1192]&#10;Stability 0.671&#10;Validity 0.600'/><rect x='521.6' y='139.0' width='22.4' height='189.0' fill='#e7f1f8' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='544.0' y='139.0' width='22.4' height='189.0' fill='#e9ab7a' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='544.0' x2='544.0' y1='113.7' y2='163.8'/><line x1='539.0' x2='549.0' y1='113.7' y2='113.7'/><line x1='539.0' x2='549.0' y1='163.8' y2='163.8'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(548.0 342.0) rotate(-35)'>SBE</text><rect class='sa-hit' x='512.0' y='18' width='64' height='414' data-tip='SBE (Backward search, search)&#10;Elo 1156  [95% CI 1106–1207]&#10;Stability 0.096&#10;Validity 0.521' aria-label='SBE (Backward search, search)&#10;Elo 1156  [95% CI 1106–1207]&#10;Stability 0.096&#10;Validity 0.521'/><rect x='585.6' y='138.5' width='22.4' height='189.5' fill='#90c2dd' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='608.0' y='138.5' width='22.4' height='189.5' fill='#ecb68c' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='608.0' x2='608.0' y1='119.2' y2='156.9'/><line x1='603.0' x2='613.0' y1='119.2' y2='119.2'/><line x1='603.0' x2='613.0' y1='156.9' y2='156.9'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(612.0 342.0) rotate(-35)'>MarkovBlanket</text><rect class='sa-hit' x='576.0' y='18' width='64' height='414' data-tip='MarkovBlanket (Backward search, search)&#10;Elo 1157  [95% CI 1120–1196]&#10;Stability 0.436&#10;Validity 0.451' aria-label='MarkovBlanket (Backward search, search)&#10;Elo 1157  [95% CI 1120–1196]&#10;Stability 0.436&#10;Validity 0.451'/><rect x='649.6' y='127.1' width='22.4' height='200.9' fill='#add2e6' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='672.0' y='127.1' width='22.4' height='200.9' fill='#e4995d' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='672.0' x2='672.0' y1='104.8' y2='147.5'/><line x1='667.0' x2='677.0' y1='104.8' y2='104.8'/><line x1='667.0' x2='677.0' y1='147.5' y2='147.5'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(676.0 342.0) rotate(-35)'>Lasso</text><rect class='sa-hit' x='640.0' y='18' width='64' height='414' data-tip='Lasso (Regularization, non-search)&#10;Elo 1180  [95% CI 1139–1225]&#10;Stability 0.322&#10;Validity 0.634' aria-label='Lasso (Regularization, non-search)&#10;Elo 1180  [95% CI 1139–1225]&#10;Stability 0.322&#10;Validity 0.634'/><rect x='713.6' y='123.2' width='22.4' height='204.8' fill='#56a2cc' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='736.0' y='123.2' width='22.4' height='204.8' fill='#de8138' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='736.0' x2='736.0' y1='105.3' y2='139.5'/><line x1='731.0' x2='741.0' y1='105.3' y2='105.3'/><line x1='731.0' x2='741.0' y1='139.5' y2='139.5'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(740.0 342.0) rotate(-35)'>F-Test</text><rect class='sa-hit' x='704.0' y='18' width='64' height='414' data-tip='F-Test (Correlation, non-search)&#10;Elo 1188  [95% CI 1155–1224]&#10;Stability 0.661&#10;Validity 0.781' aria-label='F-Test (Correlation, non-search)&#10;Elo 1188  [95% CI 1155–1224]&#10;Stability 0.661&#10;Validity 0.781'/><rect x='777.6' y='112.2' width='22.4' height='215.8' fill='#96c5df' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='800.0' y='112.2' width='22.4' height='215.8' fill='#e39557' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='800.0' x2='800.0' y1='88.9' y2='134.6'/><line x1='795.0' x2='805.0' y1='88.9' y2='88.9'/><line x1='795.0' x2='805.0' y1='134.6' y2='134.6'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(804.0 342.0) rotate(-35)'>ElasticNet</text><rect class='sa-hit' x='768.0' y='18' width='64' height='414' data-tip='ElasticNet (Regularization, non-search)&#10;Elo 1210  [95% CI 1165–1257]&#10;Stability 0.410&#10;Validity 0.657' aria-label='ElasticNet (Regularization, non-search)&#10;Elo 1210  [95% CI 1165–1257]&#10;Stability 0.410&#10;Validity 0.657'/><rect x='841.6' y='110.3' width='22.4' height='217.7' fill='#9cc8e1' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='864.0' y='110.3' width='22.4' height='217.7' fill='#eaae7f' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='864.0' x2='864.0' y1='92.4' y2='129.6'/><line x1='859.0' x2='869.0' y1='92.4' y2='92.4'/><line x1='859.0' x2='869.0' y1='129.6' y2='129.6'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(868.0 342.0) rotate(-35)'>CART</text><rect class='sa-hit' x='832.0' y='18' width='64' height='414' data-tip='CART (Tree, non-search)&#10;Elo 1214  [95% CI 1175–1250]&#10;Stability 0.389&#10;Validity 0.502' aria-label='CART (Tree, non-search)&#10;Elo 1214  [95% CI 1175–1250]&#10;Stability 0.389&#10;Validity 0.502'/><rect x='905.6' y='107.8' width='22.4' height='220.2' fill='#5fa6cf' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='928.0' y='107.8' width='22.4' height='220.2' fill='#e18c48' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='928.0' x2='928.0' y1='87.9' y2='127.6'/><line x1='923.0' x2='933.0' y1='87.9' y2='87.9'/><line x1='923.0' x2='933.0' y1='127.6' y2='127.6'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(932.0 342.0) rotate(-35)'>MI</text><rect class='sa-hit' x='896.0' y='18' width='64' height='414' data-tip='MI (Information theory, non-search)&#10;Elo 1219  [95% CI 1179–1259]&#10;Stability 0.628&#10;Validity 0.716' aria-label='MI (Information theory, non-search)&#10;Elo 1219  [95% CI 1179–1259]&#10;Stability 0.628&#10;Validity 0.716'/><rect x='969.6' y='79.5' width='22.4' height='248.5' fill='#59a3cd' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><rect x='992.0' y='79.5' width='22.4' height='248.5' fill='#e69f66' stroke='#000' stroke-width='0.8' fill-opacity='0.9'/><g class='sa-ink' stroke-width='1.5'><line x1='992.0' x2='992.0' y1='57.7' y2='99.8'/><line x1='987.0' x2='997.0' y1='57.7' y2='57.7'/><line x1='987.0' x2='997.0' y1='99.8' y2='99.8'/></g><text class='sa-text' font-size='12' text-anchor='end' transform='translate(996.0 342.0) rotate(-35)'>RFImportance</text><rect class='sa-hit' x='960.0' y='18' width='64' height='414' data-tip='RFImportance (Tree, non-search)&#10;Elo 1276  [95% CI 1235–1320]&#10;Stability 0.651&#10;Validity 0.599' aria-label='RFImportance (Tree, non-search)&#10;Elo 1276  [95% CI 1235–1320]&#10;Stability 0.651&#10;Validity 0.599'/><line class='sa-ink' x1='64' x2='1024' y1='328.0' y2='328.0' stroke-width='1' opacity='0.4'/><rect x='1070' y='40.0' width='12' height='107.0' fill='url(#sa-g-stab)' stroke='#000' stroke-width='0.6'/><text class='sa-text' x='1076' y='30.0' text-anchor='middle' font-size='12'>stable</text><text class='sa-text' x='1076' y='165.0' text-anchor='middle' font-size='12'>unstable</text><text class='sa-muted' x='1088' y='151.0' font-size='11'>0.0</text><text class='sa-muted' x='1088' y='97.5' font-size='11'>0.5</text><text class='sa-muted' x='1088' y='44.0' font-size='11'>1.0</text><rect x='1070' y='207.0' width='12' height='107.0' fill='url(#sa-g-val)' stroke='#000' stroke-width='0.6'/><text class='sa-text' x='1076' y='197.0' text-anchor='middle' font-size='12'>valid</text><text class='sa-text' x='1076' y='332.0' text-anchor='middle' font-size='12'>invalid</text><text class='sa-muted' x='1088' y='318.0' font-size='11'>0.0</text><text class='sa-muted' x='1088' y='264.5' font-size='11'>0.5</text><text class='sa-muted' x='1088' y='211.0' font-size='11'>1.0</text><rect x='1070' y='352.0' width='12' height='12' fill='url(#sa-na)' stroke='#000' stroke-width='0.6'/><text class='sa-muted' x='1088' y='362.0' font-size='11'>no result</text></svg><script type='text/plain' id='sa-csv'>Method,Category,Subgroup,Elo,Elo CI low,Elo CI high,Stability,Validity
+RFImportance,Non-search,Tree,1276.0,1235.0,1320.0,0.651,0.599
+MI,Non-search,Information theory,1219.0,1179.0,1259.0,0.628,0.716
+CART,Non-search,Tree,1214.0,1175.0,1250.0,0.389,0.502
+ElasticNet,Non-search,Regularization,1210.0,1165.0,1257.0,0.41,0.657
+F-Test,Non-search,Correlation,1188.0,1155.0,1224.0,0.661,0.781
+Lasso,Non-search,Regularization,1180.0,1139.0,1225.0,0.322,0.634
+MarkovBlanket,Search,Backward search,1157.0,1120.0,1196.0,0.436,0.451
+SBE,Search,Backward search,1156.0,1106.0,1207.0,0.096,0.521
+mRMR,Non-search,Information theory,1154.0,1116.0,1192.0,0.671,0.6
+(R)ReliefF,Non-search,Distance,1150.0,1109.0,1189.0,0.646,0.657
+GainRatio,Non-search,Information theory,1132.0,1096.0,1168.0,0.652,0.766
+SFS,Search,Forward search,1114.0,1073.0,1150.0,0.226,0.563
+LOCO,Search,Leave-one-out,1107.0,1066.0,1148.0,0.117,0.531
+Random,Baseline,Baseline,1000.0,955.0,1046.0,0.002,0.49
+LaplacianScore,Non-search,Distance,922.0,848.0,983.0,0.679,0.763
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+// Instant tooltip: a native SVG <title> only shows after a browser delay of 1-3 s.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'sa-tip';
+  document.body.appendChild(tip);
+  var current = null;
+  function show(hit, x, y) {
+    if (current !== hit) {
+      if (current) current.classList.remove('sa-on');
+      current = hit;
+      hit.classList.add('sa-on');
+      var lines = hit.getAttribute('data-tip').split('\n');
+      tip.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = lines[0];
+      tip.appendChild(head);
+      tip.appendChild(document.createTextNode('\n' + lines.slice(1).join('\n')));
+      tip.style.display = 'block';
+    }
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 14;
+    if (left + w > window.innerWidth - 4) left = Math.max(4, x - w - 14);
+    if (top + h > window.innerHeight - 4) top = Math.max(4, y - h - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    if (current) current.classList.remove('sa-on');
+    current = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('pointermove', function (e) {
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else if (e.pointerType === 'mouse') hide();
+  });
+  document.addEventListener('pointerdown', function (e) {  // touch: tap a bar to show, elsewhere to hide
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else hide();
+  });
+  document.addEventListener('mouseleave', hide);
+})();
+// Downloads always use the light colours (the paper look), whatever the page's theme.
+var SA_LIGHT = {'--fg': '#1f2328', '--muted': '#59636e', '--line': '#d1d9e0', '--bg': '#ffffff',
+  '--soft': '#f6f8fa', '--accent': '#0072B2'};
+function saSvgString() {
+  var svg = document.getElementById('sa-figure').cloneNode(true);
+  var style = svg.querySelector('style');
+  var css = style.textContent;
+  Object.keys(SA_LIGHT).forEach(function (v) { css = css.split('var(' + v + ')').join(SA_LIGHT[v]); });
+  style.textContent = css;
+  svg.querySelectorAll('.sa-hit').forEach(function (hit) { hit.remove(); });
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  return new XMLSerializer().serializeToString(svg);
+}
+function saSvg(name) {
+  saDownload(name + '.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
+}
+function saPng(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal, scale = 3;
+  var img = new Image();
+  img.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = box.width * scale; canvas.height = box.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = SA_LIGHT['--bg'];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function (blob) { saDownload(name + '.png', blob); });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
+}
+</script></body></html>

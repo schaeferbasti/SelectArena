@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena: improvement over Random by samples</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+#sa-tip { position:fixed; z-index:10; pointer-events:none; display:none; max-width:280px;
+  padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  font-size:12px; line-height:1.45; white-space:pre-line; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#sa-tip b { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Hover or tap a cell for its values.</span><button onclick="saSvg('selectarena_improvement_by_samples_groups')">SVG</button><button onclick="saPng('selectarena_improvement_by_samples_groups')">PNG</button><button onclick="saCsv('selectarena_improvement_by_samples_groups.csv')">CSV</button></div><svg id='sa-figure' viewBox='0 0 526 497' role='img' aria-label='Improvement over Random of each method per samples' style='max-width:605px;margin:0 auto'><style>
+svg { display:block; width:100%; height:auto; }
+.sa-text { fill:var(--fg); }
+.sa-muted { fill:var(--muted); }
+.sa-grid { stroke:var(--line); }
+.sa-ink { stroke:var(--fg); }
+.sa-hit { fill:transparent; cursor:default; }
+.sa-hit:hover, .sa-hit.sa-on { fill:var(--fg); fill-opacity:0.06; }
+
+.sa-dim { fill:var(--muted); }
+.sa-frame-line { stroke:var(--fg); stroke-opacity:0.3; fill:none; }
+.sa-point { stroke:var(--fg); }
+.sa-legend { fill:var(--bg); stroke:var(--line); }
+.sa-heat { image-rendering:pixelated; image-rendering:crisp-edges; }
+.sa-halo { paint-order:stroke; stroke:var(--bg); stroke-width:3px; stroke-opacity:0.7; }
+.sa-hollow { fill:var(--bg); stroke:var(--fg); } .sa-ci-none { stroke:var(--muted); }</style><text class='sa-text' x='174.0' y='32' text-anchor='middle' font-size='12' font-weight='700'>All</text><text class='sa-muted' x='174.0' y='48' text-anchor='middle' font-size='11'>71 datasets</text><text class='sa-text' x='280.0' y='32' text-anchor='middle' font-size='12' font-weight='600'>&lt; 1k</text><text class='sa-muted' x='280.0' y='48' text-anchor='middle' font-size='11'>31 datasets</text><text class='sa-text' x='372.0' y='32' text-anchor='middle' font-size='12' font-weight='600'>1k–10k</text><text class='sa-muted' x='372.0' y='48' text-anchor='middle' font-size='11'>18 datasets</text><text class='sa-text' x='464.0' y='32' text-anchor='middle' font-size='12' font-weight='600'>≥ 10k</text><text class='sa-muted' x='464.0' y='48' text-anchor='middle' font-size='11'>22 datasets</text><text class='sa-text' x='8.0' y='74.5' font-size='12'>RFImportance</text><text class='sa-text' x='8.0' y='99.5' font-size='12'>MI</text><text class='sa-text' x='8.0' y='124.5' font-size='12'>CART</text><text class='sa-text' x='8.0' y='149.5' font-size='12'>F-Test</text><text class='sa-text' x='8.0' y='174.5' font-size='12'>ElasticNet</text><text class='sa-text' x='8.0' y='199.5' font-size='12'>mRMR</text><text class='sa-text' x='8.0' y='224.5' font-size='12'>MarkovBlanket</text><text class='sa-text' x='8.0' y='249.5' font-size='12'>Lasso</text><text class='sa-text' x='8.0' y='274.5' font-size='12'>GainRatio</text><text class='sa-text' x='8.0' y='299.5' font-size='12'>(R)ReliefF</text><text class='sa-text' x='8.0' y='324.5' font-size='12'>SFS</text><text class='sa-text' x='8.0' y='349.5' font-size='12'>LOCO</text><text class='sa-text' x='8.0' y='374.5' font-size='12'>SBE</text><text class='sa-text' x='8.0' y='399.5' font-size='12'>Random</text><text class='sa-text' x='8.0' y='424.5' font-size='12'>LaplacianScore</text><rect x='129.0' y='59.0' width='90' height='23' rx='3' fill='#09529d'/><rect class='sa-ink' x='129.5' y='59.5' width='89' height='22' rx='3' fill='none' stroke-width='2'/><text x='174.0' y='74.5' text-anchor='middle' font-size='12' fill='#ffffff' font-weight='700'>26.2</text><rect class='sa-hit' x='128.0' y='58.0' width='92' height='25' data-tip='RFImportance · All&#10;Improvement over Random +26.2%: place 1 of 15 (best)&#10;71 datasets'/><rect x='129.0' y='84.0' width='90' height='23' rx='3' fill='#1764ab'/><text x='174.0' y='99.5' text-anchor='middle' font-size='12' fill='#ffffff'>23.8</text><rect class='sa-hit' x='128.0' y='83.0' width='92' height='25' data-tip='MI · All&#10;Improvement over Random +23.8%: place 2 of 15&#10;71 datasets'/><rect x='129.0' y='109.0' width='90' height='23' rx='3' fill='#1764ab'/><text x='174.0' y='124.5' text-anchor='middle' font-size='12' fill='#ffffff'>23.8</text><rect class='sa-hit' x='128.0' y='108.0' width='92' height='25' data-tip='CART · All&#10;Improvement over Random +23.8%: place 3 of 15&#10;71 datasets'/><rect x='129.0' y='134.0' width='90' height='23' rx='3' fill='#1c6bb0'/><text x='174.0' y='149.5' text-anchor='middle' font-size='12' fill='#ffffff'>22.8</text><rect class='sa-hit' x='128.0' y='133.0' width='92' height='25' data-tip='F-Test · All&#10;Improvement over Random +22.8%: place 4 of 15&#10;71 datasets'/><rect x='129.0' y='159.0' width='90' height='23' rx='3' fill='#2272b6'/><text x='174.0' y='174.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.9</text><rect class='sa-hit' x='128.0' y='158.0' width='92' height='25' data-tip='ElasticNet · All&#10;Improvement over Random +21.9%: place 5 of 15&#10;71 datasets'/><rect x='129.0' y='184.0' width='90' height='23' rx='3' fill='#2373b6'/><text x='174.0' y='199.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.7</text><rect class='sa-hit' x='128.0' y='183.0' width='92' height='25' data-tip='mRMR · All&#10;Improvement over Random +21.7%: place 6 of 15&#10;71 datasets'/><rect x='129.0' y='209.0' width='90' height='23' rx='3' fill='#2676b8'/><text x='174.0' y='224.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.2</text><rect class='sa-hit' x='128.0' y='208.0' width='92' height='25' data-tip='MarkovBlanket · All&#10;Improvement over Random +21.2%: place 7 of 15&#10;71 datasets'/><rect x='129.0' y='234.0' width='90' height='23' rx='3' fill='#2a7ab9'/><text x='174.0' y='249.5' text-anchor='middle' font-size='12' fill='#ffffff'>20.9</text><rect class='sa-hit' x='128.0' y='233.0' width='92' height='25' data-tip='Lasso · All&#10;Improvement over Random +20.9%: place 8 of 15&#10;71 datasets'/><rect x='129.0' y='259.0' width='90' height='23' rx='3' fill='#3484bf'/><text x='174.0' y='274.5' text-anchor='middle' font-size='12' fill='#ffffff'>19.5</text><rect class='sa-hit' x='128.0' y='258.0' width='92' height='25' data-tip='GainRatio · All&#10;Improvement over Random +19.5%: place 9 of 15&#10;71 datasets'/><rect x='129.0' y='284.0' width='90' height='23' rx='3' fill='#3b8bc2'/><text x='174.0' y='299.5' text-anchor='middle' font-size='12' fill='#ffffff'>18.6</text><rect class='sa-hit' x='128.0' y='283.0' width='92' height='25' data-tip='(R)ReliefF · All&#10;Improvement over Random +18.6%: place 10 of 15&#10;71 datasets'/><rect x='129.0' y='309.0' width='90' height='23' rx='3' fill='#3e8ec4'/><text x='174.0' y='324.5' text-anchor='middle' font-size='12' fill='#ffffff'>18.2</text><rect class='sa-hit' x='128.0' y='308.0' width='92' height='25' data-tip='SFS · All&#10;Improvement over Random +18.2%: place 11 of 15&#10;71 datasets'/><rect x='129.0' y='334.0' width='90' height='23' rx='3' fill='#6fb0d7'/><text x='174.0' y='349.5' text-anchor='middle' font-size='12' fill='#1f2328'>13.0</text><rect class='sa-hit' x='128.0' y='333.0' width='92' height='25' data-tip='LOCO · All&#10;Improvement over Random +13.0%: place 12 of 15&#10;71 datasets'/><rect x='129.0' y='359.0' width='90' height='23' rx='3' fill='#81badb'/><text x='174.0' y='374.5' text-anchor='middle' font-size='12' fill='#1f2328'>11.4</text><rect class='sa-hit' x='128.0' y='358.0' width='92' height='25' data-tip='SBE · All&#10;Improvement over Random +11.4%: place 13 of 15&#10;71 datasets'/><rect x='129.0' y='384.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='174.0' y='399.5' text-anchor='middle' font-size='12' fill='#1f2328'>0.0</text><rect class='sa-hit' x='128.0' y='383.0' width='92' height='25' data-tip='Random · All&#10;Improvement over Random +0.0%: place 14 of 15&#10;71 datasets'/><rect x='129.0' y='409.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='174.0' y='424.5' text-anchor='middle' font-size='12' fill='#1f2328'>-18.6</text><rect class='sa-hit' x='128.0' y='408.0' width='92' height='25' data-tip='LaplacianScore · All&#10;Improvement over Random -18.6%: place 15 of 15&#10;71 datasets'/><rect x='235.0' y='59.0' width='90' height='23' rx='3' fill='#083c7d'/><rect class='sa-ink' x='235.5' y='59.5' width='89' height='22' rx='3' fill='none' stroke-width='2'/><text x='280.0' y='74.5' text-anchor='middle' font-size='12' fill='#ffffff' font-weight='700'>29.1</text><rect class='sa-hit' x='234.0' y='58.0' width='92' height='25' data-tip='RFImportance · &lt; 1k&#10;Improvement over Random +29.1%: place 1 of 15 (best)&#10;31 datasets'/><rect x='235.0' y='84.0' width='90' height='23' rx='3' fill='#084b93'/><text x='280.0' y='99.5' text-anchor='middle' font-size='12' fill='#ffffff'>27.2</text><rect class='sa-hit' x='234.0' y='83.0' width='92' height='25' data-tip='MI · &lt; 1k&#10;Improvement over Random +27.2%: place 2 of 15&#10;31 datasets'/><rect x='235.0' y='109.0' width='90' height='23' rx='3' fill='#1966ad'/><text x='280.0' y='124.5' text-anchor='middle' font-size='12' fill='#ffffff'>23.4</text><rect class='sa-hit' x='234.0' y='108.0' width='92' height='25' data-tip='CART · &lt; 1k&#10;Improvement over Random +23.4%: place 8 of 15&#10;31 datasets'/><rect x='235.0' y='134.0' width='90' height='23' rx='3' fill='#0e58a2'/><text x='280.0' y='149.5' text-anchor='middle' font-size='12' fill='#ffffff'>25.5</text><rect class='sa-hit' x='234.0' y='133.0' width='92' height='25' data-tip='F-Test · &lt; 1k&#10;Improvement over Random +25.5%: place 5 of 15&#10;31 datasets'/><rect x='235.0' y='159.0' width='90' height='23' rx='3' fill='#135fa7'/><text x='280.0' y='174.5' text-anchor='middle' font-size='12' fill='#ffffff'>24.4</text><rect class='sa-hit' x='234.0' y='158.0' width='92' height='25' data-tip='ElasticNet · &lt; 1k&#10;Improvement over Random +24.4%: place 6 of 15&#10;31 datasets'/><rect x='235.0' y='184.0' width='90' height='23' rx='3' fill='#0d57a1'/><text x='280.0' y='199.5' text-anchor='middle' font-size='12' fill='#ffffff'>25.6</text><rect class='sa-hit' x='234.0' y='183.0' width='92' height='25' data-tip='mRMR · &lt; 1k&#10;Improvement over Random +25.6%: place 3 of 15&#10;31 datasets'/><rect x='235.0' y='209.0' width='90' height='23' rx='3' fill='#1c6ab0'/><text x='280.0' y='224.5' text-anchor='middle' font-size='12' fill='#ffffff'>22.9</text><rect class='sa-hit' x='234.0' y='208.0' width='92' height='25' data-tip='MarkovBlanket · &lt; 1k&#10;Improvement over Random +22.9%: place 9 of 15&#10;31 datasets'/><rect x='235.0' y='234.0' width='90' height='23' rx='3' fill='#1c6bb0'/><text x='280.0' y='249.5' text-anchor='middle' font-size='12' fill='#ffffff'>22.8</text><rect class='sa-hit' x='234.0' y='233.0' width='92' height='25' data-tip='Lasso · &lt; 1k&#10;Improvement over Random +22.8%: place 10 of 15&#10;31 datasets'/><rect x='235.0' y='259.0' width='90' height='23' rx='3' fill='#1562a9'/><text x='280.0' y='274.5' text-anchor='middle' font-size='12' fill='#ffffff'>24.0</text><rect class='sa-hit' x='234.0' y='258.0' width='92' height='25' data-tip='GainRatio · &lt; 1k&#10;Improvement over Random +24.0%: place 7 of 15&#10;31 datasets'/><rect x='235.0' y='284.0' width='90' height='23' rx='3' fill='#0d57a1'/><text x='280.0' y='299.5' text-anchor='middle' font-size='12' fill='#ffffff'>25.6</text><rect class='sa-hit' x='234.0' y='283.0' width='92' height='25' data-tip='(R)ReliefF · &lt; 1k&#10;Improvement over Random +25.6%: place 4 of 15&#10;31 datasets'/><rect x='235.0' y='309.0' width='90' height='23' rx='3' fill='#65aad4'/><text x='280.0' y='324.5' text-anchor='middle' font-size='12' fill='#1f2328'>13.9</text><rect class='sa-hit' x='234.0' y='308.0' width='92' height='25' data-tip='SFS · &lt; 1k&#10;Improvement over Random +13.9%: place 11 of 15&#10;31 datasets'/><rect x='235.0' y='334.0' width='90' height='23' rx='3' fill='#a8cee4'/><text x='280.0' y='349.5' text-anchor='middle' font-size='12' fill='#1f2328'>7.9</text><rect class='sa-hit' x='234.0' y='333.0' width='92' height='25' data-tip='LOCO · &lt; 1k&#10;Improvement over Random +7.9%: place 13 of 15&#10;31 datasets'/><rect x='235.0' y='359.0' width='90' height='23' rx='3' fill='#9dcae1'/><text x='280.0' y='374.5' text-anchor='middle' font-size='12' fill='#1f2328'>9.0</text><rect class='sa-hit' x='234.0' y='358.0' width='92' height='25' data-tip='SBE · &lt; 1k&#10;Improvement over Random +9.0%: place 12 of 15&#10;31 datasets'/><rect x='235.0' y='384.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='280.0' y='399.5' text-anchor='middle' font-size='12' fill='#1f2328'>0.0</text><rect class='sa-hit' x='234.0' y='383.0' width='92' height='25' data-tip='Random · &lt; 1k&#10;Improvement over Random +0.0%: place 14 of 15&#10;31 datasets'/><rect x='235.0' y='409.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='280.0' y='424.5' text-anchor='middle' font-size='12' fill='#1f2328'>-14.7</text><rect class='sa-hit' x='234.0' y='408.0' width='92' height='25' data-tip='LaplacianScore · &lt; 1k&#10;Improvement over Random -14.7%: place 15 of 15&#10;31 datasets'/><rect x='327.0' y='59.0' width='90' height='23' rx='3' fill='#1663aa'/><rect class='sa-ink' x='327.5' y='59.5' width='89' height='22' rx='3' fill='none' stroke-width='2'/><text x='372.0' y='74.5' text-anchor='middle' font-size='12' fill='#ffffff' font-weight='700'>23.9</text><rect class='sa-hit' x='326.0' y='58.0' width='92' height='25' data-tip='RFImportance · 1k–10k&#10;Improvement over Random +23.9%: place 1 of 15 (best)&#10;18 datasets'/><rect x='327.0' y='84.0' width='90' height='23' rx='3' fill='#2c7cba'/><text x='372.0' y='99.5' text-anchor='middle' font-size='12' fill='#ffffff'>20.6</text><rect class='sa-hit' x='326.0' y='83.0' width='92' height='25' data-tip='MI · 1k–10k&#10;Improvement over Random +20.6%: place 4 of 15&#10;18 datasets'/><rect x='327.0' y='109.0' width='90' height='23' rx='3' fill='#1663aa'/><text x='372.0' y='124.5' text-anchor='middle' font-size='12' fill='#ffffff'>23.9</text><rect class='sa-hit' x='326.0' y='108.0' width='92' height='25' data-tip='CART · 1k–10k&#10;Improvement over Random +23.9%: place 2 of 15&#10;18 datasets'/><rect x='327.0' y='134.0' width='90' height='23' rx='3' fill='#4090c5'/><text x='372.0' y='149.5' text-anchor='middle' font-size='12' fill='#ffffff'>17.9</text><rect class='sa-hit' x='326.0' y='133.0' width='92' height='25' data-tip='F-Test · 1k–10k&#10;Improvement over Random +17.9%: place 6 of 15&#10;18 datasets'/><rect x='327.0' y='159.0' width='90' height='23' rx='3' fill='#3c8cc3'/><text x='372.0' y='174.5' text-anchor='middle' font-size='12' fill='#ffffff'>18.4</text><rect class='sa-hit' x='326.0' y='158.0' width='92' height='25' data-tip='ElasticNet · 1k–10k&#10;Improvement over Random +18.4%: place 5 of 15&#10;18 datasets'/><rect x='327.0' y='184.0' width='90' height='23' rx='3' fill='#63a8d3'/><text x='372.0' y='199.5' text-anchor='middle' font-size='12' fill='#1f2328'>14.2</text><rect class='sa-hit' x='326.0' y='183.0' width='92' height='25' data-tip='mRMR · 1k–10k&#10;Improvement over Random +14.2%: place 10 of 15&#10;18 datasets'/><rect x='327.0' y='209.0' width='90' height='23' rx='3' fill='#6dafd7'/><text x='372.0' y='224.5' text-anchor='middle' font-size='12' fill='#1f2328'>13.1</text><rect class='sa-hit' x='326.0' y='208.0' width='92' height='25' data-tip='MarkovBlanket · 1k–10k&#10;Improvement over Random +13.1%: place 11 of 15&#10;18 datasets'/><rect x='327.0' y='234.0' width='90' height='23' rx='3' fill='#4997c9'/><text x='372.0' y='249.5' text-anchor='middle' font-size='12' fill='#ffffff'>17.0</text><rect class='sa-hit' x='326.0' y='233.0' width='92' height='25' data-tip='Lasso · 1k–10k&#10;Improvement over Random +17.0%: place 7 of 15&#10;18 datasets'/><rect x='327.0' y='259.0' width='90' height='23' rx='3' fill='#6dafd7'/><text x='372.0' y='274.5' text-anchor='middle' font-size='12' fill='#1f2328'>13.1</text><rect class='sa-hit' x='326.0' y='258.0' width='92' height='25' data-tip='GainRatio · 1k–10k&#10;Improvement over Random +13.1%: place 12 of 15&#10;18 datasets'/><rect x='327.0' y='284.0' width='90' height='23' rx='3' fill='#519ccc'/><text x='372.0' y='299.5' text-anchor='middle' font-size='12' fill='#ffffff'>16.1</text><rect class='sa-hit' x='326.0' y='283.0' width='92' height='25' data-tip='(R)ReliefF · 1k–10k&#10;Improvement over Random +16.1%: place 8 of 15&#10;18 datasets'/><rect x='327.0' y='309.0' width='90' height='23' rx='3' fill='#2a7ab9'/><text x='372.0' y='324.5' text-anchor='middle' font-size='12' fill='#ffffff'>20.9</text><rect class='sa-hit' x='326.0' y='308.0' width='92' height='25' data-tip='SFS · 1k–10k&#10;Improvement over Random +20.9%: place 3 of 15&#10;18 datasets'/><rect x='327.0' y='334.0' width='90' height='23' rx='3' fill='#5aa2cf'/><text x='372.0' y='349.5' text-anchor='middle' font-size='12' fill='#1f2328'>15.2</text><rect class='sa-hit' x='326.0' y='333.0' width='92' height='25' data-tip='LOCO · 1k–10k&#10;Improvement over Random +15.2%: place 9 of 15&#10;18 datasets'/><rect x='327.0' y='359.0' width='90' height='23' rx='3' fill='#75b4d8'/><text x='372.0' y='374.5' text-anchor='middle' font-size='12' fill='#1f2328'>12.4</text><rect class='sa-hit' x='326.0' y='358.0' width='92' height='25' data-tip='SBE · 1k–10k&#10;Improvement over Random +12.4%: place 13 of 15&#10;18 datasets'/><rect x='327.0' y='384.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='372.0' y='399.5' text-anchor='middle' font-size='12' fill='#1f2328'>0.0</text><rect class='sa-hit' x='326.0' y='383.0' width='92' height='25' data-tip='Random · 1k–10k&#10;Improvement over Random +0.0%: place 14 of 15&#10;18 datasets'/><rect x='327.0' y='409.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='372.0' y='424.5' text-anchor='middle' font-size='12' fill='#1f2328'>-35.4</text><rect class='sa-hit' x='326.0' y='408.0' width='92' height='25' data-tip='LaplacianScore · 1k–10k&#10;Improvement over Random -35.4%: place 15 of 15&#10;18 datasets'/><rect x='419.0' y='59.0' width='90' height='23' rx='3' fill='#1561a9'/><text x='464.0' y='74.5' text-anchor='middle' font-size='12' fill='#ffffff'>24.1</text><rect class='sa-hit' x='418.0' y='58.0' width='92' height='25' data-tip='RFImportance · ≥ 10k&#10;Improvement over Random +24.1%: place 3 of 15&#10;22 datasets'/><rect x='419.0' y='84.0' width='90' height='23' rx='3' fill='#2474b7'/><text x='464.0' y='99.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.6</text><rect class='sa-hit' x='418.0' y='83.0' width='92' height='25' data-tip='MI · ≥ 10k&#10;Improvement over Random +21.6%: place 7 of 15&#10;22 datasets'/><rect x='419.0' y='109.0' width='90' height='23' rx='3' fill='#1561a9'/><text x='464.0' y='124.5' text-anchor='middle' font-size='12' fill='#ffffff'>24.2</text><rect class='sa-hit' x='418.0' y='108.0' width='92' height='25' data-tip='CART · ≥ 10k&#10;Improvement over Random +24.2%: place 2 of 15&#10;22 datasets'/><rect x='419.0' y='134.0' width='90' height='23' rx='3' fill='#1c6ab0'/><text x='464.0' y='149.5' text-anchor='middle' font-size='12' fill='#ffffff'>22.9</text><rect class='sa-hit' x='418.0' y='133.0' width='92' height='25' data-tip='F-Test · ≥ 10k&#10;Improvement over Random +22.9%: place 4 of 15&#10;22 datasets'/><rect x='419.0' y='159.0' width='90' height='23' rx='3' fill='#2777b8'/><text x='464.0' y='174.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.2</text><rect class='sa-hit' x='418.0' y='158.0' width='92' height='25' data-tip='ElasticNet · ≥ 10k&#10;Improvement over Random +21.2%: place 9 of 15&#10;22 datasets'/><rect x='419.0' y='184.0' width='90' height='23' rx='3' fill='#206fb4'/><text x='464.0' y='199.5' text-anchor='middle' font-size='12' fill='#ffffff'>22.2</text><rect class='sa-hit' x='418.0' y='183.0' width='92' height='25' data-tip='mRMR · ≥ 10k&#10;Improvement over Random +22.2%: place 5 of 15&#10;22 datasets'/><rect x='419.0' y='209.0' width='90' height='23' rx='3' fill='#0d57a1'/><rect class='sa-ink' x='419.5' y='209.5' width='89' height='22' rx='3' fill='none' stroke-width='2'/><text x='464.0' y='224.5' text-anchor='middle' font-size='12' fill='#ffffff' font-weight='700'>25.6</text><rect class='sa-hit' x='418.0' y='208.0' width='92' height='25' data-tip='MarkovBlanket · ≥ 10k&#10;Improvement over Random +25.6%: place 1 of 15 (best)&#10;22 datasets'/><rect x='419.0' y='234.0' width='90' height='23' rx='3' fill='#2575b7'/><text x='464.0' y='249.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.5</text><rect class='sa-hit' x='418.0' y='233.0' width='92' height='25' data-tip='Lasso · ≥ 10k&#10;Improvement over Random +21.5%: place 8 of 15&#10;22 datasets'/><rect x='419.0' y='259.0' width='90' height='23' rx='3' fill='#3b8bc2'/><text x='464.0' y='274.5' text-anchor='middle' font-size='12' fill='#ffffff'>18.5</text><rect class='sa-hit' x='418.0' y='258.0' width='92' height='25' data-tip='GainRatio · ≥ 10k&#10;Improvement over Random +18.5%: place 10 of 15&#10;22 datasets'/><rect x='419.0' y='284.0' width='90' height='23' rx='3' fill='#8abfdd'/><text x='464.0' y='299.5' text-anchor='middle' font-size='12' fill='#1f2328'>10.7</text><rect class='sa-hit' x='418.0' y='283.0' width='92' height='25' data-tip='(R)ReliefF · ≥ 10k&#10;Improvement over Random +10.7%: place 13 of 15&#10;22 datasets'/><rect x='419.0' y='309.0' width='90' height='23' rx='3' fill='#2171b5'/><text x='464.0' y='324.5' text-anchor='middle' font-size='12' fill='#ffffff'>21.9</text><rect class='sa-hit' x='418.0' y='308.0' width='92' height='25' data-tip='SFS · ≥ 10k&#10;Improvement over Random +21.9%: place 6 of 15&#10;22 datasets'/><rect x='419.0' y='334.0' width='90' height='23' rx='3' fill='#3d8dc4'/><text x='464.0' y='349.5' text-anchor='middle' font-size='12' fill='#ffffff'>18.3</text><rect class='sa-hit' x='418.0' y='333.0' width='92' height='25' data-tip='LOCO · ≥ 10k&#10;Improvement over Random +18.3%: place 11 of 15&#10;22 datasets'/><rect x='419.0' y='359.0' width='90' height='23' rx='3' fill='#65aad4'/><text x='464.0' y='374.5' text-anchor='middle' font-size='12' fill='#1f2328'>13.9</text><rect class='sa-hit' x='418.0' y='358.0' width='92' height='25' data-tip='SBE · ≥ 10k&#10;Improvement over Random +13.9%: place 12 of 15&#10;22 datasets'/><rect x='419.0' y='384.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='464.0' y='399.5' text-anchor='middle' font-size='12' fill='#1f2328'>0.0</text><rect class='sa-hit' x='418.0' y='383.0' width='92' height='25' data-tip='Random · ≥ 10k&#10;Improvement over Random +0.0%: place 14 of 15&#10;22 datasets'/><rect x='419.0' y='409.0' width='90' height='23' rx='3' fill='#dfecf7'/><text x='464.0' y='424.5' text-anchor='middle' font-size='12' fill='#1f2328'>-10.3</text><rect class='sa-hit' x='418.0' y='408.0' width='92' height='25' data-tip='LaplacianScore · ≥ 10k&#10;Improvement over Random -10.3%: place 15 of 15&#10;22 datasets'/><rect x='128.0' y='461' width='13.0' height='10' fill='#083c7d'/><rect x='140.5' y='461' width='13.0' height='10' fill='#08478d'/><rect x='153.0' y='461' width='13.0' height='10' fill='#08509b'/><rect x='165.5' y='461' width='13.0' height='10' fill='#0e59a2'/><rect x='178.0' y='461' width='13.0' height='10' fill='#1562a9'/><rect x='190.5' y='461' width='13.0' height='10' fill='#1c6bb0'/><rect x='203.0' y='461' width='13.0' height='10' fill='#2575b7'/><rect x='215.5' y='461' width='13.0' height='10' fill='#2f7fbc'/><rect x='228.0' y='461' width='13.0' height='10' fill='#3888c1'/><rect x='240.5' y='461' width='13.0' height='10' fill='#4191c6'/><rect x='253.0' y='461' width='13.0' height='10' fill='#4e9acb'/><rect x='265.5' y='461' width='13.0' height='10' fill='#5aa2cf'/><rect x='278.0' y='461' width='13.0' height='10' fill='#65aad4'/><rect x='290.5' y='461' width='13.0' height='10' fill='#72b2d8'/><rect x='303.0' y='461' width='13.0' height='10' fill='#82bbdb'/><rect x='315.5' y='461' width='13.0' height='10' fill='#91c3de'/><rect x='328.0' y='461' width='13.0' height='10' fill='#9fcae1'/><rect x='340.5' y='461' width='13.0' height='10' fill='#aacfe5'/><rect x='353.0' y='461' width='13.0' height='10' fill='#b7d4ea'/><rect x='365.5' y='461' width='13.0' height='10' fill='#c2d9ee'/><rect x='378.0' y='461' width='13.0' height='10' fill='#cadef0'/><rect x='390.5' y='461' width='13.0' height='10' fill='#d1e2f3'/><rect x='403.0' y='461' width='13.0' height='10' fill='#d9e7f5'/><rect x='415.5' y='461' width='13.0' height='10' fill='#dfecf7'/><text class='sa-muted' x='128.0' y='484' font-size='11'>29.1 (better)</text><text class='sa-muted' x='428.0' y='484' text-anchor='end' font-size='11'>≤ 0 (Random or worse)</text><text class='sa-text' x='128.0' y='455' font-size='11'>Improvement over Random (%)</text></svg><script type='text/plain' id='sa-csv'>group,method,improvement,n_datasets
+All,RFImportance,26.229,71
+All,MI,23.8,71
+All,CART,23.781,71
+All,F-Test,22.757,71
+All,ElasticNet,21.875,71
+All,mRMR,21.668,71
+All,MarkovBlanket,21.24,71
+All,Lasso,20.905,71
+All,GainRatio,19.528,71
+All,(R)ReliefF,18.568,71
+All,SFS,18.182,71
+All,LOCO,12.983,71
+All,SBE,11.396,71
+All,Random,0.0,71
+All,LaplacianScore,-18.582,71
+&lt; 1k,RFImportance,29.053,31
+&lt; 1k,MI,27.226,31
+&lt; 1k,mRMR,25.602,31
+&lt; 1k,(R)ReliefF,25.595,31
+&lt; 1k,F-Test,25.468,31
+&lt; 1k,ElasticNet,24.386,31
+&lt; 1k,GainRatio,24.014,31
+&lt; 1k,CART,23.431,31
+&lt; 1k,MarkovBlanket,22.88,31
+&lt; 1k,Lasso,22.773,31
+&lt; 1k,SFS,13.93,31
+&lt; 1k,SBE,9.041,31
+&lt; 1k,LOCO,7.922,31
+&lt; 1k,Random,0.0,31
+&lt; 1k,LaplacianScore,-14.745,31
+1k–10k,RFImportance,23.943,18
+1k–10k,CART,23.918,18
+1k–10k,SFS,20.902,18
+1k–10k,MI,20.632,18
+1k–10k,ElasticNet,18.401,18
+1k–10k,F-Test,17.933,18
+1k–10k,Lasso,16.979,18
+1k–10k,(R)ReliefF,16.082,18
+1k–10k,LOCO,15.16,18
+1k–10k,mRMR,14.211,18
+1k–10k,MarkovBlanket,13.14,18
+1k–10k,GainRatio,13.053,18
+1k–10k,SBE,12.408,18
+1k–10k,Random,0.0,18
+1k–10k,LaplacianScore,-35.358,18
+≥ 10k,MarkovBlanket,25.558,22
+≥ 10k,CART,24.162,22
+≥ 10k,RFImportance,24.12,22
+≥ 10k,F-Test,22.885,22
+≥ 10k,mRMR,22.227,22
+≥ 10k,SFS,21.95,22
+≥ 10k,MI,21.563,22
+≥ 10k,Lasso,21.483,22
+≥ 10k,ElasticNet,21.179,22
+≥ 10k,GainRatio,18.504,22
+≥ 10k,LOCO,18.334,22
+≥ 10k,SBE,13.888,22
+≥ 10k,(R)ReliefF,10.7,22
+≥ 10k,Random,0.0,22
+≥ 10k,LaplacianScore,-10.263,22
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+// Instant tooltip: a native SVG <title> only shows after a browser delay of 1-3 s.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'sa-tip';
+  document.body.appendChild(tip);
+  var current = null;
+  function show(hit, x, y) {
+    if (current !== hit) {
+      if (current) current.classList.remove('sa-on');
+      current = hit;
+      hit.classList.add('sa-on');
+      var lines = hit.getAttribute('data-tip').split('\n');
+      tip.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = lines[0];
+      tip.appendChild(head);
+      tip.appendChild(document.createTextNode('\n' + lines.slice(1).join('\n')));
+      tip.style.display = 'block';
+    }
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 14;
+    if (left + w > window.innerWidth - 4) left = Math.max(4, x - w - 14);
+    if (top + h > window.innerHeight - 4) top = Math.max(4, y - h - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    if (current) current.classList.remove('sa-on');
+    current = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('pointermove', function (e) {
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else if (e.pointerType === 'mouse') hide();
+  });
+  document.addEventListener('pointerdown', function (e) {  // touch: tap a bar to show, elsewhere to hide
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else hide();
+  });
+  document.addEventListener('mouseleave', hide);
+})();
+// Downloads always use the light colours (the paper look), whatever the page's theme.
+var SA_LIGHT = {'--fg': '#1f2328', '--muted': '#59636e', '--line': '#d1d9e0', '--bg': '#ffffff',
+  '--soft': '#f6f8fa', '--accent': '#0072B2'};
+function saSvgString() {
+  var svg = document.getElementById('sa-figure').cloneNode(true);
+  var style = svg.querySelector('style');
+  var css = style.textContent;
+  Object.keys(SA_LIGHT).forEach(function (v) { css = css.split('var(' + v + ')').join(SA_LIGHT[v]); });
+  style.textContent = css;
+  svg.querySelectorAll('.sa-hit').forEach(function (hit) { hit.remove(); });
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  return new XMLSerializer().serializeToString(svg);
+}
+function saSvg(name) {
+  saDownload(name + '.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
+}
+function saPng(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal, scale = 3;
+  var img = new Image();
+  img.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = box.width * scale; canvas.height = box.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = SA_LIGHT['--bg'];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function (blob) { saDownload(name + '.png', blob); });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
+}
+</script></body></html>

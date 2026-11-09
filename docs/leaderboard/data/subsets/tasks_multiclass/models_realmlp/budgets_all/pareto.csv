@@ -1,0 +1,16 @@
+method,improvement,time_per_1k,n_datasets,pareto_optimal
+RFImportance,30.2519,28.9817,12,True
+MI,28.0626,23.9964,12,True
+MarkovBlanket,27.4198,12.3987,12,True
+CART,24.6592,10.6496,12,True
+mRMR,22.8896,40.7848,12,False
+GainRatio,22.8636,3.5576,12,True
+F-Test,22.5324,0.79,12,True
+ElasticNet,22.1359,4353.1378,12,False
+(R)ReliefF,21.7305,30687.749,12,False
+SFS,17.629,46381.5084,12,False
+LOCO,15.5849,9620.9514,12,False
+Lasso,15.548,6266.1041,12,False
+SBE,13.4939,40275.0663,12,False
+Random,0.0,0.0085,12,True
+LaplacianScore,-11.8049,4.7316,12,False

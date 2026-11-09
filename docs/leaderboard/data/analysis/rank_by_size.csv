@@ -1,0 +1,46 @@
+characteristic,method,rho,ci_low,ci_high,n_datasets
+Samples,(R)ReliefF,-0.3153,-0.5165,-0.0806,71
+Samples,CART,0.3225,0.0608,0.5447,71
+Samples,ElasticNet,0.1845,-0.0623,0.4223,71
+Samples,F-Test,-0.012,-0.2458,0.2374,71
+Samples,GainRatio,-0.1842,-0.4143,0.045,71
+Samples,LOCO,0.2855,0.0349,0.5155,71
+Samples,LaplacianScore,-0.3816,-0.5883,-0.1582,71
+Samples,Lasso,0.1485,-0.0769,0.3724,71
+Samples,MI,-0.1391,-0.3469,0.0989,71
+Samples,MarkovBlanket,0.1939,-0.0242,0.4016,71
+Samples,RFImportance,0.0613,-0.2012,0.3078,71
+Samples,Random,-0.2961,-0.5078,-0.0726,71
+Samples,SBE,0.0961,-0.1696,0.3584,71
+Samples,SFS,0.3233,0.069,0.5364,71
+Samples,mRMR,-0.1687,-0.3937,0.0932,71
+Features,(R)ReliefF,0.2596,0.0199,0.4733,71
+Features,CART,0.0673,-0.1785,0.3138,71
+Features,ElasticNet,0.4522,0.251,0.5941,71
+Features,F-Test,0.1379,-0.0903,0.3362,71
+Features,GainRatio,0.0698,-0.1832,0.32,71
+Features,LOCO,-0.4771,-0.6491,-0.2381,71
+Features,LaplacianScore,-0.1744,-0.415,0.0605,71
+Features,Lasso,0.3996,0.1864,0.571,71
+Features,MI,-0.0647,-0.283,0.1707,71
+Features,MarkovBlanket,0.0665,-0.1703,0.3062,71
+Features,RFImportance,0.4042,0.2018,0.5835,71
+Features,Random,-0.0339,-0.2425,0.1935,71
+Features,SBE,-0.6824,-0.7778,-0.5391,71
+Features,SFS,-0.2364,-0.4404,-0.0018,71
+Features,mRMR,0.1709,-0.0963,0.3966,71
+Samples per feature,(R)ReliefF,-0.2451,-0.4445,-0.0172,71
+Samples per feature,CART,0.173,-0.0644,0.3867,71
+Samples per feature,ElasticNet,-0.0339,-0.2543,0.1978,71
+Samples per feature,F-Test,-0.098,-0.3389,0.1489,71
+Samples per feature,GainRatio,-0.2095,-0.4261,0.0433,71
+Samples per feature,LOCO,0.5058,0.2963,0.6925,71
+Samples per feature,LaplacianScore,-0.1873,-0.4172,0.06,71
+Samples per feature,Lasso,-0.0563,-0.2786,0.1735,71
+Samples per feature,MI,-0.1351,-0.3478,0.0896,71
+Samples per feature,MarkovBlanket,0.0259,-0.2032,0.2251,71
+Samples per feature,RFImportance,-0.1752,-0.3993,0.0582,71
+Samples per feature,Random,-0.2623,-0.4677,-0.0458,71
+Samples per feature,SBE,0.4499,0.2175,0.6495,71
+Samples per feature,SFS,0.2994,0.0333,0.5143,71
+Samples per feature,mRMR,-0.2892,-0.506,-0.0446,71

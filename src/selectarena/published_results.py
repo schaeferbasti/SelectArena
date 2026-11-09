@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pandas as pd
 
-RESULTS_REPO_ID = "SelectArena/SelectArena_Results"
+RESULTS_REPO_ID = "ANONYMIZED/SelectArena_Results"
 #: Commit of :data:`RESULTS_REPO_ID` the results are read from. ``None`` reads the latest version;
 #: pin it to a commit (as ``selectarena.datasets.HF_REVISION``) so a leaderboard is reproducible.
 RESULTS_REVISION: str | None = None

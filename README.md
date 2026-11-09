@@ -6,23 +6,14 @@
 </p>
 
 <p align="center">
-  <a href="https://arxiv.org/abs/2610.13644"><img src="https://img.shields.io/badge/arXiv-2610.13644-b31b1b.svg" alt="arXiv paper"></a>
-  <a href="https://huggingface.co/spaces/SelectArena/Leaderboard"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Leaderboard-SelectArena-0072b2" alt="Leaderboard"></a>
-  <a href="https://huggingface.co/datasets/SelectArena/SelectArena_Datasets"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Datasets-SelectArena-0072b2" alt="Datasets"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0 license"></a>
-</p>
-
-<p align="center">
-  <a href="https://arxiv.org/abs/2610.13644"><b>Paper</b></a> ·
-  <a href="https://huggingface.co/spaces/SelectArena/Leaderboard"><b>Leaderboard</b></a> ·
-  <a href="https://huggingface.co/datasets/SelectArena/SelectArena_Datasets"><b>Datasets</b></a> ·
+  <a href="https://anonymous.4open.science/w/selectarena/leaderboard/"><b>Leaderboard</b></a> ·
   <a href="#add-your-method-to-selectarena"><b>Add your method</b></a>
 </p>
 
 SelectArena is a **living benchmark** for feature selection on real-world tabular IID data. Each feature selection
 method selects a budgeted number of features, and the selection is judged by the downstream performance of tabular
 models trained on the selected features, plus a stability and validity benchmark that captures the interpretability
-of the methods. The [leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is updated as new methods
+of the methods. The [leaderboard](https://anonymous.4open.science/w/selectarena/leaderboard/) is updated as new methods
 are added.
 
 ## Installation
@@ -30,7 +21,7 @@ are added.
 SelectArena depends on [TabArena](https://github.com/autogluon/tabarena). All commands in this
 README run from the repository root (the folder with `pyproject.toml`).
 ```bash
-git clone https://github.com/schaeferbasti/SelectArena.git && cd SelectArena
+# download the repository from https://anonymous.4open.science/r/selectarena and cd into it
 uv venv --python 3.12 .venv && source .venv/bin/activate
 uv pip install --prerelease=allow -e ".[models,dev]"
 ```
@@ -80,7 +71,7 @@ land in `<workspace>/output/<benchmark_name>/`. On an OAR cluster, start from
 
 ## Leaderboard
 
-The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is generated from
+The [public leaderboard](https://anonymous.4open.science/w/selectarena/leaderboard/) is generated from
 the benchmark results with `scripts/run_generate_website_artifacts.py`.
 
 ### Your method on the leaderboard, locally
@@ -95,7 +86,7 @@ python scripts/preview_leaderboard.py      # the whole leaderboard website at ht
 ```
 
 `--with-published-results` downloads the published results of all methods from
-[SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) into
+ANONYMIZED/SelectArena_Results into
 `results/` (several GB, only once) and adds yours; your results replace the published ones of the
 same method on the same dataset (e.g. a rerun). Methods are compared on the same dataset splits, so
 run your method with the published `configs/benchmark.yaml`.

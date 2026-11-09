@@ -1,0 +1,421 @@
+grouping,group,method,improvement,n_datasets
+Task type,All,RFImportance,26.2289,71
+Task type,All,MI,23.7998,71
+Task type,All,CART,23.781,71
+Task type,All,F-Test,22.7574,71
+Task type,All,ElasticNet,21.875,71
+Task type,All,mRMR,21.6681,71
+Task type,All,MarkovBlanket,21.2405,71
+Task type,All,Lasso,20.9045,71
+Task type,All,GainRatio,19.528,71
+Task type,All,(R)ReliefF,18.5678,71
+Task type,All,SFS,18.1824,71
+Task type,All,LOCO,12.9833,71
+Task type,All,SBE,11.3964,71
+Task type,All,Random,0.0,71
+Task type,All,LaplacianScore,-18.5819,71
+Task type,Binary,RFImportance,28.0162,49
+Task type,Binary,CART,25.7885,49
+Task type,Binary,F-Test,25.6258,49
+Task type,Binary,MI,25.5063,49
+Task type,Binary,ElasticNet,24.0809,49
+Task type,Binary,mRMR,23.9148,49
+Task type,Binary,Lasso,23.4261,49
+Task type,Binary,MarkovBlanket,22.1785,49
+Task type,Binary,GainRatio,20.8909,49
+Task type,Binary,SFS,20.7627,49
+Task type,Binary,(R)ReliefF,19.4348,49
+Task type,Binary,LOCO,14.0883,49
+Task type,Binary,SBE,11.7689,49
+Task type,Binary,Random,0.0,49
+Task type,Binary,LaplacianScore,-23.7565,49
+Task type,Multiclass,RFImportance,31.6828,12
+Task type,Multiclass,MI,28.9489,12
+Task type,Multiclass,MarkovBlanket,28.8375,12
+Task type,Multiclass,CART,26.5537,12
+Task type,Multiclass,mRMR,25.3444,12
+Task type,Multiclass,GainRatio,24.5744,12
+Task type,Multiclass,(R)ReliefF,24.518,12
+Task type,Multiclass,ElasticNet,24.2329,12
+Task type,Multiclass,F-Test,23.4373,12
+Task type,Multiclass,Lasso,21.1735,12
+Task type,Multiclass,SFS,16.9992,12
+Task type,Multiclass,SBE,13.7701,12
+Task type,Multiclass,LOCO,13.6393,12
+Task type,Multiclass,Random,0.0,12
+Task type,Multiclass,LaplacianScore,-12.1581,12
+Task type,Regression,RFImportance,10.9261,10
+Task type,Regression,CART,10.6172,10
+Task type,Regression,MI,9.2591,10
+Task type,Regression,ElasticNet,8.2368,10
+Task type,Regression,Lasso,8.2262,10
+Task type,Regression,F-Test,7.8867,10
+Task type,Regression,MarkovBlanket,7.5278,10
+Task type,Regression,(R)ReliefF,7.179,10
+Task type,Regression,SFS,6.9587,10
+Task type,Regression,GainRatio,6.794,10
+Task type,Regression,LOCO,6.7815,10
+Task type,Regression,SBE,6.7229,10
+Task type,Regression,mRMR,6.2474,10
+Task type,Regression,Random,0.0,10
+Task type,Regression,LaplacianScore,-0.9354,10
+Samples,All,RFImportance,26.2289,71
+Samples,All,MI,23.7998,71
+Samples,All,CART,23.781,71
+Samples,All,F-Test,22.7574,71
+Samples,All,ElasticNet,21.875,71
+Samples,All,mRMR,21.6681,71
+Samples,All,MarkovBlanket,21.2405,71
+Samples,All,Lasso,20.9045,71
+Samples,All,GainRatio,19.528,71
+Samples,All,(R)ReliefF,18.5678,71
+Samples,All,SFS,18.1824,71
+Samples,All,LOCO,12.9833,71
+Samples,All,SBE,11.3964,71
+Samples,All,Random,0.0,71
+Samples,All,LaplacianScore,-18.5819,71
+Samples,< 1k,RFImportance,29.0525,31
+Samples,< 1k,MI,27.2264,31
+Samples,< 1k,mRMR,25.6018,31
+Samples,< 1k,(R)ReliefF,25.5947,31
+Samples,< 1k,F-Test,25.4681,31
+Samples,< 1k,ElasticNet,24.386,31
+Samples,< 1k,GainRatio,24.0143,31
+Samples,< 1k,CART,23.4307,31
+Samples,< 1k,MarkovBlanket,22.8799,31
+Samples,< 1k,Lasso,22.7732,31
+Samples,< 1k,SFS,13.9296,31
+Samples,< 1k,SBE,9.0408,31
+Samples,< 1k,LOCO,7.9223,31
+Samples,< 1k,Random,0.0,31
+Samples,< 1k,LaplacianScore,-14.7449,31
+Samples,1k–10k,RFImportance,23.9429,18
+Samples,1k–10k,CART,23.9185,18
+Samples,1k–10k,SFS,20.9018,18
+Samples,1k–10k,MI,20.6321,18
+Samples,1k–10k,ElasticNet,18.401,18
+Samples,1k–10k,F-Test,17.9332,18
+Samples,1k–10k,Lasso,16.9793,18
+Samples,1k–10k,(R)ReliefF,16.082,18
+Samples,1k–10k,LOCO,15.1596,18
+Samples,1k–10k,mRMR,14.2106,18
+Samples,1k–10k,MarkovBlanket,13.1405,18
+Samples,1k–10k,GainRatio,13.053,18
+Samples,1k–10k,SBE,12.4084,18
+Samples,1k–10k,Random,0.0,18
+Samples,1k–10k,LaplacianScore,-35.3583,18
+Samples,≥ 10k,MarkovBlanket,25.5575,22
+Samples,≥ 10k,CART,24.162,22
+Samples,≥ 10k,RFImportance,24.1204,22
+Samples,≥ 10k,F-Test,22.885,22
+Samples,≥ 10k,mRMR,22.2267,22
+Samples,≥ 10k,SFS,21.9499,22
+Samples,≥ 10k,MI,21.5633,22
+Samples,≥ 10k,Lasso,21.4829,22
+Samples,≥ 10k,ElasticNet,21.1792,22
+Samples,≥ 10k,GainRatio,18.504,22
+Samples,≥ 10k,LOCO,18.334,22
+Samples,≥ 10k,SBE,13.8878,22
+Samples,≥ 10k,(R)ReliefF,10.7001,22
+Samples,≥ 10k,Random,0.0,22
+Samples,≥ 10k,LaplacianScore,-10.2626,22
+Features,All,RFImportance,26.2289,71
+Features,All,MI,23.7998,71
+Features,All,CART,23.781,71
+Features,All,F-Test,22.7574,71
+Features,All,ElasticNet,21.875,71
+Features,All,mRMR,21.6681,71
+Features,All,MarkovBlanket,21.2405,71
+Features,All,Lasso,20.9045,71
+Features,All,GainRatio,19.528,71
+Features,All,(R)ReliefF,18.5678,71
+Features,All,SFS,18.1824,71
+Features,All,LOCO,12.9833,71
+Features,All,SBE,11.3964,71
+Features,All,Random,0.0,71
+Features,All,LaplacianScore,-18.5819,71
+Features,< 20,MI,22.5763,24
+Features,< 20,F-Test,21.1461,24
+Features,< 20,SBE,20.4615,24
+Features,< 20,mRMR,19.3113,24
+Features,< 20,RFImportance,19.0607,24
+Features,< 20,CART,18.545,24
+Features,< 20,ElasticNet,17.9417,24
+Features,< 20,SFS,17.6458,24
+Features,< 20,(R)ReliefF,17.4208,24
+Features,< 20,GainRatio,17.1659,24
+Features,< 20,Lasso,16.9916,24
+Features,< 20,MarkovBlanket,16.784,24
+Features,< 20,LOCO,15.5847,24
+Features,< 20,Random,0.0,24
+Features,< 20,LaplacianScore,-2.4103,24
+Features,20–99,RFImportance,25.3153,22
+Features,20–99,CART,24.76,22
+Features,20–99,MI,20.9086,22
+Features,20–99,SFS,20.1085,22
+Features,20–99,MarkovBlanket,18.9095,22
+Features,20–99,LOCO,18.2645,22
+Features,20–99,mRMR,17.5949,22
+Features,20–99,(R)ReliefF,16.9669,22
+Features,20–99,F-Test,16.7992,22
+Features,20–99,SBE,16.5011,22
+Features,20–99,GainRatio,16.3398,22
+Features,20–99,ElasticNet,16.2645,22
+Features,20–99,Lasso,14.7047,22
+Features,20–99,Random,0.0,22
+Features,20–99,LaplacianScore,-25.4534,22
+Features,≥ 100,RFImportance,33.9142,25
+Features,≥ 100,ElasticNet,30.5884,25
+Features,≥ 100,Lasso,30.1169,25
+Features,≥ 100,F-Test,29.5475,25
+Features,≥ 100,CART,27.946,25
+Features,≥ 100,MarkovBlanket,27.5699,25
+Features,≥ 100,MI,27.5187,25
+Features,≥ 100,mRMR,27.515,25
+Features,≥ 100,GainRatio,24.6011,25
+Features,≥ 100,(R)ReliefF,21.0777,25
+Features,≥ 100,SFS,17.0025,25
+Features,≥ 100,LOCO,5.8384,25
+Features,≥ 100,Random,0.0,25
+Features,≥ 100,SBE,-1.7981,25
+Features,≥ 100,LaplacianScore,-28.0599,25
+Samples per feature,All,RFImportance,26.2289,71
+Samples per feature,All,MI,23.7998,71
+Samples per feature,All,CART,23.781,71
+Samples per feature,All,F-Test,22.7574,71
+Samples per feature,All,ElasticNet,21.875,71
+Samples per feature,All,mRMR,21.6681,71
+Samples per feature,All,MarkovBlanket,21.2405,71
+Samples per feature,All,Lasso,20.9045,71
+Samples per feature,All,GainRatio,19.528,71
+Samples per feature,All,(R)ReliefF,18.5678,71
+Samples per feature,All,SFS,18.1824,71
+Samples per feature,All,LOCO,12.9833,71
+Samples per feature,All,SBE,11.3964,71
+Samples per feature,All,Random,0.0,71
+Samples per feature,All,LaplacianScore,-18.5819,71
+Samples per feature,< 10,RFImportance,28.5099,40
+Samples per feature,< 10,MI,25.1948,40
+Samples per feature,< 10,CART,23.8923,40
+Samples per feature,< 10,MarkovBlanket,23.2762,40
+Samples per feature,< 10,mRMR,23.1848,40
+Samples per feature,< 10,F-Test,22.9741,40
+Samples per feature,< 10,GainRatio,20.6977,40
+Samples per feature,< 10,ElasticNet,20.4495,40
+Samples per feature,< 10,Lasso,19.4867,40
+Samples per feature,< 10,(R)ReliefF,19.2481,40
+Samples per feature,< 10,SFS,15.3713,40
+Samples per feature,< 10,LOCO,7.4791,40
+Samples per feature,< 10,SBE,6.2199,40
+Samples per feature,< 10,Random,0.0,40
+Samples per feature,< 10,LaplacianScore,-22.9821,40
+Samples per feature,10–99,RFImportance,26.3318,13
+Samples per feature,10–99,ElasticNet,26.0323,13
+Samples per feature,10–99,CART,25.6788,13
+Samples per feature,10–99,F-Test,24.6687,13
+Samples per feature,10–99,Lasso,24.5098,13
+Samples per feature,10–99,SFS,21.3211,13
+Samples per feature,10–99,MI,20.7781,13
+Samples per feature,10–99,LOCO,19.1775,13
+Samples per feature,10–99,mRMR,18.683,13
+Samples per feature,10–99,(R)ReliefF,17.1882,13
+Samples per feature,10–99,GainRatio,15.5648,13
+Samples per feature,10–99,SBE,15.4328,13
+Samples per feature,10–99,MarkovBlanket,12.5443,13
+Samples per feature,10–99,Random,0.0,13
+Samples per feature,10–99,LaplacianScore,-23.3938,13
+Samples per feature,≥ 100,MarkovBlanket,22.9972,18
+Samples per feature,≥ 100,MI,22.8822,18
+Samples per feature,≥ 100,CART,22.163,18
+Samples per feature,≥ 100,SFS,22.1625,18
+Samples per feature,≥ 100,ElasticNet,22.0404,18
+Samples per feature,≥ 100,Lasso,21.4515,18
+Samples per feature,≥ 100,RFImportance,21.0855,18
+Samples per feature,≥ 100,F-Test,20.8954,18
+Samples per feature,≥ 100,LOCO,20.7412,18
+Samples per feature,≥ 100,mRMR,20.4533,18
+Samples per feature,≥ 100,SBE,19.9847,18
+Samples per feature,≥ 100,GainRatio,19.7908,18
+Samples per feature,≥ 100,(R)ReliefF,18.0524,18
+Samples per feature,≥ 100,Random,0.0,18
+Samples per feature,≥ 100,LaplacianScore,-5.3285,18
+Downstream model,All,RFImportance,26.2289,71
+Downstream model,All,MI,23.7998,71
+Downstream model,All,CART,23.781,71
+Downstream model,All,F-Test,22.7574,71
+Downstream model,All,ElasticNet,21.875,71
+Downstream model,All,mRMR,21.6681,71
+Downstream model,All,MarkovBlanket,21.2405,71
+Downstream model,All,Lasso,20.9045,71
+Downstream model,All,GainRatio,19.528,71
+Downstream model,All,(R)ReliefF,18.5678,71
+Downstream model,All,SFS,18.1824,71
+Downstream model,All,LOCO,12.9833,71
+Downstream model,All,SBE,11.3964,71
+Downstream model,All,Random,0.0,71
+Downstream model,All,LaplacianScore,-18.5819,71
+Downstream model,LightGBM,RFImportance,25.5467,71
+Downstream model,LightGBM,CART,23.5071,71
+Downstream model,LightGBM,MI,22.9183,71
+Downstream model,LightGBM,mRMR,21.651,71
+Downstream model,LightGBM,ElasticNet,21.5894,71
+Downstream model,LightGBM,F-Test,21.475,71
+Downstream model,LightGBM,MarkovBlanket,21.1769,71
+Downstream model,LightGBM,Lasso,21.0678,71
+Downstream model,LightGBM,GainRatio,19.7715,71
+Downstream model,LightGBM,(R)ReliefF,18.4867,71
+Downstream model,LightGBM,SFS,18.0757,71
+Downstream model,LightGBM,LOCO,13.0103,71
+Downstream model,LightGBM,SBE,12.3493,71
+Downstream model,LightGBM,Random,0.0,71
+Downstream model,LightGBM,LaplacianScore,-23.1502,71
+Downstream model,LinearModel,RFImportance,24.5664,71
+Downstream model,LinearModel,MI,23.1632,71
+Downstream model,LinearModel,F-Test,22.8523,71
+Downstream model,LinearModel,ElasticNet,22.5544,71
+Downstream model,LinearModel,CART,21.9597,71
+Downstream model,LinearModel,mRMR,21.8144,71
+Downstream model,LinearModel,Lasso,21.6866,71
+Downstream model,LinearModel,MarkovBlanket,19.0224,71
+Downstream model,LinearModel,GainRatio,18.3668,71
+Downstream model,LinearModel,SFS,17.7144,71
+Downstream model,LinearModel,(R)ReliefF,16.2645,71
+Downstream model,LinearModel,LOCO,11.9654,71
+Downstream model,LinearModel,SBE,8.3911,71
+Downstream model,LinearModel,Random,0.0,71
+Downstream model,LinearModel,LaplacianScore,-14.3694,71
+Downstream model,RandomForest,RFImportance,27.744,71
+Downstream model,RandomForest,MI,25.7525,71
+Downstream model,RandomForest,CART,24.8293,71
+Downstream model,RandomForest,F-Test,23.7761,71
+Downstream model,RandomForest,MarkovBlanket,23.5531,71
+Downstream model,RandomForest,ElasticNet,22.1065,71
+Downstream model,RandomForest,Lasso,21.1521,71
+Downstream model,RandomForest,mRMR,21.1309,71
+Downstream model,RandomForest,GainRatio,20.6076,71
+Downstream model,RandomForest,(R)ReliefF,20.3467,71
+Downstream model,RandomForest,SFS,17.5256,71
+Downstream model,RandomForest,SBE,13.0122,71
+Downstream model,RandomForest,LOCO,12.7433,71
+Downstream model,RandomForest,Random,0.0,71
+Downstream model,RandomForest,LaplacianScore,-17.0265,71
+Downstream model,RealMLP,RFImportance,27.0392,71
+Downstream model,RealMLP,CART,24.9132,71
+Downstream model,RealMLP,MI,24.2144,71
+Downstream model,RealMLP,F-Test,23.128,71
+Downstream model,RealMLP,MarkovBlanket,21.8261,71
+Downstream model,RealMLP,mRMR,21.5824,71
+Downstream model,RealMLP,ElasticNet,20.9298,71
+Downstream model,RealMLP,(R)ReliefF,20.6316,71
+Downstream model,RealMLP,GainRatio,20.3239,71
+Downstream model,RealMLP,Lasso,19.2202,71
+Downstream model,RealMLP,SFS,18.7021,71
+Downstream model,RealMLP,LOCO,14.7581,71
+Downstream model,RealMLP,SBE,12.5247,71
+Downstream model,RealMLP,Random,0.0,71
+Downstream model,RealMLP,LaplacianScore,-18.397,71
+Downstream model,TabICLv2,RFImportance,29.0337,71
+Downstream model,TabICLv2,CART,25.9125,71
+Downstream model,TabICLv2,MI,25.4563,71
+Downstream model,TabICLv2,F-Test,24.197,71
+Downstream model,TabICLv2,mRMR,23.5926,71
+Downstream model,TabICLv2,MarkovBlanket,23.542,71
+Downstream model,TabICLv2,ElasticNet,21.7247,71
+Downstream model,TabICLv2,(R)ReliefF,21.6818,71
+Downstream model,TabICLv2,GainRatio,20.8154,71
+Downstream model,TabICLv2,Lasso,20.2986,71
+Downstream model,TabICLv2,SFS,19.3388,71
+Downstream model,TabICLv2,LOCO,14.6377,71
+Downstream model,TabICLv2,SBE,13.1672,71
+Downstream model,TabICLv2,Random,0.0,71
+Downstream model,TabICLv2,LaplacianScore,-19.6423,71
+Budget,All,RFImportance,26.2289,71
+Budget,All,MI,23.7998,71
+Budget,All,CART,23.781,71
+Budget,All,F-Test,22.7574,71
+Budget,All,ElasticNet,21.875,71
+Budget,All,mRMR,21.6681,71
+Budget,All,MarkovBlanket,21.2405,71
+Budget,All,Lasso,20.9045,71
+Budget,All,GainRatio,19.528,71
+Budget,All,(R)ReliefF,18.5678,71
+Budget,All,SFS,18.1824,71
+Budget,All,LOCO,12.9833,71
+Budget,All,SBE,11.3964,71
+Budget,All,Random,0.0,71
+Budget,All,LaplacianScore,-18.5819,71
+Budget,1 (smallest),RFImportance,29.9487,71
+Budget,1 (smallest),MI,28.6934,71
+Budget,1 (smallest),F-Test,28.2875,71
+Budget,1 (smallest),CART,27.6214,71
+Budget,1 (smallest),MarkovBlanket,26.8161,71
+Budget,1 (smallest),ElasticNet,25.633,71
+Budget,1 (smallest),mRMR,25.5094,71
+Budget,1 (smallest),Lasso,24.1238,71
+Budget,1 (smallest),SFS,23.7241,71
+Budget,1 (smallest),GainRatio,23.5685,71
+Budget,1 (smallest),(R)ReliefF,20.4384,71
+Budget,1 (smallest),LOCO,15.342,71
+Budget,1 (smallest),SBE,12.5094,71
+Budget,1 (smallest),Random,0.0,71
+Budget,1 (smallest),LaplacianScore,-14.7201,71
+Budget,2,RFImportance,29.3441,71
+Budget,2,MI,27.4519,71
+Budget,2,CART,27.1339,71
+Budget,2,ElasticNet,25.9894,71
+Budget,2,F-Test,25.8943,71
+Budget,2,Lasso,25.4346,71
+Budget,2,MarkovBlanket,24.5651,71
+Budget,2,mRMR,24.5515,71
+Budget,2,GainRatio,23.7169,71
+Budget,2,SFS,21.6169,71
+Budget,2,(R)ReliefF,21.2714,71
+Budget,2,LOCO,15.8511,71
+Budget,2,SBE,14.6597,71
+Budget,2,Random,0.0,71
+Budget,2,LaplacianScore,-22.7707,71
+Budget,3,RFImportance,24.3008,71
+Budget,3,MI,20.8893,71
+Budget,3,CART,20.4694,71
+Budget,3,ElasticNet,19.7625,71
+Budget,3,(R)ReliefF,18.5166,71
+Budget,3,Lasso,18.3058,71
+Budget,3,F-Test,18.2586,71
+Budget,3,MarkovBlanket,18.0419,71
+Budget,3,mRMR,17.7182,71
+Budget,3,GainRatio,16.2124,71
+Budget,3,SFS,13.5613,71
+Budget,3,SBE,10.365,71
+Budget,3,LOCO,9.3199,71
+Budget,3,Random,0.0,71
+Budget,3,LaplacianScore,-58.2022,71
+Budget,4,RFImportance,17.9516,71
+Budget,4,CART,14.3581,71
+Budget,4,MI,14.1607,71
+Budget,4,mRMR,13.6984,71
+Budget,4,F-Test,13.6736,71
+Budget,4,ElasticNet,13.472,71
+Budget,4,(R)ReliefF,12.8701,71
+Budget,4,Lasso,12.6472,71
+Budget,4,GainRatio,11.6249,71
+Budget,4,MarkovBlanket,11.3031,71
+Budget,4,SFS,8.1034,71
+Budget,4,SBE,6.3074,71
+Budget,4,LOCO,4.9577,71
+Budget,4,Random,0.0,71
+Budget,4,LaplacianScore,-89.8624,71
+Budget,5 (largest),RFImportance,11.1111,71
+Budget,5 (largest),F-Test,9.9441,71
+Budget,5 (largest),mRMR,9.0137,71
+Budget,5 (largest),ElasticNet,8.6598,71
+Budget,5 (largest),(R)ReliefF,8.0589,71
+Budget,5 (largest),CART,7.59,71
+Budget,5 (largest),Lasso,7.4586,71
+Budget,5 (largest),MI,7.4066,71
+Budget,5 (largest),MarkovBlanket,6.5404,71
+Budget,5 (largest),GainRatio,6.0163,71
+Budget,5 (largest),LOCO,4.3517,71
+Budget,5 (largest),SBE,3.8896,71
+Budget,5 (largest),SFS,3.4099,71
+Budget,5 (largest),Random,0.0,71
+Budget,5 (largest),LaplacianScore,-92.0807,71

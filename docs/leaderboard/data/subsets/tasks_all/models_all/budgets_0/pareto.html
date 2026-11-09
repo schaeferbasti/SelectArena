@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SelectArena leaderboard: all tasks, all models, budget 1</title><style>
+:root { --fg:#1f2328; --muted:#59636e; --bg:#ffffff; --line:#d1d9e0; --soft:#f6f8fa; --accent:#0072B2; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+}
+:root[data-theme="dark"] { --fg:#e6edf3; --muted:#9198a1; --bg:#0d1117; --line:#3d444d; --soft:#151b23; --accent:#4aa3df; }
+html, body { margin:0; padding:0; background:var(--bg); color:var(--fg);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+.toolbar { display:flex; gap:6px; justify-content:flex-end; align-items:center; padding:4px 2px 8px; }
+.toolbar .hint { margin-right:auto; color:var(--muted); font-size:12px; }
+.toolbar button { font:inherit; font-size:12px; color:var(--fg); background:var(--soft);
+  border:1px solid var(--line); border-radius:6px; padding:3px 10px; cursor:pointer; }
+.toolbar button:hover { border-color:var(--accent); }
+
+#sa-tip { position:fixed; z-index:10; pointer-events:none; display:none; max-width:280px;
+  padding:6px 9px; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--fg);
+  font-size:12px; line-height:1.45; white-space:pre-line; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+#sa-tip b { font-weight:600; }
+</style></head><body><div class='toolbar'><span class='hint'>Hover or tap a method for its values.</span><button onclick="saSvg('selectarena_pareto')">SVG</button><button onclick="saPng('selectarena_pareto')">PNG</button><button onclick="saCsv('selectarena_pareto.csv')">CSV</button></div><svg id='sa-figure' viewBox='0 0 864 432' role='img' aria-label='Improvement over Random against feature selection time per 1k features'><style>
+svg { display:block; width:100%; height:auto; }
+.sa-text { fill:var(--fg); }
+.sa-muted { fill:var(--muted); }
+.sa-grid { stroke:var(--line); }
+.sa-ink { stroke:var(--fg); }
+.sa-hit { fill:transparent; cursor:default; }
+.sa-hit:hover, .sa-hit.sa-on { fill:var(--fg); fill-opacity:0.06; }
+
+.sa-dim { fill:var(--muted); }
+.sa-frame-line { stroke:var(--fg); stroke-opacity:0.3; fill:none; }
+.sa-point { stroke:var(--fg); }
+.sa-legend { fill:var(--bg); stroke:var(--line); }
+.sa-heat { image-rendering:pixelated; image-rendering:crisp-edges; }
+.sa-halo { paint-order:stroke; stroke:var(--bg); stroke-width:3px; stroke-opacity:0.7; }
+</style><line class='sa-grid' x1='96.7' x2='96.7' y1='16.2' y2='368.0'/><text class='sa-text' x='96.7' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>-2</tspan></text><line class='sa-grid' x1='206.1' x2='206.1' y1='16.2' y2='368.0'/><text class='sa-text' x='206.1' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>-1</tspan></text><line class='sa-grid' x1='315.6' x2='315.6' y1='16.2' y2='368.0'/><text class='sa-text' x='315.6' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>0</tspan></text><line class='sa-grid' x1='425.1' x2='425.1' y1='16.2' y2='368.0'/><text class='sa-text' x='425.1' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>1</tspan></text><line class='sa-grid' x1='534.5' x2='534.5' y1='16.2' y2='368.0'/><text class='sa-text' x='534.5' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>2</tspan></text><line class='sa-grid' x1='644.0' x2='644.0' y1='16.2' y2='368.0'/><text class='sa-text' x='644.0' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>3</tspan></text><line class='sa-grid' x1='753.5' x2='753.5' y1='16.2' y2='368.0'/><text class='sa-text' x='753.5' y='390.5' text-anchor='middle' font-size='15'>10<tspan dy='-7' font-size='10'>4</tspan></text><line class='sa-grid' x1='67.0' x2='847.8' y1='352.0' y2='352.0'/><text class='sa-text' x='58.0' y='358.0' text-anchor='end' font-size='15'>0</text><line class='sa-grid' x1='67.0' x2='847.8' y1='298.6' y2='298.6'/><text class='sa-text' x='58.0' y='304.6' text-anchor='end' font-size='15'>5</text><line class='sa-grid' x1='67.0' x2='847.8' y1='245.2' y2='245.2'/><text class='sa-text' x='58.0' y='251.2' text-anchor='end' font-size='15'>10</text><line class='sa-grid' x1='67.0' x2='847.8' y1='191.8' y2='191.8'/><text class='sa-text' x='58.0' y='197.8' text-anchor='end' font-size='15'>15</text><line class='sa-grid' x1='67.0' x2='847.8' y1='138.4' y2='138.4'/><text class='sa-text' x='58.0' y='144.4' text-anchor='end' font-size='15'>20</text><line class='sa-grid' x1='67.0' x2='847.8' y1='85.0' y2='85.0'/><text class='sa-text' x='58.0' y='91.0' text-anchor='end' font-size='15'>25</text><line class='sa-grid' x1='67.0' x2='847.8' y1='31.6' y2='31.6'/><text class='sa-text' x='58.0' y='37.6' text-anchor='end' font-size='15'>30</text><rect class='sa-frame-line' x='67.0' y='16.2' width='780.8' height='351.8'/><text class='sa-text' x='457.4' y='420.0' text-anchor='middle' font-size='15'>Feature Selection Time (s) per 1k Features</text><text class='sa-text' transform='translate(21.0 192.1) rotate(-90)' text-anchor='middle' font-size='15'>Improvement over Random (%)</text><defs><marker id='sa-arrow' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10' fill='none' stroke='#009E73' stroke-width='1.6'/></marker></defs><line x1='109.6' y1='51.9' x2='69.0' y2='18.2' stroke='#009E73' stroke-width='2.2' marker-end='url(#sa-arrow)'/><text x='82.6' y='75.9' fill='#009E73' font-size='18' font-weight='700'>optimal</text><polyline points='102.5,352.0 305.1,49.9 496.6,32.2' fill='none' stroke='#D55E00' stroke-width='3.0'/><circle class='sa-point' cx='496.6' cy='32.2' r='6.8' fill='#D55E00' stroke-width='1'/><circle cx='502.9' cy='45.6' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle class='sa-point' cx='305.1' cy='49.9' r='6.8' fill='#D55E00' stroke-width='1'/><circle cx='446.4' cy='57.0' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='461.7' cy='65.6' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='686.3' cy='78.3' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='454.0' cy='79.6' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='684.5' cy='94.4' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='778.9' cy='98.7' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='442.0' cy='100.3' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='795.9' cy='133.8' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='731.5' cy='188.2' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle cx='812.3' cy='218.4' r='5.8' fill='#d3d3d3' fill-opacity='0.8' stroke='#808080' stroke-width='1'/><circle class='sa-point' cx='102.5' cy='352.0' r='6.8' fill='#D55E00' stroke-width='1'/><line class='sa-ink' x1='496.6' y1='32.2' x2='597.3' y2='25.6' stroke-width='1' opacity='0.6'/><text class='sa-text sa-halo' x='597.3' y='25.6' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='700'>RFImportance</text><line class='sa-ink' x1='502.9' y1='45.6' x2='580.4' y2='58.7' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='580.4' y='58.7' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>MI</text><line class='sa-ink' x1='305.1' y1='49.9' x2='264.2' y2='64.2' stroke-width='1' opacity='0.6'/><text class='sa-text sa-halo' x='264.2' y='64.2' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='700'>F-Test</text><line class='sa-ink' x1='446.4' y1='57.0' x2='416.2' y2='42.8' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='416.2' y='42.8' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>CART</text><line class='sa-ink' x1='461.7' y1='65.6' x2='575.8' y2='87.4' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='575.8' y='87.4' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>MarkovBlanket</text><line class='sa-ink' x1='686.3' y1='78.3' x2='790.7' y2='57.7' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='790.7' y='57.7' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>ElasticNet</text><line class='sa-ink' x1='454.0' y1='79.6' x2='549.7' y2='121.9' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='549.7' y='121.9' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>mRMR</text><line class='sa-ink' x1='684.5' y1='94.4' x2='731.0' y2='118.4' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='731.0' y='118.4' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>Lasso</text><line class='sa-ink' x1='778.9' y1='98.7' x2='805.4' y2='85.0' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='805.4' y='85.0' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>SFS</text><line class='sa-ink' x1='442.0' y1='100.3' x2='412.4' y2='121.5' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='412.4' y='121.5' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>GainRatio</text><text class='sa-dim sa-halo' x='797.0' y='154.3' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>(R)ReliefF</text><line class='sa-ink' x1='731.5' y1='188.2' x2='697.5' y2='202.5' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='697.5' y='202.5' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>LOCO</text><line class='sa-ink' x1='812.3' y1='218.4' x2='787.1' y2='232.7' stroke-width='1' opacity='0.6'/><text class='sa-dim sa-halo' x='787.1' y='232.7' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='400'>SBE</text><line class='sa-ink' x1='102.5' y1='352.0' x2='156.2' y2='337.8' stroke-width='1' opacity='0.6'/><text class='sa-text sa-halo' x='156.2' y='337.8' text-anchor='middle' dominant-baseline='central' font-size='18' font-weight='700'>Random</text><rect class='sa-legend' x='610.8' y='296.0' width='225.0' height='60.0' rx='4'/><circle stroke='#808080' cx='631.8' cy='314.0' r='6.0' fill='#d3d3d3'/><text class='sa-text' x='649.8' y='320.0' font-size='15'>Dominated Methods</text><circle class='sa-point' cx='631.8' cy='338.0' r='6.0' fill='#D55E00'/><text class='sa-text' x='649.8' y='344.0' font-size='15'>Pareto Front</text><circle class='sa-hit' cx='496.6' cy='32.2' r='10.5' data-tip='RFImportance (on the Pareto front)&#10;Improvement over Random: 29.9%&#10;Selection time per 1k features: 45 s&#10;Datasets: 71&#10;Next to MI: 28.7%, 51.4 s' aria-label='RFImportance (on the Pareto front)&#10;Improvement over Random: 29.9%&#10;Selection time per 1k features: 45 s&#10;Datasets: 71&#10;Next to MI: 28.7%, 51.4 s'/><circle class='sa-hit' cx='502.9' cy='45.6' r='10.5' data-tip='MI&#10;Improvement over Random: 28.7%&#10;Selection time per 1k features: 51.4 s&#10;Datasets: 71&#10;Next to RFImportance: 29.9%, 45 s' aria-label='MI&#10;Improvement over Random: 28.7%&#10;Selection time per 1k features: 51.4 s&#10;Datasets: 71&#10;Next to RFImportance: 29.9%, 45 s'/><circle class='sa-hit' cx='305.1' cy='49.9' r='10.5' data-tip='F-Test (on the Pareto front)&#10;Improvement over Random: 28.3%&#10;Selection time per 1k features: 0.802 s&#10;Datasets: 71' aria-label='F-Test (on the Pareto front)&#10;Improvement over Random: 28.3%&#10;Selection time per 1k features: 0.802 s&#10;Datasets: 71'/><circle class='sa-hit' cx='446.4' cy='57.0' r='10.5' data-tip='CART&#10;Improvement over Random: 27.6%&#10;Selection time per 1k features: 15.7 s&#10;Datasets: 71&#10;Next to MarkovBlanket: 26.8%, 21.6 s' aria-label='CART&#10;Improvement over Random: 27.6%&#10;Selection time per 1k features: 15.7 s&#10;Datasets: 71&#10;Next to MarkovBlanket: 26.8%, 21.6 s'/><circle class='sa-hit' cx='461.7' cy='65.6' r='10.5' data-tip='MarkovBlanket&#10;Improvement over Random: 26.8%&#10;Selection time per 1k features: 21.6 s&#10;Datasets: 71&#10;Next to CART: 27.6%, 15.7 s&#10;Next to mRMR: 25.5%, 18.4 s' aria-label='MarkovBlanket&#10;Improvement over Random: 26.8%&#10;Selection time per 1k features: 21.6 s&#10;Datasets: 71&#10;Next to CART: 27.6%, 15.7 s&#10;Next to mRMR: 25.5%, 18.4 s'/><circle class='sa-hit' cx='686.3' cy='78.3' r='10.5' data-tip='ElasticNet&#10;Improvement over Random: 25.6%&#10;Selection time per 1k features: 2.43e+03 s&#10;Datasets: 71&#10;Next to Lasso: 24.1%, 2.35e+03 s' aria-label='ElasticNet&#10;Improvement over Random: 25.6%&#10;Selection time per 1k features: 2.43e+03 s&#10;Datasets: 71&#10;Next to Lasso: 24.1%, 2.35e+03 s'/><circle class='sa-hit' cx='454.0' cy='79.6' r='10.5' data-tip='mRMR&#10;Improvement over Random: 25.5%&#10;Selection time per 1k features: 18.4 s&#10;Datasets: 71&#10;Next to MarkovBlanket: 26.8%, 21.6 s' aria-label='mRMR&#10;Improvement over Random: 25.5%&#10;Selection time per 1k features: 18.4 s&#10;Datasets: 71&#10;Next to MarkovBlanket: 26.8%, 21.6 s'/><circle class='sa-hit' cx='684.5' cy='94.4' r='10.5' data-tip='Lasso&#10;Improvement over Random: 24.1%&#10;Selection time per 1k features: 2.35e+03 s&#10;Datasets: 71&#10;Next to ElasticNet: 25.6%, 2.43e+03 s' aria-label='Lasso&#10;Improvement over Random: 24.1%&#10;Selection time per 1k features: 2.35e+03 s&#10;Datasets: 71&#10;Next to ElasticNet: 25.6%, 2.43e+03 s'/><circle class='sa-hit' cx='778.9' cy='98.7' r='10.5' data-tip='SFS&#10;Improvement over Random: 23.7%&#10;Selection time per 1k features: 1.71e+04 s&#10;Datasets: 71' aria-label='SFS&#10;Improvement over Random: 23.7%&#10;Selection time per 1k features: 1.71e+04 s&#10;Datasets: 71'/><circle class='sa-hit' cx='442.0' cy='100.3' r='10.5' data-tip='GainRatio&#10;Improvement over Random: 23.6%&#10;Selection time per 1k features: 14.3 s&#10;Datasets: 71' aria-label='GainRatio&#10;Improvement over Random: 23.6%&#10;Selection time per 1k features: 14.3 s&#10;Datasets: 71'/><circle class='sa-hit' cx='795.9' cy='133.8' r='10.5' data-tip='(R)ReliefF&#10;Improvement over Random: 20.4%&#10;Selection time per 1k features: 2.44e+04 s&#10;Datasets: 71' aria-label='(R)ReliefF&#10;Improvement over Random: 20.4%&#10;Selection time per 1k features: 2.44e+04 s&#10;Datasets: 71'/><circle class='sa-hit' cx='731.5' cy='188.2' r='10.5' data-tip='LOCO&#10;Improvement over Random: 15.3%&#10;Selection time per 1k features: 6.3e+03 s&#10;Datasets: 71' aria-label='LOCO&#10;Improvement over Random: 15.3%&#10;Selection time per 1k features: 6.3e+03 s&#10;Datasets: 71'/><circle class='sa-hit' cx='812.3' cy='218.4' r='10.5' data-tip='SBE&#10;Improvement over Random: 12.5%&#10;Selection time per 1k features: 3.45e+04 s&#10;Datasets: 71' aria-label='SBE&#10;Improvement over Random: 12.5%&#10;Selection time per 1k features: 3.45e+04 s&#10;Datasets: 71'/><circle class='sa-hit' cx='102.5' cy='352.0' r='10.5' data-tip='Random (on the Pareto front)&#10;Improvement over Random: 0.0%&#10;Selection time per 1k features: 0.0113 s&#10;Datasets: 71' aria-label='Random (on the Pareto front)&#10;Improvement over Random: 0.0%&#10;Selection time per 1k features: 0.0113 s&#10;Datasets: 71'/></svg><script type='text/plain' id='sa-csv'>method,improvement,time_per_1k,n_datasets,pareto_optimal
+RFImportance,29.9487,44.9997,71,True
+MI,28.6934,51.3992,71,False
+F-Test,28.2875,0.8021,71,True
+CART,27.6214,15.6751,71,False
+MarkovBlanket,26.8161,21.6238,71,False
+ElasticNet,25.633,2432.4697,71,False
+mRMR,25.5094,18.3638,71,False
+Lasso,24.1238,2345.1987,71,False
+SFS,23.7241,17082.8785,71,False
+GainRatio,23.5685,14.2876,71,False
+(R)ReliefF,20.4384,24428.508,71,False
+LOCO,15.342,6295.0899,71,False
+SBE,12.5094,34469.1508,71,False
+Random,0.0,0.0113,71,True
+LaplacianScore,-14.7201,4.6393,71,False
+</script><script>
+// Theme: the Space sets data-theme on this page when its theme button was used (same origin), or
+// sends {saTheme: 'light' | 'dark' | null}; without either, the page follows the system setting.
+(function () {
+  function apply(theme) {
+    if (theme === 'light' || theme === 'dark') document.documentElement.setAttribute('data-theme', theme);
+    else document.documentElement.removeAttribute('data-theme');
+  }
+  try { apply(window.parent.document.documentElement.getAttribute('data-theme')); } catch (e) {}
+  window.addEventListener('message', function (event) {
+    if (event.data && 'saTheme' in event.data) apply(event.data.saTheme);
+  });
+})();
+function saDownload(name, blob) {
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function saCsv(name) {
+  saDownload(name, new Blob([document.getElementById('sa-csv').textContent], {type: 'text/csv'}));
+}
+// Report the page height to an embedding page (the Space resizes its iframe to it).
+(function () {
+  function post() {
+    try {
+      var height = Math.ceil(document.body.getBoundingClientRect().height) + 4;
+      if (window.parent !== window) window.parent.postMessage({saFrameHeight: height}, '*');
+    } catch (e) {}
+  }
+  window.addEventListener('load', post);
+  window.addEventListener('resize', post);
+  if (window.ResizeObserver) new ResizeObserver(post).observe(document.body);
+})();
+
+// Instant tooltip: a native SVG <title> only shows after a browser delay of 1-3 s.
+(function () {
+  var tip = document.createElement('div');
+  tip.id = 'sa-tip';
+  document.body.appendChild(tip);
+  var current = null;
+  function show(hit, x, y) {
+    if (current !== hit) {
+      if (current) current.classList.remove('sa-on');
+      current = hit;
+      hit.classList.add('sa-on');
+      var lines = hit.getAttribute('data-tip').split('\n');
+      tip.textContent = '';
+      var head = document.createElement('b');
+      head.textContent = lines[0];
+      tip.appendChild(head);
+      tip.appendChild(document.createTextNode('\n' + lines.slice(1).join('\n')));
+      tip.style.display = 'block';
+    }
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 14;
+    if (left + w > window.innerWidth - 4) left = Math.max(4, x - w - 14);
+    if (top + h > window.innerHeight - 4) top = Math.max(4, y - h - 14);
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  }
+  function hide() {
+    if (current) current.classList.remove('sa-on');
+    current = null;
+    tip.style.display = 'none';
+  }
+  document.addEventListener('pointermove', function (e) {
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else if (e.pointerType === 'mouse') hide();
+  });
+  document.addEventListener('pointerdown', function (e) {  // touch: tap a bar to show, elsewhere to hide
+    var hit = e.target.closest ? e.target.closest('.sa-hit') : null;
+    if (hit) show(hit, e.clientX, e.clientY); else hide();
+  });
+  document.addEventListener('mouseleave', hide);
+})();
+// Downloads always use the light colours (the paper look), whatever the page's theme.
+var SA_LIGHT = {'--fg': '#1f2328', '--muted': '#59636e', '--line': '#d1d9e0', '--bg': '#ffffff',
+  '--soft': '#f6f8fa', '--accent': '#0072B2'};
+function saSvgString() {
+  var svg = document.getElementById('sa-figure').cloneNode(true);
+  var style = svg.querySelector('style');
+  var css = style.textContent;
+  Object.keys(SA_LIGHT).forEach(function (v) { css = css.split('var(' + v + ')').join(SA_LIGHT[v]); });
+  style.textContent = css;
+  svg.querySelectorAll('.sa-hit').forEach(function (hit) { hit.remove(); });
+  svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  return new XMLSerializer().serializeToString(svg);
+}
+function saSvg(name) {
+  saDownload(name + '.svg', new Blob([saSvgString()], {type: 'image/svg+xml'}));
+}
+function saPng(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal, scale = 3;
+  var img = new Image();
+  img.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = box.width * scale; canvas.height = box.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = SA_LIGHT['--bg'];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(function (blob) { saDownload(name + '.png', blob); });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
+}
+</script></body></html>
