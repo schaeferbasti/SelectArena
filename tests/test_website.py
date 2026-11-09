@@ -568,6 +568,7 @@ def test_analysis_figures(artifacts):
     assert set(table["grouping"]) == {g["label"] for g in analysis["groupings"]}
     assert analysis["improvement_by_model"] and (folder / "improvement_by_model.html").is_file()
     assert analysis["improvement_by_task_type"] == (folder / "improvement_by_task_type.html").is_file()
+    assert analysis["improvement_by_budget"] and (folder / "improvement_by_budget.html").is_file()
     # Removed figures (per domain, selection time, stability and validity per domain and size) stay out.
     assert not {"improvement_by_domain", "improvement_by_data_foundry_domain", "selection_time", "stability"} & set(
         analysis

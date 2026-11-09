@@ -25,7 +25,8 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
     ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
     model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
     dataset size), ``improvement_by_model.html``, ``improvement_by_task_type.html`` and
-    ``.csv`` (improvement over Random per downstream model and task type);
+    ``improvement_by_budget.html`` and ``.csv`` (improvement over Random per downstream model,
+    task type and feature budget);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -186,15 +187,18 @@ def _analysis_figures(
         pd.concat(tables)[["grouping", "group", "method", "improvement", "n_datasets"]].round(4).to_csv(
             folder / "heatmap.csv", index=False
         )
-    # Improvement over Random per downstream model and per task type.
+    # Improvement over Random per downstream model, task type and feature budget.
     per_group = {}
     named = df.assign(dataset=df["dataset_key"])
+    budgets = sorted(int(b) for b in named["budget_index"].dropna().unique()) if "budget_index" in named else []
+    budget_labels = {b: characteristics.budget_label(b, budgets) for b in budgets}
     for key, column, labels, all_label, between in (
         ("model", "model", None, "All models", "the downstream models"),
         ("task_type", "problem_type", characteristics.TASK_TYPE_LABELS, "All task types", "the task types"),
+        ("budget", "budget_index", budget_labels, "All budgets", "the budgets"),
     ):
         per_group[key] = False
-        if not order or named[column].nunique() < 2:
+        if not order or column not in named or named[column].nunique() < 2:
             continue
         table = characteristics.improvement_by(named, column, labels)
         if table.empty:
@@ -223,13 +227,14 @@ def _analysis_figures(
             has_size = True
     log(
         f"Analysis figures: {len(groupings)} groupings, per model {per_group['model']}, per task type "
-        f"{per_group['task_type']}, rank by size {has_size}."
+        f"{per_group['task_type']}, per budget {per_group['budget']}, rank by size {has_size}."
     )
     return {
         "path": "analysis",
         "groupings": [{"key": g.key, "label": g.label} for g in groupings],
         "improvement_by_model": per_group["model"],
         "improvement_by_task_type": per_group["task_type"],
+        "improvement_by_budget": per_group["budget"],
         "rank_by_size": has_size,
     }
 
