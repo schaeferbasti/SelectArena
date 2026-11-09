@@ -566,18 +566,12 @@ def test_analysis_figures(artifacts):
         assert "id='sa-figure'" in page and ">All<" in page
     table = pd.read_csv(folder / "heatmap.csv")
     assert set(table["grouping"]) == {g["label"] for g in analysis["groupings"]}
-    assert analysis["selection_time"] and (folder / "selection_time.html").is_file()
     assert analysis["improvement_by_model"] and (folder / "improvement_by_model.html").is_file()
     assert analysis["improvement_by_task_type"] == (folder / "improvement_by_task_type.html").is_file()
-    assert analysis["improvement_by_domain"] == (folder / "improvement_by_domain.html").is_file()
-    # Stability and validity per domain and size: an entry per measure (and noise level), files as listed.
-    entries = [analysis["stability"], *analysis["validity"]]
-    assert len(analysis["validity"]) == len(json.loads((data / "meta.json").read_text())["validity_tables"])
-    for entry in entries:
-        for kind in ("by_domain", "by_size"):
-            assert entry[kind] == (data / entry["path"] / f"{kind}.html").is_file()
-    assert (
-        analysis["improvement_by_data_foundry_domain"] == (folder / "improvement_by_data_foundry_domain.html").is_file()
+    # Removed figures (per domain, selection time, stability and validity per domain and size) stay out.
+    assert not {"improvement_by_domain", "improvement_by_data_foundry_domain", "selection_time", "stability"} & set(
+        analysis
     )
+    assert not any(folder.glob("*domain*")) and not (folder / "selection_time.html").exists()
     # The rank correlation needs at least five datasets (the fixture has fewer).
     assert analysis["rank_by_size"] == (folder / "rank_by_size.html").is_file()
