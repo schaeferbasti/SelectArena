@@ -88,7 +88,26 @@
 
   // ---- iframes and images ----
   function setFrame(frame, src) {
-    if (frame.getAttribute('src') !== src) frame.setAttribute('src', src);
+    // Anonymized build: Anonymous GitHub refuses to show its pages inside frames, so each embedded
+    // page is loaded as a script (<page>.html.js, which sets SA_PAGES[<page>]) and shown via srcdoc.
+    if (frame.getAttribute('data-src') === src) return;
+    frame.setAttribute('data-src', src);
+    loadPage(src).then(function (html) {
+      if (frame.getAttribute('data-src') === src) frame.srcdoc = html;
+    });
+  }
+  var pageLoads = {};
+  function loadPage(src) {
+    if (!pageLoads[src]) {
+      pageLoads[src] = new Promise(function (resolve) {
+        var script = document.createElement('script');
+        script.src = src + '.js';
+        script.onload = function () { resolve((window.SA_PAGES || {})[src] || ''); };
+        script.onerror = function () { delete pageLoads[src]; resolve(''); };
+        document.head.appendChild(script);
+      });
+    }
+    return pageLoads[src];
   }
   window.addEventListener('message', function (event) {
     var data = event.data;
@@ -246,7 +265,7 @@
     setFrame($('frame-figure'), dir + 'elo_explorer.html');
     var table = $('frame-table');
     var src = dir + 'leaderboard_table.html';
-    if (table.getAttribute('src') !== src) table.style.height = (info.n_methods * 37 + 90) + 'px';
+    if (table.getAttribute('data-src') !== src) table.style.height = (info.n_methods * 37 + 90) + 'px';
     setFrame(table, src);
   }
 
