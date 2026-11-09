@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <!-- Bumped with every data refresh (shown in the header). -->
-  <meta name="selectarena-version" content="0.9.1">
+  <meta name="selectarena-version" content="0.9.3">
   <title>SelectArena Leaderboard</title>
   <meta name="description" content="Leaderboard of feature selection methods on real-world tabular data.">
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
@@ -197,6 +197,17 @@
             (Spearman) between the method rankings of every pair of task types. The errors differ
             between task types (ROC AUC, log-loss, RMSE), so compare the methods within a task type
             rather than the size of the gains across task types.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="budget-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-budget" title="Improvement over Random of each method per feature budget" style="height:540px"></iframe>
+          <figcaption class="caption">
+            <strong>Improvement over Random per feature budget.</strong> As the first figure of this
+            section, with the budgets as groups: each cell is a method's improvement of the downstream
+            error over Random (%) at one feature budget, from 1 (the fewest selected features) to 5
+            (the most), and <em>All</em> over all budgets, as in the leaderboard. Darker is better, and
+            the best method of each budget is outlined. Improvements shrink at larger budgets for every
+            method, since Random's selection then holds most of the features.
           </figcaption>
         </figure>
         <figure class="plot" id="size-figure" hidden>

@@ -169,7 +169,7 @@ pre {
 .plot { max-width: min(960px, max(560px, calc((100vh - 330px) * 2.1))); }
 #pareto-figure { max-width: min(960px, max(560px, calc((100vh - 330px) * 1.75))); }
 /* Where Methods Win: the figures keep about their natural width (the heat map is narrow). */
-#group-figure { max-width: 780px; }
+#group-figure, #budget-figure { max-width: 780px; }
 #model-figure, #task-figure { max-width: 840px; }
 #size-figure { max-width: 900px; }
 

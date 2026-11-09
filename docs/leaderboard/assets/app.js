@@ -359,6 +359,10 @@
     if (info.improvement_by_model) setFrame($('plot-model'), dir + 'improvement_by_model.html');
     $('task-figure').hidden = !info.improvement_by_task_type;
     if (info.improvement_by_task_type) setFrame($('plot-task'), dir + 'improvement_by_task_type.html');
+    // The heat map by budget (also a "Group by" option of the first figure) as a figure of its own.
+    var byBudget = groupings.some(function (g) { return g.key === 'budget'; });
+    $('budget-figure').hidden = !byBudget;
+    if (byBudget) setFrame($('plot-budget'), dir + 'heatmap_budget.html');
     $('size-figure').hidden = !info.rank_by_size;
     if (info.rank_by_size) setFrame($('plot-size'), dir + 'rank_by_size.html');
   }
