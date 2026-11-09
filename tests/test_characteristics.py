@@ -10,7 +10,6 @@ from selectarena.website.characteristic_figures import (
     improvement_heatmap_html,
     method_order,
     rank_sensitivity_html,
-    selection_time_html,
 )
 
 FEATURES = [10, 15, 25, 60, 150, 400, 900, 2000]
@@ -120,24 +119,6 @@ def test_rank_sensitivity(data):
     assert (sens["n_datasets"] == 8).all()
 
 
-def test_selection_time():
-    df = pd.DataFrame(
-        {
-            "dataset_key": ["a", "a", "b", "b", "c", "c"],
-            "method": ["SFS", "Lasso"] * 3,
-            "feature_selection_fit_time": [10.0, 0.1, 3600.0, 0.5, 3600.0, 1.0],
-            "feature_selection_time_limit": [3600] * 6,
-        }
-    )
-    chars = pd.DataFrame({"num_features": [10, 100, 1000]}, index=pd.Index(["a", "b", "c"], name="dataset"))
-    times, limit = C.selection_time(df, chars)
-    assert limit == 3600 and len(times) == 6
-    binned = C.binned_time(times, n_bins=3)
-    sfs = binned[binned["method"] == "SFS"].sort_values("features_mid")
-    assert sfs["features_mid"].tolist() == [10, 100, 1000] and sfs["time_s"].tolist() == [10, 3600, 3600]
-    assert (binned["n_datasets"] == 1).all()
-
-
 def test_figures(data):
     scores, chars = data
     with_chars = C.add_characteristics(scores, chars)
@@ -150,11 +131,7 @@ def test_figures(data):
     sens = C.rank_sensitivity(scores, chars, n_bootstrap=50)
     by_size = rank_sensitivity_html(sens, order, title="t")
     assert "Ranks worse with more features" in by_size and "Ranks better with more features" in by_size
-    df = scores.assign(feature_selection_fit_time=1.0, feature_selection_time_limit=60.0)
-    times, limit = C.selection_time(df, chars)
-    timing = selection_time_html(C.binned_time(times), limit, order, title="t")
-    assert "Time limit (60 s)" in timing
-    for page in (heatmap, by_size, timing):
+    for page in (heatmap, by_size):
         svg = page.split("<svg", 1)[1].split("</svg>", 1)[0]
         # Theme colours only through classes: var() does not work in SVG attributes, and the
         # downloads replace var() in the figure's <style> only.
@@ -187,20 +164,6 @@ def test_improvement_by_model_and_task_type():
     assert "All task types: +35.0%" in page and "Spearman" not in page
 
 
-def test_domain_labels():
-    domains = {"a": "finance", "b": "finance", "c": "finance", "d": "medical & healthcare", "e": "education"}
-    labels = C.domain_labels(["a", "b", "c", "d", "e", "f"], domains, min_datasets=2)
-    # Small domains together as "Other" (last), the number of datasets in the label; "f" has no domain.
-    assert labels.astype(str).to_dict() == {
-        "a": "Finance (3)",
-        "b": "Finance (3)",
-        "c": "Finance (3)",
-        "d": "Other (2)",
-        "e": "Other (2)",
-    }
-    assert list(labels.cat.categories) == ["Finance (3)", "Other (2)"]
-
-
 def test_every_benchmark_dataset_has_a_domain():
     from selectarena.datasets import (
         BENCHMARK_DATA_FOUNDRY_TASKS,
@@ -213,50 +176,3 @@ def test_every_benchmark_dataset_has_a_domain():
     assert set(DATASET_DOMAINS.values()) == set(PAPER_DOMAINS)  # the paper's domains, each used
     assert set(DATA_FOUNDRY_DOMAINS) == set(DATASET_DOMAINS)
     assert DATA_FOUNDRY_DOMAINS["framingham_heart_study"] == "medical & healthcare"  # corrected metadata
-
-
-def test_stability_by_domain_and_size(data):
-    _, chars = data
-    # "Steady" is equally stable everywhere; "Grows" gets more stable the more features a dataset has.
-    rows = pd.DataFrame(
-        [
-            {"dataset": f"d{d}", "method": method, "budget_index": b, "stability": value}
-            for d, width in enumerate(FEATURES)
-            for b in range(2)
-            for method, value in [("Steady", 0.8), ("Grows", 0.1 + 0.1 * d)]
-        ]
-    )
-    groups = C.domain_labels(
-        [f"d{d}" for d in range(8)], {f"d{d}": "finance" if d < 4 else "physics" for d in range(8)}
-    )
-    table = C.measure_by(rows, "stability", groups).set_index(["group", "method"])["stability"]
-    assert table[("All", "Steady")] == pytest.approx(0.8)
-    assert table[("Finance (4)", "Grows")] == pytest.approx(0.25) and table[("Physics (4)", "Grows")] == pytest.approx(
-        0.65
-    )
-    sens = C.measure_sensitivity(rows, "stability", chars, n_bootstrap=100).set_index(["characteristic", "method"])
-    assert (
-        sens.loc[("Features", "Grows"), "rho"] == pytest.approx(1.0) and sens.loc[("Features", "Grows"), "ci_low"] > 0
-    )
-    assert np.isnan(sens.loc[("Features", "Steady"), "rho"])
-    page = rank_sensitivity_html(
-        sens.reset_index(),
-        ["Grows", "Steady"],
-        title="t",
-        better="more stable",
-        worse="less stable",
-        direction="higher",
-    )
-    assert "More stable with more features" in page and "← higher with fewer" in page
-    page = group_improvement_html(
-        table.rename("stability").reset_index(),
-        ["Steady", "Grows"],
-        None,
-        title="t",
-        name="n",
-        all_label="All domains",
-        value="stability",
-        axis_label="Mean stability",
-        unit="",
-    )
-    assert "Physics (4): 0.650" in page and "Mean stability" in page

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "selectarena"
 version = "0.1.0"
-description = "SelectArena: a benchmark for feature selection on tabular data, built on TabArena"
+description = "SelectArena: a Modern Benchmark for Feature Selection on Real-world Tabular Data"
 readme = "README.md"
 license = "Apache-2.0"
 authors = [{ name = "Anonymous" }]
