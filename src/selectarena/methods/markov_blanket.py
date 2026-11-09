@@ -42,6 +42,7 @@ class MarkovBlanketFeatureSelector(AbstractITFeatureSelector):
       always met exactly and the random fallback never fires. See
       ``_ks_timed_out``.
 
+    Implementation: the SelectArena team.
     """
 
     name = "MarkovBlanketFeatureSelector"

@@ -44,12 +44,17 @@ dependencies = [
   "scikit-learn",
   "scipy",
   "pyyaml",
+  # Shapley values of the proxy model (SHAPFeatureSelector).
+  "shapiq>=1.4",
+  # Regularization path of a sparse neural network (LassoNetFeatureSelector).
+  "lassonet>=0.0.22",
 ]
 
 [project.optional-dependencies]
-# Downstream models used in the benchmark config beyond AutoGluon's defaults.
+# Downstream models used in the benchmark config beyond AutoGluon's defaults, and the search spaces
+# of their random configs (`[<model>, n_configs > 0]` in model_jobs).
 models = [
-  "tabarena[tabicl,realmlp] @ git+https://github.com/autogluon/tabarena.git@57d47e71cf256920a844f965f13c9ebeb121acdc#subdirectory=packages/tabarena",
+  "tabarena[tabicl,realmlp,search-spaces] @ git+https://github.com/autogluon/tabarena.git@57d47e71cf256920a844f965f13c9ebeb121acdc#subdirectory=packages/tabarena",
 ]
 dev = ["pytest", "ruff"]
 

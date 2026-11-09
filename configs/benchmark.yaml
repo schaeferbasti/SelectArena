@@ -1,6 +1,4 @@
 # What SelectArena benchmarks. Machine-specific settings live in configs/cluster.yaml.
-# The model jobs and splits follow the last downstream-performance launcher of tabarena_fork_fs;
-# adjust them to the run you want.
 #
 #   python scripts/run_benchmark.py setup  --config configs/benchmark.yaml
 #   python scripts/run_benchmark.py eval   --config configs/benchmark.yaml
@@ -9,7 +7,7 @@ benchmark_name: feature_selection_benchmark_2026_all
 
 feature_selection:
   # Registry names (selectarena.methods.FEATURE_SELECTION_METHODS) or "all".
-  methods: all
+  methods: [SHAPFeatureSelector]
   # Number of feature-count budgets per dataset. For d features and budget index i (0-based) the
   # selector keeps ceil(d * (i+1)/(b+1)) features when d <= 100, else ceil(d ** ((i+1)/(b+1))).
   total_budget: 5
@@ -32,20 +30,21 @@ experiment:
 
 # Scope of the run (tabarena TaskSubset fields). Omit to run every split of every dataset.
 task_subset:
-  split_indices: [r0f0, r0f1, r0f2]
+  split_indices: [r0f0]
 
 # One entry per group of models sharing resources (tabflow_slurm.ModelJob fields).
 model_jobs:
   - name: gpu
     models:
-      - [TabICLv2, all]
-      - [RealMLP, all]
+      - [TabICLv2, 0]
     resources:
       num_gpus: 1
       fake_memory_for_estimates: 140  # GPU VRAM in GB
-  # - name: cpu
-  #   models:
-  #     - [LightGBM, 0]
+  - name: cpu
+    models:
+      - [LightGBM, 25]
+      - [LinearModel, 0]
+      - [RandomForest, 0]
 
 # Stability / validity benchmark (selection only).
 extra_benchmark:

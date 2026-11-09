@@ -22,9 +22,11 @@ overview.
   the same job JSON as SLURM plus OAR array scripts; each subjob runs `python -m selectarena.benchmark.oar`
   in place of TabArena's SLURM `submit_template.sh`.
 - `src/selectarena/extra_benchmark/`: stability/validity runs, plain SLURM arrays.
-- `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (port of the paper's `elo_v4.py`),
-  Pareto front (`pareto.py`) and lasagna plots (`lasagna.py`), ported from the paper's plotting code;
-  their interactive website versions are in `website/figures.py`.
+- `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (`elo.py`), Pareto front
+  (`pareto.py`) and lasagna plots (`lasagna.py`), computed as for the paper's figures; their
+  interactive website versions are in `website/figures.py`. `characteristics.py` breaks the ranks
+  down by dataset size, task type, downstream model and budget (figures in
+  `website/characteristic_figures.py`, the Performance tab's "Where Methods Win" section).
 - `src/selectarena/published_results.py`: the published raw results (`RESULTS_REPO_ID` on Hugging Face,
   pin `RESULTS_REVISION` to a commit), downloaded into `results/` by
   `run_generate_website_artifacts.py --with-published-results` and merged with a user's own results.

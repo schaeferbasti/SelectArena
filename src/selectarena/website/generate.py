@@ -21,6 +21,15 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
   - ``results.csv`` and ``results_explorer.html``: the complete results, per dataset, method, downstream
     model and budget, averaged over splits;
   - ``per_dataset.csv``: mean rank per dataset and method (data only; the site does not show it);
+  - ``analysis/``: where and why methods win (see :mod:`selectarena.evaluation.characteristics`):
+    ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
+    model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
+    dataset size), ``improvement_by_model.html``, ``improvement_by_task_type.html`` and
+    ``improvement_by_domain.html`` / ``improvement_by_data_foundry_domain.html`` / ``.csv``
+    (improvement over Random per downstream model, task type and domain, in the paper's domains and in
+    those of Data Foundry; :mod:`selectarena.datasets`), ``stability/`` and ``validity/noise_<g>/``
+    (``by_domain.html`` and ``by_size.html`` / ``.csv``: stability and validity per paper domain and
+    their rank correlation with the dataset size) and ``selection_time.html`` / ``.csv`` (selection time against the number of features);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -44,8 +53,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from selectarena.datasets import dataset_name, task_names_from_ids
-from selectarena.evaluation import lasagna
+from selectarena.datasets import DATA_FOUNDRY_DOMAINS, dataset_name, task_names_from_ids
+from selectarena.evaluation import characteristics, lasagna
 from selectarena.evaluation.elo import compute_elo
 from selectarena.evaluation.leaderboard import (
     VALIDITY_NOISE_MAIN_FIGURE,
@@ -61,6 +70,13 @@ from selectarena.evaluation.leaderboard import (
 )
 from selectarena.evaluation.pareto import improvement_and_runtime, improvement_over_random
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
+from selectarena.website.characteristic_figures import (
+    group_improvement_html,
+    improvement_heatmap_html,
+    method_order,
+    rank_sensitivity_html,
+    selection_time_html,
+)
 from selectarena.website.figures import lasagna_explorer_html, pareto_explorer_html
 from selectarena.website.html import (
     elo_explorer_html,
@@ -141,6 +157,164 @@ def _lasagna_plots(
     return written
 
 
+def _analysis_figures(
+    df: pd.DataFrame,
+    scores: pd.DataFrame,
+    chars: pd.DataFrame,
+    folder: Path,
+    n_bootstrap: int,
+    log: Callable[[str], None],
+) -> dict:
+    """The figures of the Performance tab's "where methods win" section, in ``folder``; returns their
+    entry of ``meta.json``."""
+    folder.mkdir(parents=True)
+    with_chars = characteristics.add_characteristics(df[df["method"].notna()], chars)
+    groupings = characteristics.available_groupings(with_chars)
+    if not chars.empty and len(chars) < scores["dataset_key"].nunique():
+        log(
+            f"Dataset sizes known for {len(chars)} of {scores['dataset_key'].nunique()} datasets (from the extra results)."
+        )
+    tables, order = [], None
+    for grouping in groupings:
+        table = characteristics.improvement_by_grouping(with_chars, grouping)
+        order = order or method_order(table)
+        tables.append(table.assign(grouping=grouping.label))
+        (folder / f"heatmap_{grouping.key}.html").write_text(
+            improvement_heatmap_html(
+                table,
+                grouping.label,
+                title=f"SelectArena: improvement over Random by {grouping.label.lower()}",
+                name=f"selectarena_improvement_by_{grouping.key}_groups",
+            )
+        )
+    if tables:
+        pd.concat(tables)[["grouping", "group", "method", "improvement", "n_datasets"]].round(4).to_csv(
+            folder / "heatmap.csv", index=False
+        )
+    # Improvement over Random per downstream model and per task type.
+    per_group = {}
+    named = df.assign(dataset=df["dataset_key"])
+    domains = characteristics.domain_labels(named["dataset"].unique())
+    named["domain"] = named["dataset"].map(domains.astype(str))
+    domain_order = {d: d for d in domains.cat.categories}
+    df_domains = characteristics.domain_labels(named["dataset"].unique(), DATA_FOUNDRY_DOMAINS)
+    named["data_foundry_domain"] = named["dataset"].map(df_domains.astype(str))
+    df_domain_order = {d: d for d in df_domains.cat.categories}
+    for key, column, labels, all_label, between in (
+        ("model", "model", None, "All models", "the downstream models"),
+        ("task_type", "problem_type", characteristics.TASK_TYPE_LABELS, "All task types", "the task types"),
+        ("domain", "domain", domain_order, "All domains", "the domains"),
+        ("data_foundry_domain", "data_foundry_domain", df_domain_order, "All domains", "the domains"),
+    ):
+        per_group[key] = False
+        if not order or named[column].nunique() < 2:
+            continue
+        table = characteristics.improvement_by(named, column, labels)
+        if table.empty:
+            continue
+        table.rename(columns={"group": key}).round(4).to_csv(folder / f"improvement_by_{key}.csv", index=False)
+        (folder / f"improvement_by_{key}.html").write_text(
+            group_improvement_html(
+                table,
+                order,
+                characteristics.ranking_agreement(table),
+                title=f"SelectArena: improvement over Random per {all_label.removeprefix('All ').rstrip('s')}",
+                name=f"selectarena_improvement_by_{key}",
+                all_label=all_label,
+                agreement_label=between,
+            )
+        )
+        per_group[key] = True
+    has_size = has_time = False
+    if not chars.empty and order:
+        sens = characteristics.rank_sensitivity(scores, chars, n_bootstrap=n_bootstrap)
+        if not sens.empty:
+            sens.round(4).to_csv(folder / "rank_by_size.csv", index=False)
+            (folder / "rank_by_size.html").write_text(
+                rank_sensitivity_html(sens, order, title="SelectArena: rank by dataset size")
+            )
+            has_size = True
+        times, limit = characteristics.selection_time(df, chars)
+        if not times.empty:
+            binned = characteristics.binned_time(times)
+            times.round(4).to_csv(folder / "selection_time.csv", index=False)
+            (folder / "selection_time.html").write_text(
+                selection_time_html(binned, limit, order, title="SelectArena: selection time by number of features")
+            )
+            has_time = True
+    log(
+        f"Analysis figures: {len(groupings)} groupings, per model {per_group['model']}, per task type "
+        f"{per_group['task_type']}, per domain {per_group['domain']}, rank by size {has_size}, "
+        f"selection time {has_time}."
+    )
+    return {
+        "path": "analysis",
+        "groupings": [{"key": g.key, "label": g.label} for g in groupings],
+        "improvement_by_model": per_group["model"],
+        "improvement_by_task_type": per_group["task_type"],
+        "improvement_by_domain": per_group["domain"],
+        "improvement_by_data_foundry_domain": per_group["data_foundry_domain"],
+        "rank_by_size": has_size,
+        "selection_time": has_time,
+    }
+
+
+def _measure_figures(
+    rows: pd.DataFrame,
+    value: str,
+    root: Path,
+    path: str,
+    chars: pd.DataFrame,
+    n_bootstrap: int,
+) -> dict:
+    """``value`` (``stability`` or ``validity``) of every method per paper domain (``by_domain.html``)
+    and its rank correlation with the dataset size (``by_size.html``), in ``root/path``; returns
+    their entry of ``meta.json``."""
+    folder = root / path
+    folder.mkdir(parents=True, exist_ok=True)
+    rows = rows.dropna(subset=[value])
+    order = rows.groupby("method")[value].mean().sort_values(ascending=False).index.tolist()
+    out = {"path": f"{root.name}/{path}", "by_domain": False, "by_size": False}
+    domains = characteristics.domain_labels(rows["dataset"].unique())
+    if len(domains.cat.categories) >= 2:
+        table = characteristics.measure_by(rows, value, domains)
+        table.rename(columns={"group": "domain"}).round(4).to_csv(folder / "by_domain.csv", index=False)
+        (folder / "by_domain.html").write_text(
+            group_improvement_html(
+                table,
+                order,
+                characteristics.ranking_agreement(table, value),
+                title=f"SelectArena: {value} per domain",
+                name=f"selectarena_{value}_by_domain",
+                all_label="All domains",
+                agreement_label="the domains",
+                value=value,
+                axis_label=f"Mean {value}",
+                unit="",
+            )
+        )
+        out["by_domain"] = True
+    if not chars.empty:
+        sens = characteristics.measure_sensitivity(rows, value, chars, n_bootstrap=n_bootstrap)
+        if not sens.empty:
+            sens.round(4).to_csv(folder / "by_size.csv", index=False)
+            adjective = {"stability": "stable", "validity": "valid"}.get(value, value)
+            (folder / "by_size.html").write_text(
+                rank_sensitivity_html(
+                    sens,
+                    order,
+                    title=f"SelectArena: {value} by dataset size",
+                    name=f"selectarena_{value}_by_size",
+                    better=f"more {adjective}",
+                    worse=f"less {adjective}",
+                    direction="higher",
+                    label=f"Rank correlation of each method's {value} with the size of the datasets",
+                )
+            )
+            out["by_size"] = True
+    return out
+
+
 def _results_table(df: pd.DataFrame) -> pd.DataFrame:
     """One row per dataset, method, downstream model and budget, averaged over the splits."""
     rows = df.assign(
@@ -206,8 +380,8 @@ def generate_website_artifacts(
         validity_noise: noise level whose validity the leaderboard shows (``None``: mean over levels).
         include_ablations: keep ablation runs (``MI [nofallback]``, ``MI [permenc1]``) as methods of
             their own; by default only the main runs are ranked.
-        include_unregistered: keep methods that are not in the registry (e.g. retired fork-era
-            methods such as ``AccuracyLinearFeatureSelector``); by default they are left out.
+        include_unregistered: keep methods that are not in the registry (e.g. a method removed
+            from it); by default they are left out.
     """
     out_dir = Path(out_dir)
     raw_dir, clean_dir = out_dir / RAW_DIR, out_dir / CLEAN_DIR
@@ -387,6 +561,29 @@ def generate_website_artifacts(
         if levels:
             lasagna_meta["validity"] = levels
 
+    chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
+    analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
+    # Stability and validity per domain and dataset size (Stability and Validity tabs).
+    if stab_rows is not None:
+        analysis_meta["stability"] = _measure_figures(
+            stab_rows, "stability", website_data / "analysis", "stability", chars, n_bootstrap
+        )
+    if val_all is not None:
+        analysis_meta["validity"] = [
+            {
+                "noise": float(noise),
+                **_measure_figures(
+                    rows,
+                    "validity",
+                    website_data / "analysis",
+                    f"validity/noise_{_noise_label(noise)}",
+                    chars,
+                    n_bootstrap,
+                ),
+            }
+            for noise, rows in val_all.dropna(subset=["noise"]).groupby("noise")
+        ]
+
     total_budget = _total_budget(df)
     results_table = _results_table(df)
     results_table.to_csv(website_data / "results.csv", index=False)
@@ -437,6 +634,7 @@ def generate_website_artifacts(
         "has_validity": val_table is not None,
         "validity_tables": validity_tables,
         "lasagna": lasagna_meta,
+        "analysis": analysis_meta,
         "has_results_explorer": True,
         "subsets": published,
     }

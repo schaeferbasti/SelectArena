@@ -1,7 +1,6 @@
 """Lasagna plots of stability and validity: one row per method, events per variable on the x axis.
 
-Ported from the paper's plotting code (``Plotting_FS/fsplots/lasagna.py``) so the leaderboard shows
-the same figures as the paper. Each column is one events-per-variable (EPV) value, i.e. one dataset:
+The same figures as in the paper. Each column is one events-per-variable (EPV) value, i.e. one dataset:
 the samples of its smallest class (all samples for regression) per original feature. A cell is the
 mean stability or validity of the method over the budgets of the datasets with that EPV. Rows are
 sorted by their mean, best on top; high EPV (easy settings) is on the left.

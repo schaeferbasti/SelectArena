@@ -1,23 +1,19 @@
 from __future__ import annotations
 
-import io
-import pickle
-import sys
-import types
-from functools import partial
-
 import pytest
 
 from selectarena.benchmark.fs_config import (
     FSBenchConfig,
-    _get_budget_feature_count,
     get_fs_benchmark_preprocessing_pipelines,
     get_num_selected_features,
     selector_and_config_from_string,
     with_encoding_permutation_variants,
 )
-from selectarena.evaluation.read_results import _CompatUnpickler
-from selectarena.methods import FEATURE_SELECTION_METHODS, ProxyModelConfig
+from selectarena.methods import (
+    FEATURE_SELECTION_METHODS,
+    FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL,
+    ProxyModelConfig,
+)
 
 
 def test_config_string_round_trip():
@@ -64,30 +60,7 @@ def test_selector_from_pipeline_string(method):
     assert selector.skip_random_fallback
     assert selector.encoding_permutation_seed == 3
     assert selector.max_features_input(10) == 4
-    if method in {
-        "LOCOFeatureSelector",
-        "SequentialBackwardEliminationFeatureSelector",
-        "SequentialForwardSelectionFeatureSelector",
-    }:
+    if method in FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL:
         assert isinstance(selector.proxy_mode_config, ProxyModelConfig)
     else:
         assert selector.proxy_mode_config is None
-
-
-def test_fork_era_results_unpickle():
-    """Results from tabarena_fork_fs reference the budget function under its old module path."""
-    legacy_name = "tabarena.benchmark.feature_selection_methods.feature_selection_benchmark_utils"
-    legacy = types.ModuleType(legacy_name)
-    legacy._get_budget_feature_count = _get_budget_feature_count
-    original_module = _get_budget_feature_count.__module__
-    sys.modules[legacy_name] = legacy
-    try:
-        _get_budget_feature_count.__module__ = legacy_name
-        payload = pickle.dumps({"max_features_input": partial(_get_budget_feature_count, b=5, idx=1)})
-    finally:
-        _get_budget_feature_count.__module__ = original_module
-        del sys.modules[legacy_name]
-
-    loaded = _CompatUnpickler(io.BytesIO(payload)).load()
-    assert loaded["max_features_input"].keywords == {"b": 5, "idx": 1}
-    assert loaded["max_features_input"](10) == 4

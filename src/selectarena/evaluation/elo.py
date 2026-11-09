@@ -1,6 +1,6 @@
 """Elo ratings of feature selection methods, as in the SelectArena paper (Figure 1, App. D.2).
 
-Port of ``performance/baseline/elo_v4.py`` from the paper's plotting code:
+Computed as for the paper's figure:
 
 * A *cell* is one dataset, downstream model (configuration), budget and metric; the metric error
   is averaged over seeds (splits) within a cell.

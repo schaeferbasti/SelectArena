@@ -267,8 +267,8 @@ def test_ablations_are_left_out_by_default(tmp_path):
     assert "MI [nofallback]" in json.loads((kept.website_data / "meta.json").read_text())["methods"]
 
 
-def test_fork_era_results(tmp_path):
-    """Results written by tabarena_fork_fs: old class names, a retired method, duplicated extra rows."""
+def test_former_names_unregistered_methods_and_duplicates(tmp_path):
+    """Former class names (as in the published results), a method not in the registry, duplicated extra rows."""
     df = results()
     df["experiment_method_name_string"] = df["experiment_method_name_string"].str.replace(
         "LassoFeatureSelector", "AccuracyFeatureSelector"
@@ -297,8 +297,8 @@ def test_fork_era_results(tmp_path):
     pd.testing.assert_series_equal(doubled.sort_index(), once.sort_index())
 
 
-def test_fork_era_selected_feature_entries(tmp_path):
-    """Before fork commit 0dcac02a, selected features were stored as {"feature", "value"} dicts."""
+def test_selected_features_as_entries(tmp_path):
+    """Selected features stored as {"feature", "value"} entries (as in the published results)."""
     stability = extra_results("stability")
     as_entries = stability.copy()
     as_entries["selected_features"] = [
@@ -338,31 +338,37 @@ def test_task_ids_are_named():
 
     from selectarena.datasets import (
         BENCHMARK_DATA_FOUNDRY_TASKS,
-        EARLIER_DATA_FOUNDRY_TASKS,
+        RENAMED_DATA_FOUNDRY_TASKS,
         dataset_name,
         user_task_id,
     )
 
-    assert user_task_id("anneal/019d3f7b-494a-71fa-8eb2-25d01dfb7792") == 1386903908  # as in a fork-era task_id_str
+    assert user_task_id("anneal/019d3f7b-494a-71fa-8eb2-25d01dfb7792") == 1386903908  # TabArena's id of a UserTask
     long_name = next(p for p in BENCHMARK_DATA_FOUNDRY_TASKS if p.startswith("predict_students"))  # slug is cut
-    for path in [BENCHMARK_DATA_FOUNDRY_TASKS[0], EARLIER_DATA_FOUNDRY_TASKS[0], long_name]:
+    for path in [BENCHMARK_DATA_FOUNDRY_TASKS[0], long_name]:
         name = path.split("/")[0]
         assert dataset_name(user_task_id(path)) == name
         assert dataset_name(str(user_task_id(path))) == name
         assert dataset_name(float(user_task_id(path))) == name
         assert dataset_name(path) == name
         assert dataset_name(f"UserTask|{user_task_id(path)}|{path}") == name
-        assert dataset_name(f"Task-{user_task_id(path)}") == name  # the fork's tabarena_task_name
+        assert dataset_name(f"Task-{user_task_id(path)}") == name  # task name in the published results
         assert dataset_name(UserTask(task_name=path).slug) == name  # TabArena's tabarena_task_name
     assert dataset_name("anneal") == "anneal"
     assert dataset_name("123") == "123"
+    # A container renamed to snake_case keeps its dataset name for results from before the rename.
+    for path in RENAMED_DATA_FOUNDRY_TASKS:
+        renamed = path.lower()
+        assert renamed in BENCHMARK_DATA_FOUNDRY_TASKS
+        assert dataset_name(user_task_id(path)) == dataset_name(user_task_id(renamed)) == renamed.split("/")[0]
+        assert dataset_name(path.split("/")[0]) == renamed.split("/")[0]
 
 
 def test_results_with_task_ids(tmp_path):
-    from selectarena.datasets import BENCHMARK_DATA_FOUNDRY_TASKS, EARLIER_DATA_FOUNDRY_TASKS, user_task_id
+    from selectarena.datasets import BENCHMARK_DATA_FOUNDRY_TASKS, user_task_id
 
     anneal = next(p for p in BENCHMARK_DATA_FOUNDRY_TASKS if p.startswith("anneal/"))
-    credit = next(p for p in EARLIER_DATA_FOUNDRY_TASKS if p.startswith("credit_approval/"))
+    credit = next(p for p in BENCHMARK_DATA_FOUNDRY_TASKS if p.startswith("credit_approval/"))
     df = results().replace(
         {"name": {"anneal/0199-uuid": user_task_id(anneal), "credit/0199-uuid": user_task_id(credit)}}
     )
@@ -546,3 +552,32 @@ def test_interactive_pareto_and_lasagna(artifacts):
         assert ("data:image/png;base64," in page) == (not variant.startswith("binary_"))
     # Downloads use the light colours, whatever the page's theme.
     assert "var SA_LIGHT" in pareto and "getComputedStyle(document.documentElement)" not in pareto
+
+
+def test_analysis_figures(artifacts):
+    data = artifacts.website_data
+    analysis = json.loads((data / "meta.json").read_text())["analysis"]
+    keys = [g["key"] for g in analysis["groupings"]]
+    # Dataset sizes come from the extra results; groupings with a single group are left out.
+    assert {"task_type", "samples", "model", "budget"} <= set(keys)
+    folder = data / analysis["path"]
+    for key in keys:
+        page = (folder / f"heatmap_{key}.html").read_text()
+        assert "id='sa-figure'" in page and ">All<" in page
+    table = pd.read_csv(folder / "heatmap.csv")
+    assert set(table["grouping"]) == {g["label"] for g in analysis["groupings"]}
+    assert analysis["selection_time"] and (folder / "selection_time.html").is_file()
+    assert analysis["improvement_by_model"] and (folder / "improvement_by_model.html").is_file()
+    assert analysis["improvement_by_task_type"] == (folder / "improvement_by_task_type.html").is_file()
+    assert analysis["improvement_by_domain"] == (folder / "improvement_by_domain.html").is_file()
+    # Stability and validity per domain and size: an entry per measure (and noise level), files as listed.
+    entries = [analysis["stability"], *analysis["validity"]]
+    assert len(analysis["validity"]) == len(json.loads((data / "meta.json").read_text())["validity_tables"])
+    for entry in entries:
+        for kind in ("by_domain", "by_size"):
+            assert entry[kind] == (data / entry["path"] / f"{kind}.html").is_file()
+    assert (
+        analysis["improvement_by_data_foundry_domain"] == (folder / "improvement_by_data_foundry_domain.html").is_file()
+    )
+    # The rank correlation needs at least five datasets (the fixture has fewer).
+    assert analysis["rank_by_size"] == (folder / "rank_by_size.html").is_file()

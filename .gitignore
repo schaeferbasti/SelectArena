@@ -29,3 +29,7 @@ logs/
 
 # Cluster-specific configs, scripts and runs (kept locally, not published)
 private/
+
+# Repo-local workspace and caches of configs/cluster.yaml (benchmark runs, OpenML / Data Foundry data)
+/workspace/
+/cache/

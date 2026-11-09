@@ -57,11 +57,11 @@ PY
   `Forward search`, or a new one, which then also needs an entry in `SUBGROUP_CATEGORIES`: `Search` or
   `Non-search`; confirm with the maintainer if unsure) and to `PAPER_NAMES`, then `pytest tests/test_website.py`.
 - **Dataset names**: results may identify tasks by TabArena task id; `selectarena.datasets.dataset_name`
-  maps the ids of every container in `BENCHMARK_DATA_FOUNDRY_TASKS` and `EARLIER_DATA_FOUNDRY_TASKS`.
-  A "task ids could not be mapped" warning in Step 2 means a container is missing from both lists.
-- **Methods not in the registry** (e.g. the retired `AccuracyLinearFeatureSelector` in fork-era
-  results) are left out by default and listed in the log; `--include-unregistered` keeps them.
-  Fork-era names `AccuracyFeatureSelector` / `ANOVAFeatureSelector` are read as LOCO / F-Test.
+  maps the ids of every container in `BENCHMARK_DATA_FOUNDRY_TASKS` and `RENAMED_DATA_FOUNDRY_TASKS`.
+  A "task ids could not be mapped" warning in Step 2 means a container is missing from these lists.
+- **Methods not in the registry** (e.g. a method removed from it) are left out by default and listed
+  in the log; `--include-unregistered` keeps them. The former names `AccuracyFeatureSelector` /
+  `ANOVAFeatureSelector` (in the published stability / validity results) are read as LOCO / F-Test.
 - **Labels with brackets** (`MI [nofallback]`, `MI [permenc1]`) are ablation runs. They are left out
   by default; pass `--include-ablations` only if the maintainer wants them ranked.
 - **Sanity**: the dataset count should match the suite (71) unless the run is partial, and every

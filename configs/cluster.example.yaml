@@ -1,10 +1,12 @@
 # Machine-specific settings for a SLURM cluster. Copy to configs/cluster.yaml (git-ignored) and
 # edit, or point $SELECTARENA_CLUSTER_CONFIG / --cluster-config at your copy.
 
-# Persistent directory reachable from every node. Results land in <workspace>/output/<benchmark_name>/.
+# Persistent directory reachable from every node (not /tmp; better not your home folder, the caches
+# grow to several GB). Results land in <workspace>/output/<benchmark_name>/.
 workspace: /path/to/selectarena_workspace
-# Python of the environment SelectArena is installed in, as seen from the compute nodes.
-python_path: /path/to/venvs/selectarena/bin/python
+# Python of the environment SelectArena is installed in, as seen from the compute nodes
+# (with the README's installation: <repo>/.venv/bin/python).
+python_path: /path/to/SelectArena/.venv/bin/python
 
 # tabarena.caching.CacheConfig fields. null keeps the library default.
 caches:
@@ -17,7 +19,7 @@ caches:
 # downloads them from Hugging Face (selectarena.datasets.HF_REPO_ID) into caches.data_foundry.
 data_foundry_warehouse: null
 
-# tabflow_slurm.SlurmSetup fields.
+# tabflow_slurm.SlurmSetup fields. `sinfo -s` lists the partitions you can submit to.
 slurm:
   gpu_partition: <gpu-partition>
   cpu_partition: <cpu-partition>
