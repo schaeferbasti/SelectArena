@@ -86,13 +86,12 @@ def _group_values(scores: pd.DataFrame, grouping: Grouping) -> pd.Series:
         return pd.Categorical(values.map(TASK_TYPE_LABELS), [TASK_TYPE_LABELS[k] for k in order], ordered=True)
     if grouping.key == "budget":
         indices = sorted(int(v) for v in values.dropna().unique())
-        labels = {i: budget_label(i, indices) for i in indices}
+        labels = {i: _budget_label(i, indices) for i in indices}
         return pd.Categorical(values.map(lambda v: labels.get(int(v)) if pd.notna(v) else None), list(labels.values()))
     return pd.Categorical(values, sorted(values.dropna().unique()))
 
 
-def budget_label(index: int, indices: list[int]) -> str:
-    """``1 (smallest)``, ``2``, ..., ``5 (largest)``: the label of budget ``index`` among ``indices``."""
+def _budget_label(index: int, indices: list[int]) -> str:
     label = str(index + 1)
     if index == indices[0]:
         return f"{label} (smallest)"
@@ -203,8 +202,7 @@ def _size_correlation(per_dataset: pd.DataFrame, chars: pd.DataFrame, n_bootstra
 
 def improvement_by(df: pd.DataFrame, column: str, labels: dict[str, str] | None = None) -> pd.DataFrame:
     """Improvement over Random (%, as on the leaderboard) of every method per value of ``column``
-    (``model``: per downstream model; ``problem_type``: per task type; ``budget_index``: per feature
-    budget) and over all of them (group
+    (``model``: per downstream model; ``problem_type``: per task type) and over all of them (group
     ``All``): ``group``, ``method``, ``improvement``. ``df`` holds the results with a ``dataset``
     column; ``labels`` names and orders the groups (others are left out)."""
     from selectarena.evaluation.pareto import improvement_over_random
