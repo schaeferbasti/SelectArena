@@ -2,8 +2,7 @@
 
 Self-contained HTML pages with an inline SVG, like the other figures (:mod:`selectarena.website.figures`):
 a tooltip per cell or point, text and axes that follow the page's light or dark theme, and SVG / PNG /
-CSV downloads in the light paper look. Methods are coloured by their category in the paper's taxonomy
-(search, non-search, baseline).
+CSV downloads in the light paper look.
 """
 
 from __future__ import annotations
@@ -15,11 +14,8 @@ import pandas as pd
 
 from selectarena.website.figures import _EXTRA_CSS, ORANGE, _figure_page, _tip
 from selectarena.website.html import _FIGURE_CSS
-from selectarena.website.website_format import method_category
 
 BLUE = "#0072B2"
-GREY = "#8c959f"
-CATEGORY_COLORS = {"Search": ORANGE, "Non-search": BLUE, "Baseline": GREY}
 _FONT = 12
 # Theme colours in SVG presentation attributes do not resolve var(); these classes do.
 _CSS = ".sa-hollow { fill:var(--bg); stroke:var(--fg); } .sa-ci-none { stroke:var(--muted); }"
@@ -33,20 +29,6 @@ def _svg_open(width: float, height: float, label: str) -> str:
         f"style='max-width:{width * 1.15:.0f}px;margin:0 auto'>"
         f"<style>{_FIGURE_CSS}{_EXTRA_CSS}{_CSS}</style>"
     )
-
-
-def _category_color(method: str) -> str:
-    return CATEGORY_COLORS.get(method_category(method), GREY)
-
-
-def _legend(x: float, y: float) -> str:
-    """Category legend: a coloured dot and the category name per category."""
-    parts = []
-    for name, color in CATEGORY_COLORS.items():
-        parts.append(f"<circle cx='{x + 5:.1f}' cy='{y - 4:.1f}' r='4.5' fill='{color}'/>")
-        parts.append(f"<text class='sa-text' x='{x + 14:.1f}' y='{y:.1f}' font-size='{_FONT}'>{name}</text>")
-        x += 22 + 7.2 * len(name)
-    return "".join(parts)
 
 
 def method_order(table: pd.DataFrame) -> list[str]:
@@ -312,133 +294,6 @@ def rank_sensitivity_html(
 
 # --------------------------------------------------------------------------------------------------
 # Selection time against the number of features
-
-
-def _decades(lo: float, hi: float) -> list[float]:
-    """Powers of ten covering ``[lo, hi]``, at least two (an axis needs a range)."""
-    first, last = math.floor(math.log10(lo)), math.ceil(math.log10(hi))
-    return [10.0**e for e in range(first, max(last, first + 1) + 1)]
-
-
-def selection_time_svg(binned: pd.DataFrame, time_limit: float | None, methods: list[str]) -> str:
-    """Median selection time (log) against the number of features (log), one line per method,
-    coloured by category, with the time limit."""
-    data = binned[binned["time_s"] > 0]
-    methods = [m for m in methods if m in set(data["method"])] or sorted(data["method"].unique())
-    if data.empty or not methods:
-        return "<p>Not enough results for this figure.</p>"
-    width, height = 760, 430
-    left, right, top, bottom = 66, 150, 18, 58
-    x_lo, x_hi = data["features_mid"].min(), data["features_mid"].max()
-    y_lo = max(min(data["time_s"].min(), 0.1), 0.01)
-    y_hi = max(data["time_s"].max(), time_limit or 0) * 2
-    xd, yd = _decades(x_lo, x_hi), _decades(y_lo, y_hi)
-    xa, xb = math.log10(xd[0]), math.log10(xd[-1])
-    ya, yb = math.log10(yd[0]), math.log10(yd[-1])
-    pw, ph = width - left - right, height - top - bottom
-
-    def X(v: float) -> float:
-        return left + (math.log10(v) - xa) / (xb - xa) * pw
-
-    def Y(v: float) -> float:
-        return top + ph - (math.log10(max(v, yd[0])) - ya) / (yb - ya) * ph
-
-    parts = [_svg_open(width, height, "Feature selection time against the number of features")]
-    for t in xd:
-        parts.append(f"<line class='sa-grid' x1='{X(t):.1f}' x2='{X(t):.1f}' y1='{top}' y2='{top + ph}'/>")
-        parts.append(
-            f"<text class='sa-text' x='{X(t):.1f}' y='{top + ph + 17}' text-anchor='middle' font-size='{_FONT}'>"
-            f"{_num(t)}</text>"
-        )
-    for t in yd:
-        parts.append(f"<line class='sa-grid' x1='{left}' x2='{left + pw}' y1='{Y(t):.1f}' y2='{Y(t):.1f}'/>")
-        parts.append(
-            f"<text class='sa-text' x='{left - 7}' y='{Y(t) + 4:.1f}' text-anchor='end' font-size='{_FONT}'>{_num(t)}</text>"
-        )
-    parts.append(
-        f"<text class='sa-text' x='{left + pw / 2:.1f}' y='{height - 26}' text-anchor='middle' font-size='{_FONT}'>"
-        "Number of features</text>"
-    )
-    parts.append(
-        f"<text class='sa-text' transform='translate(16 {top + ph / 2:.1f}) rotate(-90)' text-anchor='middle' "
-        f"font-size='{_FONT}'>Feature selection time (s)</text>"
-    )
-    if time_limit:
-        parts.append(
-            f"<line class='sa-ink' x1='{left}' x2='{left + pw}' y1='{Y(time_limit):.1f}' y2='{Y(time_limit):.1f}' "
-            "stroke-dasharray='6 4' stroke-width='1.2'/>"
-        )
-        parts.append(
-            f"<text class='sa-text' x='{left + 6}' y='{Y(time_limit) - 6:.1f}' font-size='{_FONT - 1}'>"
-            f"Time limit ({_num(time_limit)} s)</text>"
-        )
-    # Non-search lines first, so the search methods are drawn on top.
-    order = sorted(methods, key=lambda m: (method_category(m) == "Search", methods.index(m)))
-    ends = []
-    for method in order:
-        rows = data[data["method"] == method].sort_values("features_mid")
-        color = _category_color(method)
-        points = " ".join(f"{X(v):.1f},{Y(t):.1f}" for v, t in zip(rows["features_mid"], rows["time_s"], strict=True))
-        search = method_category(method) == "Search"
-        parts.append(
-            f"<polyline points='{points}' fill='none' stroke='{color}' stroke-width='{2.2 if search else 1.4}' "
-            f"stroke-opacity='{1 if search else 0.75}' stroke-linejoin='round'/>"
-        )
-        for _, r in rows.iterrows():
-            cx, cy = X(r["features_mid"]), Y(r["time_s"])
-            parts.append(f"<circle cx='{cx:.1f}' cy='{cy:.1f}' r='2.6' fill='{color}'/>")
-            lines = [
-                method,
-                f"{_num(r['features_low'])}–{_num(r['features_high'])} features: median {_seconds(r['time_s'])}",
-                f"{int(r['n_datasets'])} datasets",
-            ]
-            parts.append(f"<circle class='sa-hit' cx='{cx:.1f}' cy='{cy:.1f}' r='7' data-tip='{_tip(lines)}'/>")
-        last = rows.iloc[-1]
-        ends.append((Y(last["time_s"]), method, color))
-    # Labels at the right end of each line, spread so they do not overlap.
-    ends.sort()
-    placed: list[float] = []
-    for y, method, color in ends:
-        y = max(y, placed[-1] + 13) if placed else y
-        placed.append(y)
-        parts.append(
-            f"<text x='{left + pw + 8}' y='{y + 4:.1f}' font-size='{_FONT - 1}' fill='{color}'>{html.escape(method)}</text>"
-        )
-    parts.append(_legend(left, height - 6))
-    parts.append("</svg>")
-    return "".join(parts)
-
-
-def _num(v: float) -> str:
-    if v >= 1000:
-        return f"{v:,.0f}"
-    if v >= 1:
-        return f"{v:.0f}"
-    return f"{v:g}"
-
-
-def _seconds(v: float) -> str:
-    if v >= 3600:
-        return f"{v / 3600:.1f} h"
-    if v >= 60:
-        return f"{v / 60:.1f} min"
-    return f"{v:.2g} s" if v < 10 else f"{v:.0f} s"
-
-
-def selection_time_html(binned: pd.DataFrame, time_limit: float | None, methods: list[str], *, title: str) -> str:
-    csv = binned.assign(
-        features_low=binned["features_low"].round(1),
-        features_high=binned["features_high"].round(1),
-        features_mid=binned["features_mid"].round(1),
-        time_s=binned["time_s"].round(3),
-    )
-    return _figure_page(
-        selection_time_svg(binned, time_limit, methods),
-        csv,
-        name="selectarena_selection_time",
-        hint="Hover or tap a point for its values.",
-        title=title,
-    )
 
 
 # --------------------------------------------------------------------------------------------------

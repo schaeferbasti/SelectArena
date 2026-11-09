@@ -8,12 +8,8 @@ The leaderboard ranks methods over all datasets. This module breaks the ranks do
 * :func:`rank_sensitivity`: how a method's rank changes with the size of a dataset, as the rank
   correlation between the method's mean rank on a dataset and the dataset's number of samples,
   number of features or samples per feature, with a bootstrap confidence interval over datasets;
-* :func:`improvement_by`: the improvement over Random of every method per downstream model, task type
-  or domain (:func:`domain_labels`);
-* :func:`measure_by` and :func:`measure_sensitivity`: the same per domain and dataset size for the
-  stability and validity of the selections;
-* :func:`selection_time`: the feature selection time of every method against the number of
-  features, with the time limit; search methods reach it on wide datasets.
+* :func:`improvement_by`: the improvement over Random of every method per downstream model or task
+  type.
 
 Improvements over Random are those of the leaderboard (:func:`selectarena.evaluation.pareto.improvement_over_random`);
 ranks those of :func:`selectarena.evaluation.leaderboard.per_group_scores` (1 = lowest error among
@@ -173,16 +169,6 @@ def rank_sensitivity(
     return _size_correlation(per_dataset, chars, n_bootstrap, seed)
 
 
-def measure_sensitivity(
-    rows: pd.DataFrame, value: str, chars: pd.DataFrame, *, n_bootstrap: int = 1000, seed: int = 0
-) -> pd.DataFrame:
-    """As :func:`rank_sensitivity`, for a per-dataset measure such as ``stability`` or ``validity``:
-    the Spearman correlation between the dataset's size and the method's mean ``value`` on the
-    dataset (``rows``: ``dataset``, ``method``, ``value``; positive: higher values on larger datasets)."""
-    per_dataset = rows.groupby(["dataset", "method"])[value].mean().unstack("method")
-    return _size_correlation(per_dataset, chars, n_bootstrap, seed)
-
-
 def _size_correlation(per_dataset: pd.DataFrame, chars: pd.DataFrame, n_bootstrap: int, seed: int) -> pd.DataFrame:
     """Spearman correlation (and 95% bootstrap interval over datasets) between every column of
     ``per_dataset`` (datasets x methods) and every size characteristic of the datasets."""
@@ -214,65 +200,6 @@ def _size_correlation(per_dataset: pd.DataFrame, chars: pd.DataFrame, n_bootstra
     return pd.DataFrame(rows, columns=["characteristic", "method", "rho", "ci_low", "ci_high", "n_datasets"])
 
 
-def measure_by(rows: pd.DataFrame, value: str, groups: pd.Series) -> pd.DataFrame:
-    """Mean ``value`` (e.g. ``stability``) of every method per group of datasets and over all
-    datasets (group ``All``), each dataset counted once: ``group``, ``method``, ``value``.
-    ``rows``: ``dataset``, ``method``, ``value``; ``groups``: dataset -> group, a categorical whose
-    categories give the order (as :func:`domain_labels`)."""
-    per_dataset = rows.groupby(["dataset", "method"], as_index=False)[value].mean()
-    per_dataset["group"] = per_dataset["dataset"].map(groups.astype(str))
-    order = list(groups.cat.categories) if hasattr(groups, "cat") else sorted(groups.dropna().unique())
-    frames = [per_dataset.groupby("method", as_index=False)[value].mean().assign(group="All")]
-    for group in order:
-        part = per_dataset[per_dataset["group"] == group]
-        if len(part):
-            frames.append(part.groupby("method", as_index=False)[value].mean().assign(group=str(group)))
-    return pd.concat(frames, ignore_index=True)[["group", "method", value]]
-
-
-def selection_time(df: pd.DataFrame, chars: pd.DataFrame) -> tuple[pd.DataFrame, float | None]:
-    """Median feature selection time of every method per dataset (over splits, budgets and downstream
-    models), with the dataset's number of features; and the selection time limit (``None`` if unknown).
-    """
-    rows = df[df["method"].notna() & df["feature_selection_fit_time"].notna()]
-    table = (
-        rows.groupby(["method", "dataset_key"])["feature_selection_fit_time"]
-        .median()
-        .rename("time_s")
-        .reset_index()
-        .join(chars["num_features"], on="dataset_key")
-        .dropna(subset=["num_features"])
-        .rename(columns={"dataset_key": "dataset"})
-    )
-    limit = None
-    if "feature_selection_time_limit" in rows and rows["feature_selection_time_limit"].notna().any():
-        limit = float(rows["feature_selection_time_limit"].max())
-    return table[["method", "dataset", "num_features", "time_s"]], limit
-
-
-def binned_time(table: pd.DataFrame, n_bins: int = 5) -> pd.DataFrame:
-    """Median selection time per method in ``n_bins`` bins of the number of features that hold about
-    as many datasets each (bins of equal width would hold only a few datasets at the wide end):
-    ``method``, ``features_low``, ``features_high``, ``features_mid`` (median number of features of
-    the bin's datasets), ``time_s`` (median), ``n_datasets``."""
-    columns = ["method", "features_low", "features_high", "features_mid", "time_s", "n_datasets"]
-    if table.empty:
-        return pd.DataFrame(columns=columns)
-    datasets = table.groupby("dataset")["num_features"].first().sort_values()
-    bins = pd.Series(np.minimum(np.arange(len(datasets)) * n_bins // len(datasets), n_bins - 1), index=datasets.index)
-    data = table.assign(bin=table["dataset"].map(bins))
-    out = (
-        data.groupby(["method", "bin"])
-        .agg(time_s=("time_s", "median"), n_datasets=("dataset", "nunique"))
-        .reset_index()
-    )
-    edges = datasets.groupby(bins).agg(["min", "max", "median"])
-    out["features_low"] = out["bin"].map(edges["min"])
-    out["features_high"] = out["bin"].map(edges["max"])
-    out["features_mid"] = out["bin"].map(edges["median"])
-    return out[columns]
-
-
 def improvement_by(df: pd.DataFrame, column: str, labels: dict[str, str] | None = None) -> pd.DataFrame:
     """Improvement over Random (%, as on the leaderboard) of every method per value of ``column``
     (``model``: per downstream model; ``problem_type``: per task type) and over all of them (group
@@ -292,26 +219,6 @@ def improvement_by(df: pd.DataFrame, column: str, labels: dict[str, str] | None 
     if not frames:
         return pd.DataFrame(columns=["group", "method", "improvement"])
     return pd.concat(frames, ignore_index=True)
-
-
-def domain_labels(datasets, domains: dict[str, str] | None = None, *, min_datasets: int = 1) -> pd.Series:
-    """The domain of every dataset in ``datasets``, as shown on the leaderboard: capitalised, with
-    the number of datasets (e.g. ``Financial (26)``); domains with fewer than ``min_datasets``
-    datasets together as ``Other``. Datasets without a domain are left out. The categories are
-    ordered by size, ``Other`` last."""
-    if domains is None:
-        from selectarena.datasets import DATASET_DOMAINS as domains
-    names = pd.Series(list(dict.fromkeys(datasets)), dtype=object)
-    raw = names.map(lambda d: domains.get(d)).dropna()
-    counts = raw.value_counts()
-    small = set(counts[counts < min_datasets].index)
-    merged = raw.map(lambda d: "Other" if d in small else d[:1].upper() + d[1:])
-    sizes = merged.value_counts()
-    order = sorted(sizes.index, key=lambda d: (d == "Other", -sizes[d], d))
-    labels = {d: f"{d} ({sizes[d]})" for d in order}
-    out = merged.map(labels)
-    out.index = names[raw.index].to_numpy()
-    return pd.Series(pd.Categorical(out, categories=list(labels.values()), ordered=True), index=out.index)
 
 
 def ranking_agreement(table: pd.DataFrame, value: str = "improvement") -> float:
