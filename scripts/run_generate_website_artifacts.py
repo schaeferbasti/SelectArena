@@ -102,7 +102,7 @@ def main() -> None:
     parser.add_argument(
         "--include-unregistered",
         action="store_true",
-        help="Rank methods that are not in the registry (e.g. retired fork-era methods); left out by default.",
+        help="Rank methods that are not in the registry (e.g. a method removed from it); left out by default.",
     )
     args = parser.parse_args()
 

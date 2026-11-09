@@ -35,6 +35,7 @@ encode_ordinal=True)` permutes the category codes). Use `self._preprocess` and t
 | `self._timed_out(time_limit, start_time)` | True (and logs) once `time_limit` seconds have passed. |
 | `self._preprocess(X, y=None, impute=, discretize=, encode_ordinal=, encode_target=, scale=)` | Imputation (mean / most frequent), quantile discretization (Sturges' bins), ordinal encoding of categoricals (honours the permutation ablation), label encoding, standardization. Returns `(X, y)`. |
 | `self.evaluate_proxy_model(X=, y=, time_limit=)` | Validation score (higher is better) of the proxy model (LightGBM by default) on a 67/33 split of the given columns; `None` if no valid feature. Needs the class in `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL`. |
+| `with self.fitted_proxy_model(X=, y=, time_limit=) as proxy:` | The same proxy model fitted once (same split and preprocessing), for methods that use the model itself (e.g. to explain it): `proxy.predict(X)` (class probabilities / regression values), `proxy.encode_labels(y)`, the split's `X_train` / `X_val` / `y_train` / `y_val`. Raises `TimeLimitExceeded` / `NoValidFeatures` from the fit; use the model only inside the `with` block. Needs the class in `FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL`. See `methods/shap.py`. |
 | `AbstractITFeatureSelector` helpers | `_mutual_information_dispatched(x, y)` (MI with the right estimator per problem type), `_entropy(*xs)`, `_mutual_information`, `_conditional_mutual_information(x, y, z)`, `_joint_mutual_information`, `_symmetrical_uncertainty`, `_symmetrical_relevance`. Expect discretized inputs. |
 
 ## Output contract
@@ -169,7 +170,7 @@ the remaining set (`value` = `float("nan")` when there is no per-feature number)
 NAME_TO_MODULE_MAP = {..., "<ClassName>": "<module>"}
 PAPER_NAMES = {..., "<ClassName>": "<MethodName>"}
 METHOD_SUBGROUPS = {..., "<ClassName>": "<Subgroup>"}
-FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL = [..., "<ClassName>"]  # only if it calls evaluate_proxy_model
+FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL = [..., "<ClassName>"]  # only if it calls evaluate_proxy_model / fitted_proxy_model
 # SUBGROUP_CATEGORIES = {..., "<New subgroup>": "Search" | "Non-search"}  # only for a new subgroup
 ```
 

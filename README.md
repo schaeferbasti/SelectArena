@@ -27,14 +27,19 @@ are added.
 
 ## Installation
 
-SelectArena depends on [TabArena](https://github.com/autogluon/tabarena).
+SelectArena depends on [TabArena](https://github.com/autogluon/tabarena). All commands in this
+README run from the repository root (the folder with `pyproject.toml`).
 ```bash
+git clone https://github.com/schaeferbasti/SelectArena.git && cd SelectArena
 uv venv --python 3.12 .venv && source .venv/bin/activate
 uv pip install --prerelease=allow -e ".[models,dev]"
 ```
 
-With pip, use `pip install --pre -e ".[models,dev]"`. The `models` extra adds the downstream
-models of the default benchmark config (TabICLv2, RealMLP).
+No `uv` on the machine (e.g. on a cluster)? Install it into your home folder with
+`curl -LsSf https://astral.sh/uv/install.sh | sh`, or use pip:
+`python3.12 -m venv .venv && source .venv/bin/activate && pip install --pre -e ".[models,dev]"`.
+The `models` extra adds the downstream models of the default benchmark config (TabICLv2, RealMLP)
+and the search spaces of their random configs.
 
 ## Quickstart
 
@@ -46,78 +51,42 @@ python examples/run_local.py    # a small benchmark through TabArena's runner on
 `run_local.py` prints one row per run with the downstream error, the number of selected features
 and the selection time.
 
-## Running the benchmark on a SLURM cluster
-
-1. Describe your machine: `cp configs/cluster.example.yaml configs/cluster.yaml` and set the
-   workspace, the Python of your environment, the cache directories and the SLURM partitions.
-   `configs/cluster.yaml` is git-ignored.
-2. Optional: download the dataset suite and convert it into TabArena tasks in advance with
-   `python scripts/prepare_datasets.py`; otherwise `setup` does it (see [Datasets](#datasets)).
-3. Choose what to run in `configs/benchmark.yaml` (methods, budgets, time limits, models, splits).
-4. On the head node: `python scripts/run_benchmark.py setup`, then launch the printed `sbatch`
-   command(s). Rerunning `setup` skips jobs whose results exist.
-5. When the jobs are done: `python scripts/run_benchmark.py eval` writes
-   `<workspace>/output/<benchmark_name>/results.csv`, one row per result including the selected
-   features, their scores and the selection time.
-
-The stability and validity benchmark uses the same configs:
-
-```bash
-python scripts/run_extra_benchmark.py setup     # writes SLURM array scripts (add --submit to submit)
-python scripts/run_extra_benchmark.py collect   # stability_results.csv, validity_results.csv
-```
-
-Both config files can be passed explicitly with `--config` and `--cluster-config`; the cluster
-config is also read from `$SELECTARENA_CLUSTER_CONFIG`.
-
-## Running the benchmark on an OAR cluster
-
-With `scheduler: oar` in the cluster config, the same scripts write OAR parametric array jobs
-and print `oarsub` commands instead of `sbatch` ones (`--submit` submits them). The jobs, their
-bundling and the results are the same as on SLURM. Start from `configs/cluster.oar.example.yaml`.
-
 ## Add your method to SelectArena
 
-To add a method, ask Claude Code to "add <method>" in this repo: the `add-method` skill
-(`.claude/skills/add-method/`) writes the `AbstractFeatureSelector` subclass from templates,
-registers it and verifies it. `python scripts/check_method.py <ClassName>` (or `--all`) checks any
-method against the benchmark's contract: registration, output format on binary / multiclass /
-regression data, determinism and the selection time limit.
+1. **Add it:** Use "/add-method" with an agent in this
+   repo. It writes the method, registers it and checks that it works with the benchmark (you can
+   rerun the check with `python scripts/check_method.py <YourMethod>`).
+2. **Benchmark it:** see [Running the benchmark](#running-the-benchmark).
+3. **See it next to the other methods** on your local copy of the leaderboard (see
+   [Your method on the leaderboard, locally](#your-method-on-the-leaderboard-locally)).
+4. **Open a pull request:** we check it and add it to the public leaderboard.
 
-Search methods (forward, backward, leave-one-out) evaluate many feature subsets; non-search methods
-use a proxy instead (Appendix A of the paper). Methods with a proxy model fit a LightGBM model
-(configurable through `ProxyModelConfig`) inside the selection.
+## Running the benchmark
 
+The benchmark runs as array jobs on a SLURM or OAR cluster.
+
+```bash
+cp configs/cluster.example.yaml configs/cluster.yaml   # once: paths, Python, partitions (see its comments)
+python scripts/run_benchmark.py setup                  # prints the sbatch commands to launch
+python scripts/run_benchmark.py eval                   # when the jobs are done: results.csv
+python scripts/run_extra_benchmark.py setup            # stability and validity (add --submit to submit)
+python scripts/run_extra_benchmark.py collect          # stability_results.csv, validity_results.csv
+```
+
+`configs/benchmark.yaml` sets what runs (methods, budgets, models, splits); keep the published
+values to compare with the leaderboard. Rerunning `setup` skips jobs whose results exist. Results
+land in `<workspace>/output/<benchmark_name>/`. On an OAR cluster, start from
+`configs/cluster.oar.example.yaml` instead: the same scripts print `oarsub` commands.
 
 ## Leaderboard
 
-The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) holds the site and this repo generates the data it serves:
-
-```bash
-python scripts/run_benchmark.py eval                # results.csv
-python scripts/run_extra_benchmark.py collect       # optional: stability / validity
-python scripts/run_generate_website_artifacts.py    # generated_website_artifacts/
-```
-
-Put the result files in `results/` and pass them explicitly; no cluster config is needed then:
-
-```bash
-python scripts/run_generate_website_artifacts.py \
-    --results results/performance_results.csv --extra-dir results   # stability_results.csv, validity_results.csv
-```
-
-`generated_website_artifacts/clean_website_artifacts/website_data/` replaces the Space's `data/`
-folder.
-`raw_website_artifacts/` keeps the main figure as PNG/PDF for the paper. The generator lives in
-`selectarena/website/`; the Elo computation (`selectarena/evaluation/elo.py`), the Pareto front
-(`pareto.py`) and the lasagna plots (`lasagna.py`) are in `selectarena/evaluation/`. All figures on
-the website are interactive SVG pages (`website/html.py`, `website/figures.py`) that follow its
-light or dark theme; their SVG / PNG downloads always use the light paper look.
+The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is generated from
+the benchmark results with `scripts/run_generate_website_artifacts.py`.
 
 ### Your method on the leaderboard, locally
 
-You do not need the maintainers' result files to see a new method next to the published ones. Benchmark
-your method (see [Add your method to SelectArena](#add-your-method-to-selectarena)), then:
+To see your method next to the published ones, benchmark it (see
+[Running the benchmark](#running-the-benchmark)), then:
 
 ```bash
 python scripts/run_generate_website_artifacts.py --with-published-results \
@@ -127,24 +96,18 @@ python scripts/preview_leaderboard.py      # the whole leaderboard website at ht
 
 `--with-published-results` downloads the published results of all methods from
 [SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) into
-`results/` (several GB, only when they are not there yet) and adds your results to them; your results
-replace the published ones of the same method on the same dataset (e.g. a rerun). The leaderboard
-compares methods on the same dataset splits, so run your method with the benchmark config of the
-published results (`configs/benchmark.yaml`). `preview_leaderboard.py` downloads the website's page
-from the Space (not its data) and serves it with your generated data; `--site <clone of the Space>`
-uses a local clone instead.
-
-To get your method on the public leaderboard, open a pull request with it; the maintainers then
-run it and publish the updated leaderboard.
+`results/` (several GB, only once) and adds yours; your results replace the published ones of the
+same method on the same dataset (e.g. a rerun). Methods are compared on the same dataset splits, so
+run your method with the published `configs/benchmark.yaml`.
 
 ## Repository layout
 
 ```
 src/selectarena/
   methods/          feature selectors, their base class and the registry
-  benchmark/        FSBench pipelines and the TabArena subclasses
+  benchmark/        the benchmark pipeline on top of TabArena
   extra_benchmark/  stability / validity benchmark (selection only)
-  evaluation/       reading results.pkl files into a table, leaderboard tables, Elo
+  evaluation/       results tables and the leaderboard metrics (Elo, stability, validity)
   website/          the leaderboard Space's data (subsets, tables, interactive figures) and its local preview
   datasets.py       the dataset suite (Data Foundry containers)
   published_results.py  the published results (download, merge with your own)
@@ -153,7 +116,7 @@ configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.ex
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
                     run_generate_website_artifacts.py, preview_leaderboard.py, check_method.py
 .claude/skills/     add-method: add a feature selection method;
-                    update-leaderboard: regenerate and publish the leaderboard
+                    update-leaderboard: publish new results (maintainers)
 examples/           quickstart.py, run_local.py
 tests/
 ```
@@ -164,4 +127,4 @@ tests/
 pytest
 ```
 
-`tests/test_benchmark_integration.py` runs real (small) fits through TabArena's experiment runner.
+The integration test (`tests/test_benchmark_integration.py`) runs small real fits and takes about a minute.

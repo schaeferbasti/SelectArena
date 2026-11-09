@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 
 class SequentialForwardSelectionFeatureSelector(AbstractFeatureSelector):
-    """SequentialForwardSelection Feature Selection."""
+    """SequentialForwardSelection Feature Selection.
+
+    Implementation: the SelectArena team.
+    """
 
     name = "SequentialForwardSelectionFeatureSelector"
     feature_scoring_method: bool = False
