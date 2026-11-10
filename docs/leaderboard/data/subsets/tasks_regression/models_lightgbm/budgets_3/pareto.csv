@@ -5,6 +5,7 @@ MI,6.1501,103.6762,10,False
 LOCO,5.5108,8585.5037,10,False
 F-Test,5.1189,0.7051,10,True
 (R)ReliefF,4.4007,9508.5631,10,False
+LassoNet,4.0248,1086.2588,10,False
 MarkovBlanket,3.9721,32.8475,10,False
 Lasso,3.9508,10.6656,10,False
 ElasticNet,3.7511,25.9844,10,False
@@ -13,4 +14,5 @@ mRMR,3.0676,117.5067,10,False
 SFS,2.6421,28290.1053,10,False
 GainRatio,2.5255,70.38,10,False
 Random,0.0,0.0033,10,True
+SHAP,-1.6239,88228.2979,10,False
 LaplacianScore,-5.0899,4.2739,10,False

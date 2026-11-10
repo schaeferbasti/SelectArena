@@ -1,6 +1,7 @@
 method,improvement,time_per_1k,n_datasets,pareto_optimal
 RFImportance,34.1663,20.602,12,True
 MarkovBlanket,30.6023,9.3603,12,True
+LassoNet,30.1694,2605.6875,12,False
 MI,28.0699,19.2145,12,False
 CART,26.9565,8.4019,12,True
 ElasticNet,26.3781,3061.5796,12,False
@@ -8,6 +9,7 @@ GainRatio,24.6054,2.4282,12,True
 Lasso,23.7722,3820.1607,12,False
 (R)ReliefF,23.4347,30644.2158,12,False
 F-Test,23.3324,0.367,12,True
+SHAP,23.1238,90384.596,12,False
 mRMR,20.3389,10.7331,12,False
 LOCO,18.2882,9596.348,12,False
 SFS,17.0954,47966.5325,12,False

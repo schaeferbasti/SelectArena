@@ -1,10 +1,12 @@
 method,improvement,time_per_1k,n_datasets,pareto_optimal
+LassoNet,30.2148,2622.3344,12,True
 RFImportance,28.7409,24.0121,12,True
 MI,26.1999,21.2578,12,True
 mRMR,22.4062,22.272,12,False
 MarkovBlanket,22.1533,10.597,12,True
 GainRatio,20.9723,2.8849,12,True
 (R)ReliefF,20.7097,30661.3897,12,False
+SHAP,19.5511,93740.1705,12,False
 F-Test,19.2938,0.4673,12,True
 ElasticNet,19.2684,3670.6913,12,False
 CART,18.6174,9.4524,12,False

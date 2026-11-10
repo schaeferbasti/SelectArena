@@ -1,10 +1,10 @@
 {
   "benchmark_name": "feature_selection_benchmark_2026_all",
-  "generated_at": "2026-11-08 10:26 UTC",
+  "generated_at": "2026-11-10 15:44 UTC",
   "selectarena_version": "0.1.0",
-  "n_results": 79873,
+  "n_results": 83418,
   "n_datasets": 71,
-  "n_methods": 15,
+  "n_methods": 17,
   "methods": [
     "(R)ReliefF",
     "CART",
@@ -14,12 +14,14 @@
     "LOCO",
     "LaplacianScore",
     "Lasso",
+    "LassoNet",
     "MI",
     "MarkovBlanket",
     "RFImportance",
     "Random",
     "SBE",
     "SFS",
+    "SHAP",
     "mRMR"
   ],
   "models": {
@@ -161,8 +163,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_all/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 79873,
+      "n_methods": 17,
+      "n_comparisons": 83418,
       "pareto": true,
       "per_model": true
     },
@@ -172,8 +174,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_all/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16684,
       "pareto": true,
       "per_model": true
     },
@@ -183,8 +185,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_all/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16684,
       "pareto": true,
       "per_model": true
     },
@@ -194,8 +196,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_all/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16684,
       "pareto": true,
       "per_model": true
     },
@@ -205,8 +207,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_all/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16684,
       "pareto": true,
       "per_model": true
     },
@@ -216,8 +218,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_all/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15973,
+      "n_methods": 17,
+      "n_comparisons": 16682,
       "pareto": true,
       "per_model": true
     },
@@ -227,8 +229,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_lightgbm/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16685,
       "pareto": true
     },
     {
@@ -237,8 +239,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_lightgbm/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -247,8 +249,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_lightgbm/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -257,8 +259,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_lightgbm/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -267,8 +269,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_lightgbm/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -277,8 +279,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_lightgbm/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -287,8 +289,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_linearmodel/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16685,
       "pareto": true
     },
     {
@@ -297,8 +299,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_linearmodel/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -307,8 +309,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_linearmodel/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -317,8 +319,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_linearmodel/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -327,8 +329,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_linearmodel/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -337,8 +339,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_linearmodel/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -347,8 +349,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_randomforest/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16685,
       "pareto": true
     },
     {
@@ -357,8 +359,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_randomforest/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -367,8 +369,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_randomforest/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -377,8 +379,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_randomforest/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -387,8 +389,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_randomforest/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -397,8 +399,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_randomforest/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -407,8 +409,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_realmlp/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15975,
+      "n_methods": 17,
+      "n_comparisons": 16680,
       "pareto": true
     },
     {
@@ -417,8 +419,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_realmlp/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3336,
       "pareto": true
     },
     {
@@ -427,8 +429,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_realmlp/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3336,
       "pareto": true
     },
     {
@@ -437,8 +439,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_realmlp/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3336,
       "pareto": true
     },
     {
@@ -447,8 +449,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_realmlp/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3336,
       "pareto": true
     },
     {
@@ -457,8 +459,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_realmlp/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3336,
       "pareto": true
     },
     {
@@ -467,8 +469,8 @@
       "budget": "all",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_all",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 15973,
+      "n_methods": 17,
+      "n_comparisons": 16683,
       "pareto": true
     },
     {
@@ -477,8 +479,8 @@
       "budget": "0",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_0",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -487,8 +489,8 @@
       "budget": "1",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_1",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -497,8 +499,8 @@
       "budget": "2",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_2",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -507,8 +509,8 @@
       "budget": "3",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_3",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3195,
+      "n_methods": 17,
+      "n_comparisons": 3337,
       "pareto": true
     },
     {
@@ -517,8 +519,8 @@
       "budget": "4",
       "path": "subsets/tasks_all/models_tabiclv2/budgets_4",
       "n_datasets": 71,
-      "n_methods": 15,
-      "n_comparisons": 3193,
+      "n_methods": 17,
+      "n_comparisons": 3335,
       "pareto": true
     },
     {
@@ -527,8 +529,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_all/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 68623,
+      "n_methods": 17,
+      "n_comparisons": 71668,
       "pareto": true,
       "per_model": true
     },
@@ -538,8 +540,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_all/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14334,
       "pareto": true,
       "per_model": true
     },
@@ -549,8 +551,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_all/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14334,
       "pareto": true,
       "per_model": true
     },
@@ -560,8 +562,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_all/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14334,
       "pareto": true,
       "per_model": true
     },
@@ -571,8 +573,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_all/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14334,
       "pareto": true,
       "per_model": true
     },
@@ -582,8 +584,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_all/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13723,
+      "n_methods": 17,
+      "n_comparisons": 14332,
       "pareto": true,
       "per_model": true
     },
@@ -593,8 +595,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14335,
       "pareto": true
     },
     {
@@ -603,8 +605,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -613,8 +615,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -623,8 +625,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -633,8 +635,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -643,8 +645,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_lightgbm/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -653,8 +655,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14335,
       "pareto": true
     },
     {
@@ -663,8 +665,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -673,8 +675,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -683,8 +685,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -693,8 +695,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -703,8 +705,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_linearmodel/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -713,8 +715,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_randomforest/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14335,
       "pareto": true
     },
     {
@@ -723,8 +725,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_randomforest/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -733,8 +735,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_randomforest/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -743,8 +745,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_randomforest/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -753,8 +755,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_randomforest/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -763,8 +765,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_randomforest/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -773,8 +775,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_realmlp/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13725,
+      "n_methods": 17,
+      "n_comparisons": 14330,
       "pareto": true
     },
     {
@@ -783,8 +785,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_realmlp/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2866,
       "pareto": true
     },
     {
@@ -793,8 +795,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_realmlp/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2866,
       "pareto": true
     },
     {
@@ -803,8 +805,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_realmlp/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2866,
       "pareto": true
     },
     {
@@ -813,8 +815,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_realmlp/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2866,
       "pareto": true
     },
     {
@@ -823,8 +825,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_realmlp/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2866,
       "pareto": true
     },
     {
@@ -833,8 +835,8 @@
       "budget": "all",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_all",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 13723,
+      "n_methods": 17,
+      "n_comparisons": 14333,
       "pareto": true
     },
     {
@@ -843,8 +845,8 @@
       "budget": "0",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_0",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -853,8 +855,8 @@
       "budget": "1",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_1",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -863,8 +865,8 @@
       "budget": "2",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_2",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -873,8 +875,8 @@
       "budget": "3",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_3",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2745,
+      "n_methods": 17,
+      "n_comparisons": 2867,
       "pareto": true
     },
     {
@@ -883,8 +885,8 @@
       "budget": "4",
       "path": "subsets/tasks_classification/models_tabiclv2/budgets_4",
       "n_datasets": 61,
-      "n_methods": 15,
-      "n_comparisons": 2743,
+      "n_methods": 17,
+      "n_comparisons": 2865,
       "pareto": true
     },
     {
@@ -893,8 +895,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_all/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 55123,
+      "n_methods": 17,
+      "n_comparisons": 57568,
       "pareto": true,
       "per_model": true
     },
@@ -904,8 +906,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_all/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11514,
       "pareto": true,
       "per_model": true
     },
@@ -915,8 +917,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_all/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11514,
       "pareto": true,
       "per_model": true
     },
@@ -926,8 +928,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_all/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11514,
       "pareto": true,
       "per_model": true
     },
@@ -937,8 +939,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_all/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11514,
       "pareto": true,
       "per_model": true
     },
@@ -948,8 +950,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_all/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11023,
+      "n_methods": 17,
+      "n_comparisons": 11512,
       "pareto": true,
       "per_model": true
     },
@@ -959,8 +961,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11515,
       "pareto": true
     },
     {
@@ -969,8 +971,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -979,8 +981,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -989,8 +991,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -999,8 +1001,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1009,8 +1011,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_lightgbm/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1019,8 +1021,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11515,
       "pareto": true
     },
     {
@@ -1029,8 +1031,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1039,8 +1041,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1049,8 +1051,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1059,8 +1061,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1069,8 +1071,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_linearmodel/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1079,8 +1081,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_randomforest/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11515,
       "pareto": true
     },
     {
@@ -1089,8 +1091,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_randomforest/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1099,8 +1101,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_randomforest/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1109,8 +1111,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_randomforest/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1119,8 +1121,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_randomforest/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1129,8 +1131,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_randomforest/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1139,8 +1141,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_realmlp/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11025,
+      "n_methods": 17,
+      "n_comparisons": 11510,
       "pareto": true
     },
     {
@@ -1149,8 +1151,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_realmlp/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2302,
       "pareto": true
     },
     {
@@ -1159,8 +1161,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_realmlp/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2302,
       "pareto": true
     },
     {
@@ -1169,8 +1171,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_realmlp/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2302,
       "pareto": true
     },
     {
@@ -1179,8 +1181,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_realmlp/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2302,
       "pareto": true
     },
     {
@@ -1189,8 +1191,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_realmlp/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2302,
       "pareto": true
     },
     {
@@ -1199,8 +1201,8 @@
       "budget": "all",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_all",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 11023,
+      "n_methods": 17,
+      "n_comparisons": 11513,
       "pareto": true
     },
     {
@@ -1209,8 +1211,8 @@
       "budget": "0",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_0",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1219,8 +1221,8 @@
       "budget": "1",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_1",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1229,8 +1231,8 @@
       "budget": "2",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_2",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1239,8 +1241,8 @@
       "budget": "3",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_3",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2205,
+      "n_methods": 17,
+      "n_comparisons": 2303,
       "pareto": true
     },
     {
@@ -1249,8 +1251,8 @@
       "budget": "4",
       "path": "subsets/tasks_binary/models_tabiclv2/budgets_4",
       "n_datasets": 49,
-      "n_methods": 15,
-      "n_comparisons": 2203,
+      "n_methods": 17,
+      "n_comparisons": 2301,
       "pareto": true
     },
     {
@@ -1259,8 +1261,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_all/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 13500,
+      "n_methods": 17,
+      "n_comparisons": 14100,
       "pareto": true,
       "per_model": true
     },
@@ -1270,8 +1272,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_all/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true,
       "per_model": true
     },
@@ -1281,8 +1283,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_all/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true,
       "per_model": true
     },
@@ -1292,8 +1294,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_all/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true,
       "per_model": true
     },
@@ -1303,8 +1305,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_all/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true,
       "per_model": true
     },
@@ -1314,8 +1316,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_all/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true,
       "per_model": true
     },
@@ -1325,8 +1327,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true
     },
     {
@@ -1335,8 +1337,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1345,8 +1347,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1355,8 +1357,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1365,8 +1367,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1375,8 +1377,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_lightgbm/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1385,8 +1387,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true
     },
     {
@@ -1395,8 +1397,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1405,8 +1407,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1415,8 +1417,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1425,8 +1427,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1435,8 +1437,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_linearmodel/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1445,8 +1447,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true
     },
     {
@@ -1455,8 +1457,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1465,8 +1467,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1475,8 +1477,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1485,8 +1487,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1495,8 +1497,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_randomforest/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1505,8 +1507,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true
     },
     {
@@ -1515,8 +1517,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1525,8 +1527,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1535,8 +1537,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1545,8 +1547,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1555,8 +1557,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_realmlp/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1565,8 +1567,8 @@
       "budget": "all",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_all",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 2700,
+      "n_methods": 17,
+      "n_comparisons": 2820,
       "pareto": true
     },
     {
@@ -1575,8 +1577,8 @@
       "budget": "0",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_0",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1585,8 +1587,8 @@
       "budget": "1",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_1",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1595,8 +1597,8 @@
       "budget": "2",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_2",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1605,8 +1607,8 @@
       "budget": "3",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_3",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1615,8 +1617,8 @@
       "budget": "4",
       "path": "subsets/tasks_multiclass/models_tabiclv2/budgets_4",
       "n_datasets": 12,
-      "n_methods": 15,
-      "n_comparisons": 540,
+      "n_methods": 17,
+      "n_comparisons": 564,
       "pareto": true
     },
     {
@@ -1625,8 +1627,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_all/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 11250,
+      "n_methods": 17,
+      "n_comparisons": 11750,
       "pareto": true,
       "per_model": true
     },
@@ -1636,8 +1638,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_all/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true,
       "per_model": true
     },
@@ -1647,8 +1649,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_all/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true,
       "per_model": true
     },
@@ -1658,8 +1660,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_all/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true,
       "per_model": true
     },
@@ -1669,8 +1671,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_all/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true,
       "per_model": true
     },
@@ -1680,8 +1682,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_all/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true,
       "per_model": true
     },
@@ -1691,8 +1693,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true
     },
     {
@@ -1701,8 +1703,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1711,8 +1713,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1721,8 +1723,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1731,8 +1733,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1741,8 +1743,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_lightgbm/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1751,8 +1753,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true
     },
     {
@@ -1761,8 +1763,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1771,8 +1773,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1781,8 +1783,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1791,8 +1793,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1801,8 +1803,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_linearmodel/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1811,8 +1813,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_randomforest/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true
     },
     {
@@ -1821,8 +1823,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_randomforest/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1831,8 +1833,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_randomforest/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1841,8 +1843,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_randomforest/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1851,8 +1853,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_randomforest/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1861,8 +1863,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_randomforest/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1871,8 +1873,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_realmlp/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true
     },
     {
@@ -1881,8 +1883,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_realmlp/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1891,8 +1893,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_realmlp/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1901,8 +1903,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_realmlp/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1911,8 +1913,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_realmlp/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1921,8 +1923,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_realmlp/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1931,8 +1933,8 @@
       "budget": "all",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_all",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 2250,
+      "n_methods": 17,
+      "n_comparisons": 2350,
       "pareto": true
     },
     {
@@ -1941,8 +1943,8 @@
       "budget": "0",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_0",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1951,8 +1953,8 @@
       "budget": "1",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_1",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1961,8 +1963,8 @@
       "budget": "2",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_2",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1971,8 +1973,8 @@
       "budget": "3",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_3",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     },
     {
@@ -1981,8 +1983,8 @@
       "budget": "4",
       "path": "subsets/tasks_regression/models_tabiclv2/budgets_4",
       "n_datasets": 10,
-      "n_methods": 15,
-      "n_comparisons": 450,
+      "n_methods": 17,
+      "n_comparisons": 470,
       "pareto": true
     }
   ]

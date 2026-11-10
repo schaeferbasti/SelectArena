@@ -12,5 +12,7 @@ MarkovBlanket,9.2336,32.7743,10,False
 mRMR,8.5688,73.8,10,False
 LOCO,8.1485,8362.0831,10,False
 (R)ReliefF,7.9273,9696.4246,10,False
+LassoNet,7.4096,1089.3986,10,False
+SHAP,5.6082,102430.7396,10,False
 LaplacianScore,1.1897,5.2498,10,False
 Random,0.0,0.0031,10,True

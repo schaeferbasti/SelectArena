@@ -12,5 +12,7 @@ SBE,4.8166,23603.162,10,False
 mRMR,4.3187,119.1243,10,False
 MarkovBlanket,3.9453,41.7802,10,False
 GainRatio,3.5168,90.7532,10,False
+SHAP,3.2031,98095.434,10,False
+LassoNet,1.3357,1816.4036,10,False
 Random,0.0,0.0066,10,True
 LaplacianScore,-2.2408,5.2201,10,False

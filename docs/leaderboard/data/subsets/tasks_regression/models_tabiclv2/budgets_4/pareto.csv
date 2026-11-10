@@ -13,4 +13,6 @@ GainRatio,2.9206,89.6556,10,False
 SBE,2.628,14873.4492,10,False
 SFS,2.1356,27960.2996,10,False
 Random,0.0,0.0036,10,True
+SHAP,-0.7881,95789.3595,10,False
+LassoNet,-1.156,1771.6292,10,False
 LaplacianScore,-4.1187,4.9179,10,False

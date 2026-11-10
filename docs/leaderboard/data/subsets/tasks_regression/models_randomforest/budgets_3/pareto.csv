@@ -11,6 +11,8 @@ MarkovBlanket,6.4662,32.6504,10,False
 mRMR,6.0969,117.961,10,False
 GainRatio,6.0516,69.7367,10,False
 SBE,5.5648,22014.5212,10,False
+LassoNet,5.0125,1000.5585,10,False
+SHAP,3.8207,97596.8743,10,False
 SFS,3.6612,27654.8012,10,False
 Random,0.0,0.0033,10,True
 LaplacianScore,-2.6687,4.2144,10,False

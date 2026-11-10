@@ -1,5 +1,7 @@
 method,improvement,time_per_1k,n_datasets,pareto_optimal
 RFImportance,20.1587,55.1453,71,True
+LassoNet,17.7548,2810.5497,71,False
+SHAP,15.8427,58979.3109,71,False
 CART,14.4246,17.434,71,True
 F-Test,11.1647,0.9523,71,True
 mRMR,10.9292,85.8167,71,False

@@ -7,10 +7,12 @@ SBE,4.0724,15330.45,10,False
 F-Test,4.0717,0.6635,10,True
 LOCO,4.0614,8203.8032,10,False
 MarkovBlanket,4.0266,30.7323,10,False
+LassoNet,3.6988,1174.7152,10,False
 Lasso,3.606,10.8859,10,False
 ElasticNet,3.5379,25.7981,10,False
 mRMR,3.3275,183.4115,10,False
 GainRatio,2.5963,69.1984,10,False
 SFS,2.2903,30058.7888,10,False
 Random,0.0,0.0034,10,True
+SHAP,-1.2014,95936.4765,10,False
 LaplacianScore,-2.3383,4.289,10,False

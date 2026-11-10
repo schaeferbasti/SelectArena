@@ -12,5 +12,7 @@ LOCO,8.2467,8333.9455,10,False
 F-Test,7.9658,0.6932,10,True
 mRMR,7.5739,80.2734,10,False
 MarkovBlanket,6.836,32.4397,10,False
+SHAP,6.1444,92954.681,10,False
+LassoNet,5.6212,1185.033,10,False
 LaplacianScore,2.0293,4.7962,10,False
 Random,0.0,0.0031,10,True

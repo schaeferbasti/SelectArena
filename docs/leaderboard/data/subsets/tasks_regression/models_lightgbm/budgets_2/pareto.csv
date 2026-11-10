@@ -10,7 +10,9 @@ MarkovBlanket,7.0303,32.1167,10,False
 ElasticNet,6.808,26.9699,10,False
 SFS,6.2295,24857.3053,10,False
 F-Test,5.8733,0.7006,10,True
+SHAP,4.8448,90763.0241,10,False
 mRMR,4.1272,89.1891,10,False
 GainRatio,3.8381,70.613,10,False
+LassoNet,1.5085,1049.1905,10,False
 Random,0.0,0.0033,10,True
 LaplacianScore,-0.0406,4.2437,10,False
