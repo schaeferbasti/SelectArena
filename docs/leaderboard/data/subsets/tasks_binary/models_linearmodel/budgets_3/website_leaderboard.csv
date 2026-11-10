@@ -3,7 +3,7 @@ Rank,Method,Category,Subgroup,Elo,Elo CI low,Elo CI high,Avg. rank,Win rate (%),
 2,ElasticNet,Non-search,Regularization,1200.0,1146.0,1258.0,6.73,61.0,15.0,13.7,,0.373,0.624,9.3,0.0,49,147
 3,Lasso,Non-search,Regularization,1194.0,1135.0,1266.0,6.8,60.4,15.3,12.3,,0.285,0.615,1.5,0.0,49,147
 4,RFImportance,Non-search,Tree,1180.0,1132.0,1233.0,7.23,57.6,14.9,15.6,,0.636,0.576,0.2,0.0,49,147
-5,SHAP,Non-search,Game theory,1180.0,1111.0,1248.0,8.06,55.9,16.3,15.6,,-0.001,0.501,1093.4,2.0,49,49
+5,SHAP,Non-search,Game theory,1180.0,1111.0,1248.0,8.06,55.9,16.3,15.6,,,,1093.4,2.0,49,49
 6,MI,Non-search,Information theory,1158.0,1111.0,1210.0,7.5,55.7,18.5,11.0,,0.608,0.695,0.4,0.0,49,147
 7,F-Test,Non-search,Correlation,1154.0,1099.0,1209.0,7.42,56.0,19.2,10.0,,0.657,0.773,0.0,0.0,49,147
 8,mRMR,Non-search,Information theory,1141.0,1084.0,1196.0,7.82,53.6,18.2,11.5,,0.67,0.578,0.5,8.2,49,147

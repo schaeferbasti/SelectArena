@@ -1,7 +1,7 @@
 Rank,Method,Category,Subgroup,Elo,Elo CI low,Elo CI high,Avg. rank,Win rate (%),Improvability (%),Improvement over Random (%),Error vs. all features,Stability,Validity,Selection time (s),Fallback rate (%),#Datasets,#Comparisons
 1,RFImportance,Non-search,Tree,1189.0,1146.0,1239.0,6.76,60.8,14.9,8.0,,0.597,0.507,0.2,0.0,71,213
 2,LassoNet,Non-search,Regularization,1185.0,1127.0,1252.0,8.46,53.3,15.6,13.5,,,,29.1,0.0,71,71
-3,SHAP,Non-search,Game theory,1180.0,1116.0,1252.0,8.45,53.4,16.7,6.9,,0.003,0.5,1726.8,4.3,70,70
+3,SHAP,Non-search,Game theory,1180.0,1116.0,1252.0,8.45,53.4,16.7,6.9,,,,1726.8,4.3,70,70
 4,CART,Non-search,Tree,1180.0,1136.0,1225.0,6.85,60.2,15.0,8.0,,0.324,0.482,0.1,0.0,71,213
 5,MI,Non-search,Information theory,1159.0,1117.0,1202.0,7.4,56.3,16.0,4.0,,0.587,0.627,0.5,0.0,71,213
 6,ElasticNet,Non-search,Regularization,1144.0,1099.0,1189.0,7.64,54.7,16.6,6.2,,0.308,0.568,9.2,0.0,71,213
