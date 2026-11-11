@@ -477,3 +477,108 @@ def group_improvement_html(
         hint="Hover or tap a method for its values.",
         title=title,
     )
+
+
+# --------------------------------------------------------------------------------------------------
+# Elo with and without the datasets where a method ran out of time (the paper's Figure D.3 design)
+
+#: Bars of Figure D.3: the default Elo in blue, the ablated one in light orange (orange at 30%).
+ELO_PAIR_COLORS = (BLUE, "#F2CFB2")
+
+
+def elo_pair_svg(default: pd.DataFrame, ablated: pd.DataFrame, *, labels: tuple[str, str]) -> str:
+    """Two Elo bars per method, as in the paper's Figure D.3: the ablated Elo (light orange, left)
+    next to the default one (blue, right), with 95% intervals and each bar's rank written on it;
+    methods ordered by the default Elo, worst first. ``default`` and ``ablated`` are
+    :func:`~selectarena.evaluation.elo.compute_elo` tables; ``labels`` name them (default first)."""
+    methods = [m for m in default.sort_values("elo")["method"] if m in set(ablated["method"])]
+    if len(methods) < 2:
+        return "<p>Not enough results for this figure.</p>"
+    tables = {"ablated": ablated.set_index("method"), "default": default.set_index("method")}
+    ranks = {k: t.loc[methods, "elo"].rank(ascending=False, method="min") for k, t in tables.items()}
+    low = min(float(t.loc[methods, "elo_ci_low"].min()) for t in tables.values())
+    high = max(float(t.loc[methods, "elo_ci_high"].max()) for t in tables.values())
+    y_min = math.floor(low / 50) * 50 - 25
+    ticks = [t for t in _nice_ticks(y_min, high, 8) if t >= y_min]
+    y_max = ticks[-1] if ticks[-1] > high else ticks[-1] + (ticks[1] - ticks[0])
+
+    slot, bar = 66, 28
+    left, right, top, bottom = 62, 16, 40, 92
+    plot_w, plot_h = slot * len(methods), 300
+    width, height = left + plot_w + right, top + plot_h + bottom
+
+    def Y(v: float) -> float:
+        return top + plot_h * (1 - (v - y_min) / (y_max - y_min))
+
+    parts = [_svg_open(width, height, f"Elo of each method: {labels[0]} and {labels[1]}")]
+    for t in ticks:
+        if y_min <= t <= y_max:
+            parts.append(f"<line class='sa-grid' x1='{left}' x2='{left + plot_w}' y1='{Y(t):.1f}' y2='{Y(t):.1f}'/>")
+            parts.append(
+                f"<text class='sa-muted' x='{left - 6}' y='{Y(t) + 4:.1f}' text-anchor='end' font-size='{_FONT - 1}'>{t:g}</text>"
+            )
+    parts.append(
+        f"<text class='sa-text' transform='translate(16 {top + plot_h / 2:.0f}) rotate(-90)' text-anchor='middle' "
+        f"font-size='{_FONT}'>Elo</text>"
+    )
+    base = Y(y_min)
+    for i, method in enumerate(methods):
+        cx = left + slot * i + slot / 2
+        lines = [method]
+        for key, dx, color, ink, label in (
+            ("ablated", -bar / 2 - 1, ELO_PAIR_COLORS[1], "#1f2328", labels[1]),
+            ("default", bar / 2 + 1, ELO_PAIR_COLORS[0], "#ffffff", labels[0]),
+        ):
+            row = tables[key].loc[method]
+            elo, lo, hi = float(row["elo"]), float(row["elo_ci_low"]), float(row["elo_ci_high"])
+            x = cx + dx - bar / 2
+            parts.append(
+                f"<rect x='{x:.1f}' y='{Y(elo):.1f}' width='{bar}' height='{max(base - Y(elo), 0):.1f}' fill='{color}'/>"
+            )
+            xm = cx + dx
+            parts.append(
+                f"<line class='sa-ink' x1='{xm:.1f}' x2='{xm:.1f}' y1='{Y(hi):.1f}' y2='{Y(lo):.1f}' stroke-width='1.2'/>"
+            )
+            for v in (lo, hi):
+                parts.append(
+                    f"<line class='sa-ink' x1='{xm - 4:.1f}' x2='{xm + 4:.1f}' y1='{Y(v):.1f}' y2='{Y(v):.1f}' stroke-width='1.2'/>"
+                )
+            rank = int(ranks[key][method])
+            parts.append(
+                f"<text x='{xm:.1f}' y='{base - 8:.1f}' text-anchor='middle' font-size='{_FONT - 1}' "
+                f"font-weight='700' fill='{ink}'>{rank}</text>"
+            )
+            lines.append(f"{label}: Elo {elo:.0f} ({lo:.0f} to {hi:.0f}), rank {rank}")
+        parts.append(
+            f"<text class='sa-text' text-anchor='end' font-size='{_FONT}' "
+            f"transform='translate({cx + 6:.1f} {base + 14:.1f}) rotate(-35)'>{html.escape(method)}</text>"
+        )
+        parts.append(
+            f"<rect class='sa-hit' x='{cx - slot / 2:.1f}' y='{top}' width='{slot}' height='{plot_h}' data-tip='{_tip(lines)}'/>"
+        )
+    parts.append(
+        f"<line class='sa-ink' x1='{left}' x2='{left + plot_w}' y1='{base:.1f}' y2='{base:.1f}' stroke-opacity='0.5'/>"
+    )
+    # Legend on top, default first (as in the paper).
+    x = left + plot_w / 2 - 6.5 * (len(labels[0]) + len(labels[1])) / 2 - 30
+    for color, label in ((ELO_PAIR_COLORS[0], labels[0]), (ELO_PAIR_COLORS[1], labels[1])):
+        parts.append(f"<rect x='{x:.1f}' y='{top - 30}' width='14' height='14' fill='{color}'/>")
+        parts.append(
+            f"<text class='sa-text' x='{x + 20:.1f}' y='{top - 18}' font-size='{_FONT}'>{html.escape(label)}</text>"
+        )
+        x += 20 + 6.8 * len(label) + 24
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def elo_pair_html(
+    default: pd.DataFrame, ablated: pd.DataFrame, *, labels: tuple[str, str], title: str, name: str
+) -> str:
+    csv = pd.concat([default.assign(results=labels[0]), ablated.assign(results=labels[1])], ignore_index=True)
+    return _figure_page(
+        elo_pair_svg(default, ablated, labels=labels),
+        csv[["results", "method", "elo", "elo_ci_low", "elo_ci_high"]].round(1),
+        name=name,
+        hint="Hover or tap a method for its values.",
+        title=title,
+    )

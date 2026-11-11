@@ -1,6 +1,6 @@
 {
   "benchmark_name": "feature_selection_benchmark_2026_all",
-  "generated_at": "2026-11-11 07:35 UTC",
+  "generated_at": "2026-11-11 16:00 UTC",
   "selectarena_version": "0.1.0",
   "n_results": 85193,
   "n_datasets": 71,
@@ -154,7 +154,8 @@
     ],
     "improvement_by_model": true,
     "improvement_by_task_type": true,
-    "rank_by_size": true
+    "rank_by_size": true,
+    "elo_without_timeouts": true
   },
   "has_results_explorer": true,
   "subsets": [

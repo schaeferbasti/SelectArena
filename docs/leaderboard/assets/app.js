@@ -343,11 +343,16 @@
     showLasagna('validity', level.path, state.vtasks, state.vvariant);
   }
 
-  // ---- where methods win (Performance tab; all results, not filtered by the chips above) ----
+  // ---- per dataset characteristic, model, task type and budget, and the ablations (Performance tab;
+  // all results, not filtered by the chips above) ----
+  // Groupings with a section of their own are not offered under "Group by".
+  var OWN_SECTION = ['model', 'task_type', 'budget'];
   // meta.analysis: {path, groupings: [{key, label}], improvement_by_model, improvement_by_task_type, rank_by_size, elo_without_timeouts}.
   function renderAnalysis() {
     var info = meta && meta.analysis;
-    var groupings = (info && info.groupings) || [];
+    var all = (info && info.groupings) || [];
+    var groupings = all.filter(function (g) { return OWN_SECTION.indexOf(g.key) < 0; });
+    if (!groupings.length) groupings = all;
     $('analysis-content').hidden = !groupings.length;
     if (!groupings.length) return;
     if (!groupings.some(function (g) { return g.key === state.group; })) state.group = groupings[0].key;
@@ -355,15 +360,15 @@
       state.group, function (value) { state.group = value; renderAnalysis(); });
     var dir = 'data/' + info.path + '/';
     setFrame($('plot-group'), dir + 'heatmap_' + state.group + '.html');
-    $('model-figure').hidden = !info.improvement_by_model;
+    $('model-section').hidden = !info.improvement_by_model;
     if (info.improvement_by_model) setFrame($('plot-model'), dir + 'improvement_by_model.html');
-    $('task-figure').hidden = !info.improvement_by_task_type;
+    $('task-section').hidden = !info.improvement_by_task_type;
     if (info.improvement_by_task_type) setFrame($('plot-task'), dir + 'improvement_by_task_type.html');
-    // The heat map by budget (also a "Group by" option of the first figure) as a figure of its own.
-    var byBudget = groupings.some(function (g) { return g.key === 'budget'; });
-    $('budget-figure').hidden = !byBudget;
+    // The heat map by budget, in a section of its own.
+    var byBudget = all.some(function (g) { return g.key === 'budget'; });
+    $('budget-section').hidden = !byBudget;
     if (byBudget) setFrame($('plot-budget'), dir + 'heatmap_budget.html');
-    $('timeout-figure').hidden = !info.elo_without_timeouts;
+    $('timeout-section').hidden = !info.elo_without_timeouts;
     if (info.elo_without_timeouts) setFrame($('plot-timeout'), dir + 'elo_no_timeouts.html');
     $('size-figure').hidden = !info.rank_by_size;
     if (info.rank_by_size) setFrame($('plot-size'), dir + 'rank_by_size.html');
