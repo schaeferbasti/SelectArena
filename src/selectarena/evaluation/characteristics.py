@@ -10,7 +10,8 @@ The leaderboard ranks methods over all datasets. This module breaks the ranks do
   number of features or samples per feature, with a bootstrap confidence interval over datasets;
 * :func:`improvement_by`: the improvement over Random of every method per downstream model or task
   type;
-* :func:`datasets_without_timeouts`: the datasets where no method ran out of time (no random
+* :func:`complete_methods` and :func:`datasets_without_timeouts`: the methods with complete results
+  and the datasets where none of them ran out of time (no random
   fallback), for the leaderboard of those datasets.
 
 Improvements over Random are those of the leaderboard (:func:`selectarena.evaluation.pareto.improvement_over_random`);
@@ -147,6 +148,15 @@ def improvement_by_grouping(results: pd.DataFrame, grouping: Grouping) -> pd.Dat
     if not frames:
         return pd.DataFrame(columns=["group", "method", "improvement", "n_datasets"])
     return pd.concat(frames, ignore_index=True)
+
+
+def complete_methods(scores: pd.DataFrame) -> list[str]:
+    """The methods with results on as many (dataset, split) pairs as the most complete method: methods
+    with preliminary results (e.g. on one of three splits) are left out of comparisons that need the
+    same results for every method, such as the time-out ablation."""
+    data = scores[scores["method"].notna()]
+    cells = data.groupby("method")[["dataset_key", "split_idx"]].apply(lambda g: len(g.drop_duplicates()))
+    return sorted(cells[cells == cells.max()].index) if len(cells) else []
 
 
 def datasets_without_timeouts(scores: pd.DataFrame) -> list[str]:

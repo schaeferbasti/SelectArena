@@ -256,3 +256,14 @@ h3 { font-size: 1rem; margin: 14px 0 6px; }
 .intro, .prose, .caption, .note, footer > p {
   text-align: justify; hyphens: auto; -webkit-hyphens: auto;
 }
+
+/* Collapsible sections of the Performance tab: a click on a title opens or closes its section. */
+details.sec { border-bottom: 1px solid var(--line); }
+details.sec > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 6px 0; }
+details.sec > summary::-webkit-details-marker { display: none; }
+details.sec > summary::before { content: "\25B8"; color: var(--muted); font-size: 0.9rem; transition: transform 0.15s; flex: none; }
+details.sec[open] > summary::before { transform: rotate(90deg); }
+details.sec > summary h2 { margin: 6px 0; }
+details.sec > summary:hover h2 { text-decoration: underline; text-underline-offset: 3px; }
+details.sec[open] { padding-bottom: 12px; }
+.sec-intro { color: var(--muted); margin: 2px 0 6px; }

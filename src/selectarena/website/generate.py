@@ -485,16 +485,24 @@ def generate_website_artifacts(
 
     chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
     analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
-    # The leaderboard's Elo figure on the datasets where no method ran out of time.
-    no_timeouts = characteristics.datasets_without_timeouts(scores)
+    # Elo on the datasets where no method ran out of time, next to the default Elo (the paper's
+    # Figure D.3 design), for the methods with complete results only (preliminary ones are left out).
+    complete = characteristics.complete_methods(scores)
+    complete_scores = scores[scores["method"].isin(complete)]
+    left_out = sorted(set(scores["method"].dropna()) - set(complete))
+    if left_out:
+        log(f"Time-out ablation without the methods with incomplete results: {left_out}.")
+    no_timeouts = characteristics.datasets_without_timeouts(complete_scores)
     analysis_meta["elo_without_timeouts"] = bool(no_timeouts) and default_elo is not None
     if no_timeouts and default_elo is not None:
-        sub = scores[scores["dataset_key"].isin(no_timeouts)]
+        sub = complete_scores[complete_scores["dataset_key"].isin(no_timeouts)]
+        reference_elo = compute_elo(complete_scores, n_bootstrap=n_bootstrap) if left_out else default_elo
 
         def _mean_no_timeouts(rows: pd.DataFrame | None, column: str) -> pd.Series | None:
             if rows is None:
                 return None
-            return rows[rows["dataset"].isin(no_timeouts)].groupby("method")[column].mean()
+            rows = rows[rows["dataset"].isin(no_timeouts) & rows["method"].isin(complete)]
+            return rows.groupby("method")[column].mean()
 
         ablated_elo = compute_elo(sub, n_bootstrap=n_bootstrap)
         leaderboard = format_leaderboard(
@@ -508,10 +516,10 @@ def generate_website_artifacts(
             ),
         )
         leaderboard.to_csv(website_data / "analysis" / "leaderboard_no_timeouts.csv", index=False)
-        all_datasets = scores["dataset_key"].nunique()
+        all_datasets = complete_scores["dataset_key"].nunique()
         (website_data / "analysis" / "elo_no_timeouts.html").write_text(
             elo_pair_html(
-                default_elo,
+                reference_elo,
                 ablated_elo,
                 labels=(
                     f"with random fallback ({all_datasets} datasets)",

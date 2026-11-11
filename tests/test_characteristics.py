@@ -192,3 +192,15 @@ def test_datasets_without_timeouts():
     # Without any time-out (or with time-outs everywhere) there is nothing to compare.
     assert C.datasets_without_timeouts(scores.assign(used_fallback=False)) == []
     assert C.datasets_without_timeouts(scores.assign(used_fallback=True)) == []
+
+
+def test_complete_methods():
+    # SHAP has results on one of two splits only (preliminary): it is left out.
+    rows = [
+        {"dataset_key": d, "split_idx": s, "method": m}
+        for d in ("d1", "d2")
+        for s in (0, 1)
+        for m in ("Random", "F-Test", "SHAP")
+        if not (m == "SHAP" and s == 1)
+    ]
+    assert C.complete_methods(pd.DataFrame(rows)) == ["F-Test", "Random"]

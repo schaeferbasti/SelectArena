@@ -539,7 +539,7 @@ def test_interactive_pareto_and_lasagna(artifacts):
     meta = json.loads((data / "meta.json").read_text())
     pareto = (data / "subsets" / Subset().rel_path / "pareto.html").read_text()
     front = pd.read_csv(data / "subsets" / Subset().rel_path / "pareto.csv")
-    shown = front[front["method"] != "LaplacianScore"]  # hidden in the figure, as in the paper
+    shown = front[~front["method"].isin(["LaplacianScore", "Random"])]  # hidden in the figure, as in the paper
     assert pareto.count("class='sa-hit'") == len(shown)
     assert "Improvement over Random" in pareto and "saSvg('selectarena_pareto')" in pareto
     lasagna = meta["lasagna"]["stability"]

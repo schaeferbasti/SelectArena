@@ -22,8 +22,10 @@ if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
 RANDOM = "Random"
-HIDDEN_IN_PLOT = frozenset({"LaplacianScore"})
-"""Left out of the figure only, as in the paper: far below Random, it would squash the y axis."""
+HIDDEN_IN_PLOT = frozenset({"LaplacianScore", RANDOM})
+"""Left out of the figure (and its Pareto front) only, as in the paper's Figure 4: LaplacianScore is far
+below Random and would squash the y axis; Random is the reference (0%) and, as the fastest method,
+would otherwise always start the front. Both stay in the CSV."""
 
 _ORANGE = "#D55E00"
 _GREEN = "#009E73"
@@ -168,7 +170,7 @@ def pareto_figure(summary: pd.DataFrame, hidden: frozenset[str] = HIDDEN_IN_PLOT
         )
     ax.set_xlabel("Feature Selection Time (s) per 1k Features")
     ax.set_ylabel("Improvement over Random (%)")
-    ax.legend()
+    ax.legend(loc="lower left")
     ax.grid(True, alpha=0.3)
     for side in ("left", "bottom", "right", "top"):
         ax.spines[side].set_color("black")
