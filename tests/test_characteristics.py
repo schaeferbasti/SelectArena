@@ -176,3 +176,19 @@ def test_every_benchmark_dataset_has_a_domain():
     assert set(DATASET_DOMAINS.values()) == set(PAPER_DOMAINS)  # the paper's domains, each used
     assert set(DATA_FOUNDRY_DOMAINS) == set(DATASET_DOMAINS)
     assert DATA_FOUNDRY_DOMAINS["framingham_heart_study"] == "medical & healthcare"  # corrected metadata
+
+
+def test_datasets_without_timeouts():
+    # SBE runs out of time on d2 (fallback) and finishes on d1; Random's fallback never counts.
+    rows = []
+    for dataset, sbe_fallback in (("d1", False), ("d2", True)):
+        rows += [
+            {"dataset_key": dataset, "method": "Random", "used_fallback": False},  # as set by prepare_results
+            {"dataset_key": dataset, "method": "F-Test", "used_fallback": False},
+            {"dataset_key": dataset, "method": "SBE", "used_fallback": sbe_fallback},
+        ]
+    scores = pd.DataFrame(rows)
+    assert C.datasets_without_timeouts(scores) == ["d1"]
+    # Without any time-out (or with time-outs everywhere) there is nothing to compare.
+    assert C.datasets_without_timeouts(scores.assign(used_fallback=False)) == []
+    assert C.datasets_without_timeouts(scores.assign(used_fallback=True)) == []

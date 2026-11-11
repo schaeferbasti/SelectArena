@@ -573,5 +573,29 @@ def test_analysis_figures(artifacts):
         analysis
     )
     assert not any(folder.glob("*domain*")) and not (folder / "selection_time.html").exists()
+    assert analysis["elo_without_timeouts"] == (folder / "elo_no_timeouts.html").is_file()
     # The rank correlation needs at least five datasets (the fixture has fewer).
     assert analysis["rank_by_size"] == (folder / "rank_by_size.html").is_file()
+
+
+def test_leaderboard_without_timeouts(tmp_path):
+    """Lasso runs out of time (random fallback) on abalone: the Elo figure of the other datasets is written."""
+    df = results()
+    timed_out = df["experiment_method_name_string"].str.contains("LassoFeatureSelector") & (
+        df["name"] == "abalone/0199-uuid"
+    )
+    df.loc[timed_out, "random_feature_names"] = "['f3']"
+    artifacts = generate_website_artifacts(df, out_dir=tmp_path, n_bootstrap=2, paper_figures=False, log=lambda _: None)
+    analysis = json.loads((artifacts.website_data / "meta.json").read_text())["analysis"]
+    assert analysis["elo_without_timeouts"] is True
+    folder = artifacts.website_data / analysis["path"]
+    leaderboard = pd.read_csv(folder / "leaderboard_no_timeouts.csv")
+    assert len(leaderboard) == len(METHODS) and set(leaderboard["#Datasets"]) == {3}
+    page = (folder / "elo_no_timeouts.html").read_text()
+    assert "id='sa-figure'" in page and "3 datasets where no method timed out" in page
+    # Without any time-out, there is no such figure.
+    plain = generate_website_artifacts(
+        results(), out_dir=tmp_path / "plain", n_bootstrap=2, paper_figures=False, log=lambda _: None
+    )
+    assert json.loads((plain.website_data / "meta.json").read_text())["analysis"]["elo_without_timeouts"] is False
+    assert not (plain.website_data / "analysis" / "elo_no_timeouts.html").exists()

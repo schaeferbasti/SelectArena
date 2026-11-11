@@ -344,7 +344,7 @@
   }
 
   // ---- where methods win (Performance tab; all results, not filtered by the chips above) ----
-  // meta.analysis: {path, groupings: [{key, label}], improvement_by_model, improvement_by_task_type, rank_by_size}.
+  // meta.analysis: {path, groupings: [{key, label}], improvement_by_model, improvement_by_task_type, rank_by_size, elo_without_timeouts}.
   function renderAnalysis() {
     var info = meta && meta.analysis;
     var groupings = (info && info.groupings) || [];
@@ -363,6 +363,8 @@
     var byBudget = groupings.some(function (g) { return g.key === 'budget'; });
     $('budget-figure').hidden = !byBudget;
     if (byBudget) setFrame($('plot-budget'), dir + 'heatmap_budget.html');
+    $('timeout-figure').hidden = !info.elo_without_timeouts;
+    if (info.elo_without_timeouts) setFrame($('plot-timeout'), dir + 'elo_no_timeouts.html');
     $('size-figure').hidden = !info.rank_by_size;
     if (info.rank_by_size) setFrame($('plot-size'), dir + 'rank_by_size.html');
   }

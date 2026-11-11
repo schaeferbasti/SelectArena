@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <!-- Bumped with every data refresh (shown in the header). -->
-  <meta name="selectarena-version" content="0.9.3">
+  <meta name="selectarena-version" content="0.9.4">
   <title>SelectArena Leaderboard</title>
   <meta name="description" content="Leaderboard of feature selection methods on real-world tabular data.">
   <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
@@ -36,6 +36,7 @@
       </div>
     </div>
   </header>
+  <p class="notice" role="note">Preliminary results: SHAP and LassoNet are evaluated on one of the three data splits so far, all other methods on all three. Their stability and validity are not evaluated yet.</p>
 
   <p class="intro">
     Which feature selection method should I use? SelectArena compares them on predictive performance, stability and validity. It is a living benchmark: your method can be added!
@@ -208,6 +209,15 @@
             (the most), and <em>All</em> over all budgets, as in the leaderboard. Darker is better, and
             the best method of each budget is outlined. Improvements shrink at larger budgets for every
             method, since Random's selection then holds most of the features.
+          </figcaption>
+        </figure>
+        <figure class="plot" id="timeout-figure" hidden>
+          <iframe class="frame sa-frame fig-frame" id="plot-timeout" title="Elo of each method on the datasets where no method ran out of time" style="height:420px"></iframe>
+          <figcaption class="caption">
+            <strong>Elo where no method ran out of time.</strong> The leaderboard's Elo figure on the
+            datasets on which every method finished within the 1-hour limit, without random fallback.
+            On these datasets, the search method SBE is among the best methods, whereas it falls behind
+            on the full leaderboard, where it often runs out of time.
           </figcaption>
         </figure>
         <figure class="plot" id="size-figure" hidden>

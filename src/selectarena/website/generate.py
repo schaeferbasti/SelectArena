@@ -25,7 +25,9 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
     ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
     model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
     dataset size), ``improvement_by_model.html``, ``improvement_by_task_type.html`` and
-    ``.csv`` (improvement over Random per downstream model and task type);
+    ``.csv`` (improvement over Random per downstream model and task type), ``elo_no_timeouts.html``
+    and ``leaderboard_no_timeouts.csv`` (the leaderboard and its Elo figure on the datasets where no
+    method ran out of time);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -482,6 +484,35 @@ def generate_website_artifacts(
 
     chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
     analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
+    # The leaderboard's Elo figure on the datasets where no method ran out of time.
+    no_timeouts = characteristics.datasets_without_timeouts(scores)
+    analysis_meta["elo_without_timeouts"] = bool(no_timeouts)
+    if no_timeouts:
+        sub = scores[scores["dataset_key"].isin(no_timeouts)]
+
+        def _mean_no_timeouts(rows: pd.DataFrame | None, column: str) -> pd.Series | None:
+            if rows is None:
+                return None
+            return rows[rows["dataset"].isin(no_timeouts)].groupby("method")[column].mean()
+
+        leaderboard = format_leaderboard(
+            compute_elo(sub, n_bootstrap=n_bootstrap),
+            aggregate(sub),
+            stability=_mean_no_timeouts(stab_rows, "stability"),
+            validity=_mean_no_timeouts(val_rows, "validity"),
+            n_datasets=sub.groupby("method")["dataset_key"].nunique(),
+            improvement=improvement_over_random(
+                df[df["dataset_key"].isin(no_timeouts)].assign(dataset=lambda d: d["dataset_key"])
+            ),
+        )
+        leaderboard.to_csv(website_data / "analysis" / "leaderboard_no_timeouts.csv", index=False)
+        (website_data / "analysis" / "elo_no_timeouts.html").write_text(
+            elo_explorer_html(
+                leaderboard,
+                title=f"SelectArena: Elo on the {len(no_timeouts)} datasets where no method timed out",
+            )
+        )
+        log(f"Leaderboard without time-outs: {len(no_timeouts)} datasets.")
 
     total_budget = _total_budget(df)
     results_table = _results_table(df)

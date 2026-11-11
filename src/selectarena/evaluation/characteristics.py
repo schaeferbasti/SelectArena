@@ -9,7 +9,9 @@ The leaderboard ranks methods over all datasets. This module breaks the ranks do
   correlation between the method's mean rank on a dataset and the dataset's number of samples,
   number of features or samples per feature, with a bootstrap confidence interval over datasets;
 * :func:`improvement_by`: the improvement over Random of every method per downstream model or task
-  type.
+  type;
+* :func:`datasets_without_timeouts`: the datasets where no method ran out of time (no random
+  fallback), for the leaderboard of those datasets.
 
 Improvements over Random are those of the leaderboard (:func:`selectarena.evaluation.pareto.improvement_over_random`);
 ranks those of :func:`selectarena.evaluation.leaderboard.per_group_scores` (1 = lowest error among
@@ -145,6 +147,24 @@ def improvement_by_grouping(results: pd.DataFrame, grouping: Grouping) -> pd.Dat
     if not frames:
         return pd.DataFrame(columns=["group", "method", "improvement", "n_datasets"])
     return pd.concat(frames, ignore_index=True)
+
+
+def datasets_without_timeouts(scores: pd.DataFrame) -> list[str]:
+    """The datasets (``dataset_key``) on which no method ran out of time; empty when every dataset or
+    no dataset has a time-out (nothing to compare then).
+
+    A method ran out of time on a dataset when it used the random fallback in any of its runs there
+    (``used_fallback``; Random itself never counts, see
+    :func:`~selectarena.evaluation.leaderboard.prepare_results`).
+    """
+    data = scores[scores["method"].notna()]
+    if "used_fallback" not in data or data.empty:
+        return []
+    timed_out = data.groupby("dataset_key")["used_fallback"].any()
+    keep = timed_out[~timed_out].index
+    if len(keep) == 0 or len(keep) == len(timed_out):
+        return []
+    return sorted(keep)
 
 
 def _spearman(x: np.ndarray, y: np.ndarray) -> float:
