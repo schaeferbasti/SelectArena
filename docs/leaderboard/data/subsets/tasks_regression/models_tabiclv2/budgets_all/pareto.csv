@@ -14,5 +14,6 @@ GainRatio,6.5338,89.933,10,False
 mRMR,6.3499,141.2203,10,False
 LassoNet,3.9089,1790.6528,10,False
 SHAP,3.891,101132.724,10,False
+CPI,2.7739,5489.2914,10,False
 Random,0.0,0.0158,10,True
 LaplacianScore,-0.3587,4.9034,10,False

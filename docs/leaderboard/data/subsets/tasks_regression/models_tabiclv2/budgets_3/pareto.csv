@@ -13,6 +13,7 @@ GainRatio,3.5949,89.8989,10,False
 SBE,3.418,20879.9148,10,False
 MarkovBlanket,3.2642,40.8445,10,False
 SHAP,1.7806,105416.2304,10,False
+CPI,1.0542,4975.6103,10,False
 LassoNet,1.0151,1732.9904,10,False
 Random,0.0,0.0035,10,True
 LaplacianScore,-4.6637,4.9009,10,False

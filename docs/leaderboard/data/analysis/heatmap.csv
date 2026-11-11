@@ -4,6 +4,7 @@ Task type,All,RFImportance,26.2289,71
 Task type,All,MI,23.7998,71
 Task type,All,CART,23.781,71
 Task type,All,F-Test,22.7574,71
+Task type,All,CPI,22.7044,71
 Task type,All,SHAP,22.3991,71
 Task type,All,ElasticNet,21.875,71
 Task type,All,mRMR,21.6681,71
@@ -22,6 +23,7 @@ Task type,Binary,CART,25.7885,49
 Task type,Binary,SHAP,25.702,49
 Task type,Binary,F-Test,25.6258,49
 Task type,Binary,MI,25.5063,49
+Task type,Binary,CPI,24.8819,49
 Task type,Binary,ElasticNet,24.0809,49
 Task type,Binary,mRMR,23.9148,49
 Task type,Binary,Lasso,23.4261,49
@@ -35,6 +37,7 @@ Task type,Binary,Random,0.0,49
 Task type,Binary,LaplacianScore,-23.7565,49
 Task type,Multiclass,RFImportance,31.6828,12
 Task type,Multiclass,LassoNet,30.6104,12
+Task type,Multiclass,CPI,29.0356,12
 Task type,Multiclass,MI,28.9489,12
 Task type,Multiclass,MarkovBlanket,28.8375,12
 Task type,Multiclass,CART,26.5537,12
@@ -64,6 +67,7 @@ Task type,Regression,LOCO,6.7815,10
 Task type,Regression,SBE,6.7229,10
 Task type,Regression,mRMR,6.2474,10
 Task type,Regression,LassoNet,4.9329,10
+Task type,Regression,CPI,4.4371,10
 Task type,Regression,SHAP,4.2486,10
 Task type,Regression,Random,0.0,10
 Task type,Regression,LaplacianScore,-0.9354,10
@@ -72,6 +76,7 @@ Samples,All,RFImportance,26.2289,71
 Samples,All,MI,23.7998,71
 Samples,All,CART,23.781,71
 Samples,All,F-Test,22.7574,71
+Samples,All,CPI,22.7044,71
 Samples,All,SHAP,22.3991,71
 Samples,All,ElasticNet,21.875,71
 Samples,All,mRMR,21.6681,71
@@ -93,6 +98,7 @@ Samples,< 1k,F-Test,25.4681,31
 Samples,< 1k,ElasticNet,24.386,31
 Samples,< 1k,GainRatio,24.0143,31
 Samples,< 1k,CART,23.4307,31
+Samples,< 1k,CPI,23.0148,31
 Samples,< 1k,MarkovBlanket,22.8799,31
 Samples,< 1k,Lasso,22.7732,31
 Samples,< 1k,SHAP,19.5349,31
@@ -104,6 +110,7 @@ Samples,< 1k,LaplacianScore,-14.7449,31
 Samples,1k–10k,SHAP,26.0151,18
 Samples,1k–10k,RFImportance,23.9429,18
 Samples,1k–10k,CART,23.9185,18
+Samples,1k–10k,CPI,23.7523,18
 Samples,1k–10k,LassoNet,22.3199,18
 Samples,1k–10k,SFS,20.9018,18
 Samples,1k–10k,MI,20.6321,18
@@ -128,6 +135,7 @@ Samples,≥ 10k,mRMR,22.2267,22
 Samples,≥ 10k,SFS,21.9499,22
 Samples,≥ 10k,MI,21.5633,22
 Samples,≥ 10k,Lasso,21.4829,22
+Samples,≥ 10k,CPI,21.4095,22
 Samples,≥ 10k,ElasticNet,21.1792,22
 Samples,≥ 10k,GainRatio,18.504,22
 Samples,≥ 10k,LOCO,18.334,22
@@ -140,6 +148,7 @@ Features,All,RFImportance,26.2289,71
 Features,All,MI,23.7998,71
 Features,All,CART,23.781,71
 Features,All,F-Test,22.7574,71
+Features,All,CPI,22.7044,71
 Features,All,SHAP,22.3991,71
 Features,All,ElasticNet,21.875,71
 Features,All,mRMR,21.6681,71
@@ -156,6 +165,7 @@ Features,< 20,LassoNet,24.9252,24
 Features,< 20,MI,22.5763,24
 Features,< 20,F-Test,21.1461,24
 Features,< 20,SBE,20.4615,24
+Features,< 20,CPI,20.2882,24
 Features,< 20,SHAP,19.8227,24
 Features,< 20,mRMR,19.3113,24
 Features,< 20,RFImportance,19.0607,24
@@ -169,6 +179,7 @@ Features,< 20,MarkovBlanket,16.784,24
 Features,< 20,LOCO,15.5847,24
 Features,< 20,Random,0.0,24
 Features,< 20,LaplacianScore,-2.4103,24
+Features,20–99,CPI,25.9805,22
 Features,20–99,RFImportance,25.3153,22
 Features,20–99,SHAP,25.3132,22
 Features,20–99,CART,24.76,22
@@ -197,6 +208,7 @@ Features,≥ 100,MI,27.5187,25
 Features,≥ 100,mRMR,27.515,25
 Features,≥ 100,GainRatio,24.6011,25
 Features,≥ 100,SHAP,22.308,25
+Features,≥ 100,CPI,22.1409,25
 Features,≥ 100,(R)ReliefF,21.0777,25
 Features,≥ 100,SFS,17.0025,25
 Features,≥ 100,LOCO,5.8384,25
@@ -208,6 +220,7 @@ Samples per feature,All,RFImportance,26.2289,71
 Samples per feature,All,MI,23.7998,71
 Samples per feature,All,CART,23.781,71
 Samples per feature,All,F-Test,22.7574,71
+Samples per feature,All,CPI,22.7044,71
 Samples per feature,All,SHAP,22.3991,71
 Samples per feature,All,ElasticNet,21.875,71
 Samples per feature,All,mRMR,21.6681,71
@@ -227,6 +240,7 @@ Samples per feature,< 10,CART,23.8923,40
 Samples per feature,< 10,MarkovBlanket,23.2762,40
 Samples per feature,< 10,mRMR,23.1848,40
 Samples per feature,< 10,F-Test,22.9741,40
+Samples per feature,< 10,CPI,22.1772,40
 Samples per feature,< 10,SHAP,21.2279,40
 Samples per feature,< 10,GainRatio,20.6977,40
 Samples per feature,< 10,ElasticNet,20.4495,40
@@ -237,6 +251,7 @@ Samples per feature,< 10,LOCO,7.4791,40
 Samples per feature,< 10,SBE,6.2199,40
 Samples per feature,< 10,Random,0.0,40
 Samples per feature,< 10,LaplacianScore,-22.9821,40
+Samples per feature,10–99,CPI,26.627,13
 Samples per feature,10–99,RFImportance,26.3318,13
 Samples per feature,10–99,SHAP,26.241,13
 Samples per feature,10–99,LassoNet,26.0549,13
@@ -263,6 +278,7 @@ Samples per feature,≥ 100,ElasticNet,22.0404,18
 Samples per feature,≥ 100,Lasso,21.4515,18
 Samples per feature,≥ 100,LassoNet,21.317,18
 Samples per feature,≥ 100,RFImportance,21.0855,18
+Samples per feature,≥ 100,CPI,21.0428,18
 Samples per feature,≥ 100,F-Test,20.8954,18
 Samples per feature,≥ 100,LOCO,20.7412,18
 Samples per feature,≥ 100,mRMR,20.4533,18
@@ -276,6 +292,7 @@ Downstream model,All,RFImportance,26.2289,71
 Downstream model,All,MI,23.7998,71
 Downstream model,All,CART,23.781,71
 Downstream model,All,F-Test,22.7574,71
+Downstream model,All,CPI,22.7044,71
 Downstream model,All,SHAP,22.3991,71
 Downstream model,All,ElasticNet,21.875,71
 Downstream model,All,mRMR,21.6681,71
@@ -291,6 +308,7 @@ Downstream model,All,LaplacianScore,-18.5819,71
 Downstream model,LightGBM,RFImportance,25.5467,71
 Downstream model,LightGBM,LassoNet,25.4937,71
 Downstream model,LightGBM,CART,23.5071,71
+Downstream model,LightGBM,CPI,23.3134,71
 Downstream model,LightGBM,MI,22.9183,71
 Downstream model,LightGBM,SHAP,22.7519,71
 Downstream model,LightGBM,mRMR,21.651,71
@@ -314,6 +332,7 @@ Downstream model,LinearModel,CART,21.9597,71
 Downstream model,LinearModel,SHAP,21.9322,71
 Downstream model,LinearModel,mRMR,21.8144,71
 Downstream model,LinearModel,Lasso,21.6866,71
+Downstream model,LinearModel,CPI,19.3943,71
 Downstream model,LinearModel,MarkovBlanket,19.0224,71
 Downstream model,LinearModel,GainRatio,18.3668,71
 Downstream model,LinearModel,SFS,17.7144,71
@@ -326,6 +345,7 @@ Downstream model,RandomForest,LassoNet,27.7943,71
 Downstream model,RandomForest,RFImportance,27.744,71
 Downstream model,RandomForest,MI,25.7525,71
 Downstream model,RandomForest,CART,24.8293,71
+Downstream model,RandomForest,CPI,24.6521,71
 Downstream model,RandomForest,F-Test,23.7761,71
 Downstream model,RandomForest,SHAP,23.6837,71
 Downstream model,RandomForest,MarkovBlanket,23.5531,71
@@ -345,6 +365,7 @@ Downstream model,RealMLP,CART,24.9132,71
 Downstream model,RealMLP,MI,24.2144,71
 Downstream model,RealMLP,F-Test,23.128,71
 Downstream model,RealMLP,MarkovBlanket,21.8261,71
+Downstream model,RealMLP,CPI,21.7091,71
 Downstream model,RealMLP,mRMR,21.5824,71
 Downstream model,RealMLP,SHAP,21.0215,71
 Downstream model,RealMLP,ElasticNet,20.9298,71
@@ -361,6 +382,7 @@ Downstream model,TabICLv2,LassoNet,28.3582,71
 Downstream model,TabICLv2,CART,25.9125,71
 Downstream model,TabICLv2,MI,25.4563,71
 Downstream model,TabICLv2,F-Test,24.197,71
+Downstream model,TabICLv2,CPI,24.0105,71
 Downstream model,TabICLv2,mRMR,23.5926,71
 Downstream model,TabICLv2,MarkovBlanket,23.542,71
 Downstream model,TabICLv2,SHAP,23.2072,71
@@ -378,6 +400,7 @@ Budget,All,RFImportance,26.2289,71
 Budget,All,MI,23.7998,71
 Budget,All,CART,23.781,71
 Budget,All,F-Test,22.7574,71
+Budget,All,CPI,22.7044,71
 Budget,All,SHAP,22.3991,71
 Budget,All,ElasticNet,21.875,71
 Budget,All,mRMR,21.6681,71
@@ -398,6 +421,7 @@ Budget,1 (smallest),CART,27.6214,71
 Budget,1 (smallest),MarkovBlanket,26.8161,71
 Budget,1 (smallest),ElasticNet,25.633,71
 Budget,1 (smallest),mRMR,25.5094,71
+Budget,1 (smallest),CPI,24.4737,71
 Budget,1 (smallest),Lasso,24.1238,71
 Budget,1 (smallest),SHAP,24.0771,71
 Budget,1 (smallest),SFS,23.7241,71
@@ -412,6 +436,7 @@ Budget,2,RFImportance,29.3441,71
 Budget,2,MI,27.4519,71
 Budget,2,SHAP,27.4213,71
 Budget,2,CART,27.1339,71
+Budget,2,CPI,26.3527,71
 Budget,2,ElasticNet,25.9894,71
 Budget,2,F-Test,25.8943,71
 Budget,2,Lasso,25.4346,71
@@ -427,6 +452,7 @@ Budget,2,LaplacianScore,-22.7707,71
 Budget,3,LassoNet,25.3741,71
 Budget,3,RFImportance,24.3008,71
 Budget,3,SHAP,22.3023,71
+Budget,3,CPI,21.138,71
 Budget,3,MI,20.8893,71
 Budget,3,CART,20.4694,71
 Budget,3,ElasticNet,19.7625,71
@@ -442,6 +468,7 @@ Budget,3,LOCO,9.3199,71
 Budget,3,Random,0.0,71
 Budget,3,LaplacianScore,-58.2022,71
 Budget,4,LassoNet,19.5864,71
+Budget,4,CPI,18.1312,71
 Budget,4,RFImportance,17.9516,71
 Budget,4,SHAP,16.3827,71
 Budget,4,CART,14.3581,71
@@ -459,6 +486,7 @@ Budget,4,LOCO,4.9577,71
 Budget,4,Random,0.0,71
 Budget,4,LaplacianScore,-89.8624,71
 Budget,5 (largest),LassoNet,13.6782,71
+Budget,5 (largest),CPI,11.845,71
 Budget,5 (largest),RFImportance,11.1111,71
 Budget,5 (largest),SHAP,10.4981,71
 Budget,5 (largest),F-Test,9.9441,71

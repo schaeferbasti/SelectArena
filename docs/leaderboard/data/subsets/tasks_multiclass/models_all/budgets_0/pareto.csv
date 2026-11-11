@@ -2,6 +2,7 @@ method,improvement,time_per_1k,n_datasets,pareto_optimal
 RFImportance,34.3808,23.9773,12,True
 MarkovBlanket,33.6698,10.6342,12,True
 LassoNet,33.6451,2768.9585,12,False
+CPI,32.677,7174.3167,12,False
 CART,31.6116,9.3248,12,True
 MI,31.0966,20.9126,12,False
 (R)ReliefF,28.9789,30660.9834,12,False

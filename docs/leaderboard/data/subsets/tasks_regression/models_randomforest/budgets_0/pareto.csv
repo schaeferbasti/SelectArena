@@ -15,4 +15,5 @@ SFS,7.6232,14106.7542,10,False
 GainRatio,6.8553,70.2992,10,False
 SHAP,5.6317,102818.724,10,False
 Random,0.0,0.003,10,True
+CPI,-3.178,4288.7281,10,False
 LaplacianScore,-6.977,4.7874,10,False

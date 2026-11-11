@@ -14,5 +14,6 @@ MarkovBlanket,9.7344,41.7545,10,False
 LOCO,9.3134,8693.4993,10,False
 LassoNet,8.6063,1812.9125,10,False
 SHAP,8.4103,101077.5131,10,False
+CPI,6.2921,5840.4086,10,False
 LaplacianScore,4.412,4.6874,10,False
 Random,0.0,0.0033,10,True

@@ -13,6 +13,7 @@ ElasticNet,3.5379,25.7981,10,False
 mRMR,3.3275,183.4115,10,False
 GainRatio,2.5963,69.1984,10,False
 SFS,2.2903,30058.7888,10,False
+CPI,1.2592,3737.7556,10,False
 Random,0.0,0.0034,10,True
 SHAP,-1.2014,95936.4765,10,False
 LaplacianScore,-2.3383,4.289,10,False

@@ -1,6 +1,7 @@
 model,method,improvement
 All,(R)ReliefF,18.5678
 All,CART,23.781
+All,CPI,22.7044
 All,ElasticNet,21.875
 All,F-Test,22.7574
 All,GainRatio,19.528
@@ -18,6 +19,7 @@ All,SHAP,22.3991
 All,mRMR,21.6681
 LightGBM,(R)ReliefF,18.4867
 LightGBM,CART,23.5071
+LightGBM,CPI,23.3134
 LightGBM,ElasticNet,21.5894
 LightGBM,F-Test,21.475
 LightGBM,GainRatio,19.7715
@@ -35,6 +37,7 @@ LightGBM,SHAP,22.7519
 LightGBM,mRMR,21.651
 LinearModel,(R)ReliefF,16.2645
 LinearModel,CART,21.9597
+LinearModel,CPI,19.3943
 LinearModel,ElasticNet,22.5544
 LinearModel,F-Test,22.8523
 LinearModel,GainRatio,18.3668
@@ -52,6 +55,7 @@ LinearModel,SHAP,21.9322
 LinearModel,mRMR,21.8144
 RandomForest,(R)ReliefF,20.3467
 RandomForest,CART,24.8293
+RandomForest,CPI,24.6521
 RandomForest,ElasticNet,22.1065
 RandomForest,F-Test,23.7761
 RandomForest,GainRatio,20.6076
@@ -69,6 +73,7 @@ RandomForest,SHAP,23.6837
 RandomForest,mRMR,21.1309
 RealMLP,(R)ReliefF,20.6316
 RealMLP,CART,24.9132
+RealMLP,CPI,21.7091
 RealMLP,ElasticNet,20.9298
 RealMLP,F-Test,23.128
 RealMLP,GainRatio,20.3239
@@ -86,6 +91,7 @@ RealMLP,SHAP,21.0215
 RealMLP,mRMR,21.5824
 TabICLv2,(R)ReliefF,21.6818
 TabICLv2,CART,25.9125
+TabICLv2,CPI,24.0105
 TabICLv2,ElasticNet,21.7247
 TabICLv2,F-Test,24.197
 TabICLv2,GainRatio,20.8154

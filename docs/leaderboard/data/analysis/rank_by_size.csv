@@ -1,52 +1,55 @@
 characteristic,method,rho,ci_low,ci_high,n_datasets
-Samples,(R)ReliefF,-0.3437,-0.5399,-0.1103,71
-Samples,CART,0.3217,0.0572,0.543,71
-Samples,ElasticNet,0.1626,-0.087,0.4006,71
-Samples,F-Test,-0.0401,-0.2772,0.211,71
-Samples,GainRatio,-0.1886,-0.4104,0.0459,71
-Samples,LOCO,0.2686,0.0192,0.5056,71
-Samples,LaplacianScore,-0.3891,-0.5955,-0.1651,71
-Samples,Lasso,0.1352,-0.0909,0.3563,71
-Samples,LassoNet,0.137,-0.109,0.3668,71
-Samples,MI,-0.1543,-0.3744,0.0593,71
-Samples,MarkovBlanket,0.1769,-0.0583,0.4025,71
-Samples,RFImportance,0.0432,-0.2165,0.2945,71
-Samples,Random,-0.304,-0.4904,-0.0765,71
-Samples,SBE,0.0965,-0.1644,0.3541,71
-Samples,SFS,0.2961,0.0464,0.5164,71
-Samples,SHAP,0.3949,0.1878,0.5888,71
-Samples,mRMR,-0.1837,-0.4144,0.0452,71
-Features,(R)ReliefF,0.2519,0.0162,0.4712,71
-Features,CART,0.0683,-0.1804,0.3234,71
-Features,ElasticNet,0.4615,0.2881,0.6156,71
-Features,F-Test,0.1313,-0.0977,0.3524,71
-Features,GainRatio,0.0706,-0.1881,0.3109,71
-Features,LOCO,-0.477,-0.6468,-0.2253,71
-Features,LaplacianScore,-0.18,-0.4163,0.0585,71
-Features,Lasso,0.4144,0.2245,0.5818,71
-Features,LassoNet,0.3114,0.079,0.4916,71
-Features,MI,-0.0756,-0.3032,0.1549,71
-Features,MarkovBlanket,0.0539,-0.162,0.2692,71
-Features,RFImportance,0.4016,0.1711,0.5904,71
-Features,Random,-0.0442,-0.2616,0.1767,71
-Features,SBE,-0.6773,-0.7729,-0.5357,71
-Features,SFS,-0.2463,-0.4484,-0.0198,71
-Features,SHAP,-0.0134,-0.2431,0.2113,71
-Features,mRMR,0.1602,-0.0911,0.3899,71
-Samples per feature,(R)ReliefF,-0.2615,-0.4698,-0.0254,71
-Samples per feature,CART,0.1698,-0.0657,0.3846,71
-Samples per feature,ElasticNet,-0.0539,-0.2895,0.1765,71
-Samples per feature,F-Test,-0.1136,-0.333,0.1352,71
-Samples per feature,GainRatio,-0.21,-0.4253,0.0163,71
-Samples per feature,LOCO,0.496,0.2862,0.6762,71
-Samples per feature,LaplacianScore,-0.1879,-0.4298,0.0604,71
-Samples per feature,Lasso,-0.0776,-0.2888,0.1424,71
-Samples per feature,LassoNet,-0.1162,-0.3372,0.1314,71
-Samples per feature,MI,-0.1339,-0.345,0.1142,71
-Samples per feature,MarkovBlanket,0.0176,-0.2169,0.238,71
-Samples per feature,RFImportance,-0.1863,-0.4166,0.0322,71
-Samples per feature,Random,-0.2612,-0.4567,-0.0377,71
-Samples per feature,SBE,0.4492,0.2306,0.6336,71
-Samples per feature,SFS,0.2866,0.0304,0.4915,71
-Samples per feature,SHAP,0.3303,0.1262,0.5099,71
-Samples per feature,mRMR,-0.2921,-0.4905,-0.029,71
+Samples,(R)ReliefF,-0.3485,-0.5447,-0.1109,71
+Samples,CART,0.3227,0.0554,0.5435,71
+Samples,CPI,0.1673,-0.0894,0.387,71
+Samples,ElasticNet,0.1661,-0.0672,0.4013,71
+Samples,F-Test,-0.0435,-0.3044,0.1974,71
+Samples,GainRatio,-0.1933,-0.4167,0.0396,71
+Samples,LOCO,0.2599,-0.0011,0.4823,71
+Samples,LaplacianScore,-0.3936,-0.5984,-0.1598,71
+Samples,Lasso,0.1267,-0.1091,0.3642,71
+Samples,LassoNet,0.118,-0.1173,0.3697,71
+Samples,MI,-0.1588,-0.3541,0.0595,71
+Samples,MarkovBlanket,0.1804,-0.0508,0.4147,71
+Samples,RFImportance,0.0331,-0.2032,0.2947,71
+Samples,Random,-0.3087,-0.493,-0.081,71
+Samples,SBE,0.092,-0.1803,0.3306,71
+Samples,SFS,0.299,0.0465,0.5149,71
+Samples,SHAP,0.3871,0.1688,0.5841,71
+Samples,mRMR,-0.1856,-0.4278,0.0431,71
+Features,(R)ReliefF,0.261,0.0044,0.4831,71
+Features,CART,0.066,-0.177,0.3246,71
+Features,CPI,-0.1307,-0.331,0.095,71
+Features,ElasticNet,0.4601,0.283,0.6077,71
+Features,F-Test,0.1359,-0.0953,0.3461,71
+Features,GainRatio,0.0705,-0.1828,0.3169,71
+Features,LOCO,-0.4794,-0.6503,-0.2667,71
+Features,LaplacianScore,-0.176,-0.3998,0.0937,71
+Features,Lasso,0.4223,0.2044,0.5708,71
+Features,LassoNet,0.3177,0.1042,0.5212,71
+Features,MI,-0.074,-0.3088,0.1627,71
+Features,MarkovBlanket,0.0571,-0.1615,0.2832,71
+Features,RFImportance,0.4018,0.2073,0.5735,71
+Features,Random,-0.0387,-0.2562,0.1795,71
+Features,SBE,-0.6759,-0.7735,-0.5431,71
+Features,SFS,-0.2519,-0.4502,-0.0223,71
+Features,SHAP,-0.0091,-0.2284,0.2269,71
+Features,mRMR,0.1574,-0.0865,0.379,71
+Samples per feature,(R)ReliefF,-0.2682,-0.4692,-0.0149,71
+Samples per feature,CART,0.1726,-0.0868,0.4055,71
+Samples per feature,CPI,0.1067,-0.1258,0.3276,71
+Samples per feature,ElasticNet,-0.0529,-0.2762,0.1929,71
+Samples per feature,F-Test,-0.1164,-0.3392,0.1128,71
+Samples per feature,GainRatio,-0.2138,-0.4237,0.0408,71
+Samples per feature,LOCO,0.4958,0.287,0.6738,71
+Samples per feature,LaplacianScore,-0.1903,-0.4194,0.0585,71
+Samples per feature,Lasso,-0.0877,-0.3016,0.139,71
+Samples per feature,LassoNet,-0.1201,-0.3507,0.124,71
+Samples per feature,MI,-0.1369,-0.3396,0.1041,71
+Samples per feature,MarkovBlanket,0.0205,-0.2022,0.247,71
+Samples per feature,RFImportance,-0.1907,-0.4031,0.0373,71
+Samples per feature,Random,-0.2633,-0.4645,-0.0408,71
+Samples per feature,SBE,0.4467,0.2229,0.6425,71
+Samples per feature,SFS,0.2946,0.0323,0.5111,71
+Samples per feature,SHAP,0.3284,0.1127,0.5143,71
+Samples per feature,mRMR,-0.2867,-0.5026,-0.015,71

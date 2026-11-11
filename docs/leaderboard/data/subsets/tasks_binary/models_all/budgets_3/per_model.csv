@@ -1,18 +1,19 @@
 Rank,Method,Category,Subgroup,Elo,Elo LightGBM,Rank LightGBM,Elo LinearModel,Rank LinearModel,Elo RandomForest,Rank RandomForest,Elo RealMLP,Rank RealMLP,Elo TabICLv2,Rank TabICLv2
-1,RFImportance,Non-search,Tree,1229.0,1218.0,1,1180.0,4,1265.0,1,1217.0,4,1276.0,1
-2,LassoNet,Non-search,Regularization,1227.0,1189.0,4,1230.0,1,1241.0,2,1229.0,1,1251.0,2
-3,SHAP,Non-search,Game theory,1214.0,1207.0,2,1180.0,5,1236.0,3,1224.0,2,1231.0,4
-4,CART,Non-search,Tree,1191.0,1184.0,5,1105.0,11,1219.0,4,1223.0,3,1232.0,3
-5,ElasticNet,Non-search,Regularization,1190.0,1194.0,3,1200.0,2,1196.0,5,1205.0,6,1163.0,9
-6,MI,Non-search,Information theory,1179.0,1171.0,8,1158.0,6,1172.0,7,1210.0,5,1191.0,7
-7,F-Test,Non-search,Correlation,1175.0,1183.0,6,1154.0,7,1159.0,8,1161.0,8,1225.0,5
-8,Lasso,Non-search,Regularization,1162.0,1179.0,7,1194.0,3,1159.0,9,1139.0,13,1144.0,10
-9,SBE,Search,Backward search,1154.0,1122.0,11,1117.0,10,1173.0,6,1155.0,10,1205.0,6
-10,mRMR,Non-search,Information theory,1141.0,1160.0,9,1141.0,8,1156.0,10,1118.0,15,1133.0,13
-11,MarkovBlanket,Search,Backward search,1128.0,1117.0,12,1043.0,15,1149.0,11,1167.0,7,1165.0,8
-12,(R)ReliefF,Non-search,Distance,1124.0,1136.0,10,1062.0,13,1132.0,13,1157.0,9,1135.0,12
-13,SFS,Search,Forward search,1119.0,1087.0,15,1136.0,9,1092.0,14,1141.0,12,1141.0,11
-14,GainRatio,Non-search,Information theory,1110.0,1096.0,14,1058.0,14,1138.0,12,1129.0,14,1132.0,14
-15,LOCO,Search,Leave-one-out,1107.0,1099.0,13,1097.0,12,1083.0,15,1147.0,11,1113.0,15
-16,Random,Baseline,Baseline,1000.0,1000.0,16,1000.0,16,1000.0,16,1000.0,16,1000.0,16
-17,LaplacianScore,Non-search,Distance,919.0,885.0,17,945.0,17,928.0,17,915.0,17,912.0,17
+1,LassoNet,Non-search,Regularization,1228.0,1193.0,4,1234.0,1,1243.0,3,1228.0,1,1251.0,2
+2,RFImportance,Non-search,Tree,1225.0,1216.0,1,1176.0,5,1263.0,1,1207.0,5,1272.0,1
+3,SHAP,Non-search,Game theory,1213.0,1204.0,3,1179.0,4,1241.0,4,1220.0,2,1228.0,5
+4,CPI,Non-search,Conditional Importance,1211.0,1206.0,2,1144.0,8,1251.0,2,1209.0,4,1251.0,3
+5,CART,Non-search,Tree,1190.0,1185.0,6,1103.0,12,1222.0,5,1216.0,3,1232.0,4
+6,ElasticNet,Non-search,Regularization,1188.0,1192.0,5,1195.0,2,1196.0,6,1199.0,7,1164.0,9
+7,MI,Non-search,Information theory,1176.0,1166.0,9,1155.0,6,1172.0,8,1201.0,6,1189.0,8
+8,F-Test,Non-search,Correlation,1172.0,1183.0,7,1149.0,7,1160.0,9,1156.0,9,1221.0,6
+9,Lasso,Non-search,Regularization,1160.0,1178.0,8,1190.0,3,1158.0,10,1135.0,13,1145.0,11
+10,SBE,Search,Backward search,1152.0,1122.0,12,1119.0,11,1172.0,7,1150.0,11,1203.0,7
+11,mRMR,Non-search,Information theory,1140.0,1161.0,10,1139.0,9,1155.0,11,1115.0,16,1134.0,14
+12,MarkovBlanket,Search,Backward search,1126.0,1117.0,13,1041.0,16,1150.0,12,1163.0,8,1162.0,10
+13,(R)ReliefF,Non-search,Distance,1122.0,1136.0,11,1063.0,14,1129.0,14,1151.0,10,1135.0,13
+14,SFS,Search,Forward search,1118.0,1089.0,16,1137.0,10,1093.0,15,1134.0,14,1142.0,12
+15,GainRatio,Non-search,Information theory,1109.0,1097.0,15,1058.0,15,1138.0,13,1124.0,15,1132.0,15
+16,LOCO,Search,Leave-one-out,1106.0,1098.0,14,1094.0,13,1086.0,16,1139.0,12,1115.0,16
+17,Random,Baseline,Baseline,1000.0,1000.0,17,1000.0,17,1000.0,17,1000.0,17,1000.0,17
+18,LaplacianScore,Non-search,Distance,917.0,887.0,18,941.0,18,927.0,18,911.0,18,912.0,18

@@ -1,5 +1,6 @@
 method,improvement,time_per_1k,n_datasets,pareto_optimal
 LassoNet,13.6714,2647.3129,12,True
+CPI,11.8828,7223.187,12,False
 RFImportance,11.0033,24.2238,12,True
 MI,10.1797,21.1719,12,True
 F-Test,9.8013,0.4649,12,True

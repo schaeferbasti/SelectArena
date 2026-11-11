@@ -1,6 +1,7 @@
 method,improvement,time_per_1k,n_datasets,pareto_optimal
 LassoNet,16.6061,1530.9433,49,True
 SHAP,15.6753,33038.8909,49,False
+CPI,14.4619,1734.6682,49,False
 RFImportance,11.2119,16.2686,49,True
 mRMR,10.2035,110.059,49,False
 ElasticNet,10.0813,2183.4509,49,False

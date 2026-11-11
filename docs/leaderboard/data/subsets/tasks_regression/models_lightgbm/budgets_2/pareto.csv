@@ -2,6 +2,7 @@ method,improvement,time_per_1k,n_datasets,pareto_optimal
 RFImportance,11.781,167.3998,10,True
 CART,11.7683,18.971,10,True
 LOCO,9.1408,8432.8983,10,False
+CPI,8.7886,4780.9159,10,False
 MI,7.9779,103.8307,10,False
 SBE,7.5716,27193.194,10,False
 Lasso,7.3171,10.1758,10,True

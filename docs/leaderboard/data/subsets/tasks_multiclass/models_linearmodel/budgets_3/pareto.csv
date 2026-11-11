@@ -3,6 +3,7 @@ LassoNet,26.6077,1962.355,12,True
 RFImportance,24.4242,21.3366,12,True
 MI,23.7831,19.1143,12,True
 GainRatio,22.0321,2.4772,12,True
+CPI,21.3496,5952.3663,12,False
 MarkovBlanket,21.2328,8.891,12,False
 F-Test,20.9164,0.373,12,True
 ElasticNet,20.8567,3007.1275,12,False
