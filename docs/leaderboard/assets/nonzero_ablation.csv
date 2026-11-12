@@ -1,25 +1,25 @@
-method,downstream_model,budget,performance_rel_all_features_pct,ci_low,ci_high,median_pct,n_datasets,median_selected_features,median_share_of_features_pct,median_features_of_datasets
-ElasticNet,LightGBM,budget 1,71.96,63.81,79.94,70.1,61,4.0,17.07,35.0
-ElasticNet,LightGBM,budget 2,82.85,75.53,90.37,86.83,61,8.0,33.33,35.0
-ElasticNet,LightGBM,budget 3,88.84,83.88,93.68,91.89,61,13.0,50.0,35.0
-ElasticNet,LightGBM,budget 4,94.06,89.84,98.16,96.27,61,22.0,66.67,35.0
-ElasticNet,LightGBM,budget 5,96.09,93.16,98.53,99.23,61,28.0,83.33,35.0
-ElasticNet,LightGBM,no budget (non-zero coefficients),99.21,97.63,100.56,100.0,61,30.0,98.98,35.0
-ElasticNet,LinearModel,budget 1,76.2,68.94,83.71,82.0,61,4.0,17.07,35.0
-ElasticNet,LinearModel,budget 2,85.73,79.8,91.14,89.89,61,8.0,33.33,35.0
-ElasticNet,LinearModel,budget 3,95.22,90.05,101.28,95.45,61,13.0,50.0,35.0
-ElasticNet,LinearModel,budget 4,100.62,93.92,110.28,97.89,61,22.0,66.67,35.0
-ElasticNet,LinearModel,budget 5,99.49,96.78,102.52,99.43,61,28.0,83.33,35.0
-ElasticNet,LinearModel,no budget (non-zero coefficients),99.92,98.36,101.53,100.0,61,30.0,98.98,35.0
-Lasso,LightGBM,budget 1,68.7,60.6,77.79,67.63,60,4.0,17.07,34.0
-Lasso,LightGBM,budget 2,81.62,75.05,88.42,85.79,60,8.0,33.33,34.0
-Lasso,LightGBM,budget 3,89.79,84.25,95.1,93.17,60,12.5,50.0,34.0
-Lasso,LightGBM,budget 4,95.12,90.66,99.32,97.19,60,21.0,66.67,34.0
-Lasso,LightGBM,budget 5,96.96,92.99,101.01,99.21,60,26.5,83.33,34.0
-Lasso,LightGBM,no budget (non-zero coefficients),98.62,95.51,101.82,99.98,60,27.0,83.48,34.0
-Lasso,LinearModel,budget 1,72.69,65.32,80.37,76.99,60,4.0,17.07,34.0
-Lasso,LinearModel,budget 2,85.33,79.22,91.23,89.89,60,8.0,33.33,34.0
-Lasso,LinearModel,budget 3,94.35,88.3,101.31,96.13,60,12.5,50.0,34.0
-Lasso,LinearModel,budget 4,98.08,94.06,102.36,98.03,60,21.0,66.67,34.0
-Lasso,LinearModel,budget 5,99.57,96.31,102.96,99.46,60,26.5,83.33,34.0
-Lasso,LinearModel,no budget (non-zero coefficients),100.0,96.83,103.37,100.0,60,27.0,83.48,34.0
+method,downstream_model,budget,performance_rel_all_features_pct,ci_low,ci_high,median_pct,n_datasets,median_selected_features,mean_share_of_features_kept_pct
+ElasticNet,LightGBM,budget 1,71.96,63.81,79.94,70.1,61,4.0,13.05
+ElasticNet,LightGBM,budget 2,82.85,75.53,90.37,86.83,61,8.0,24.62
+ElasticNet,LightGBM,budget 3,88.84,83.88,93.68,91.89,61,13.0,36.5
+ElasticNet,LightGBM,budget 4,94.06,89.84,98.16,96.27,61,22.0,50.3
+ElasticNet,LightGBM,budget 5,96.09,93.16,98.53,99.23,61,28.0,68.65
+ElasticNet,LightGBM,no budget (non-zero coefficients),99.21,97.63,100.56,100.0,61,30.0,81.14
+ElasticNet,LinearModel,budget 1,76.2,68.94,83.71,82.0,61,4.0,13.05
+ElasticNet,LinearModel,budget 2,85.73,79.8,91.14,89.89,61,8.0,24.62
+ElasticNet,LinearModel,budget 3,95.22,90.05,101.28,95.45,61,13.0,36.5
+ElasticNet,LinearModel,budget 4,100.62,93.92,110.28,97.89,61,22.0,50.3
+ElasticNet,LinearModel,budget 5,99.49,96.78,102.52,99.43,61,28.0,68.65
+ElasticNet,LinearModel,no budget (non-zero coefficients),99.92,98.36,101.53,100.0,61,30.0,81.14
+Lasso,LightGBM,budget 1,68.7,60.6,77.79,67.63,60,4.0,12.95
+Lasso,LightGBM,budget 2,81.62,75.05,88.42,85.79,60,8.0,24.45
+Lasso,LightGBM,budget 3,89.79,84.25,95.1,93.17,60,12.5,36.25
+Lasso,LightGBM,budget 4,95.12,90.66,99.32,97.19,60,21.0,50.01
+Lasso,LightGBM,budget 5,96.96,92.99,101.01,99.21,60,26.5,68.4
+Lasso,LightGBM,no budget (non-zero coefficients),98.62,95.51,101.82,99.98,60,27.0,69.33
+Lasso,LinearModel,budget 1,72.69,65.32,80.37,76.99,60,4.0,12.95
+Lasso,LinearModel,budget 2,85.33,79.22,91.23,89.89,60,8.0,24.45
+Lasso,LinearModel,budget 3,94.35,88.3,101.31,96.13,60,12.5,36.25
+Lasso,LinearModel,budget 4,98.08,94.06,102.36,98.03,60,21.0,50.01
+Lasso,LinearModel,budget 5,99.57,96.31,102.96,99.46,60,26.5,68.4
+Lasso,LinearModel,no budget (non-zero coefficients),100.0,96.83,103.37,100.0,60,27.0,69.33
