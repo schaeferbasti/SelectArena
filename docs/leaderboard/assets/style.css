@@ -297,3 +297,4 @@ details.nz-raw > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
 .nz-table .nz-k { color: var(--muted); font-size: 0.8em; }
 .nz-raw .nz-table td:nth-child(2), .nz-raw .nz-table th:nth-child(2) { text-align: left; }
 .nz-raw .nz-table th:nth-child(3), .nz-raw .nz-table td:nth-child(3) { text-align: right; }
+.nz-svg .nz-pct { font-size: 9px; opacity: 0.9; }
