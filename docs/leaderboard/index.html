@@ -278,16 +278,41 @@
             the same model on all features (error on all features divided by error with the selected
             features, &times;100; 100% = all features, dashed line), averaged over datasets, with 95%
             bootstrap intervals; the number on each bar is the median number of selected features.
-            One split (fold 0), default LightGBM and linear models. The number of datasets per panel
-            reflects where the comparison is defined: on 7 datasets (8 for Lasso), the cross-validated
-            regularization sets all coefficients to zero, so without a budget the method keeps no
-            feature and there is nothing to compare with; on a few further datasets, a model reaches
-            zero error, where a relative performance cannot be computed. From budget
-            4 on, both methods are within a few percent of their budget-free version: the fixed budget
-            does not materially affect their performance. Hover over a bar for its values;
+            One split (fold 0), default LightGBM and linear models, on 60 (Lasso) and 61 (ElasticNet)
+            datasets. Hover over a bar for its values;
             <a href="assets/nonzero_ablation.csv" download>download the values (CSV)</a>.
           </figcaption>
         </figure>
+        <div class='nz-table-wrap'><table class='nz-table'><thead><tr><th>Method</th><th>Model</th><th>Budget</th><th>Performance (%)</th><th>95% interval</th><th>Median (%)</th><th>Selected features (median)</th><th>Datasets</th></tr></thead><tbody><tr><td>Lasso</td><td>Linear</td><td>1</td><td>72.7</td><td>65.3–80.4</td><td>77.0</td><td>4</td><td>60</td></tr><tr><td>Lasso</td><td>Linear</td><td>2</td><td>85.3</td><td>79.2–91.2</td><td>89.9</td><td>8</td><td>60</td></tr><tr><td>Lasso</td><td>Linear</td><td>3</td><td>94.3</td><td>88.3–101.3</td><td>96.1</td><td>12.5</td><td>60</td></tr><tr><td>Lasso</td><td>Linear</td><td>4</td><td>98.1</td><td>94.1–102.4</td><td>98.0</td><td>21</td><td>60</td></tr><tr><td>Lasso</td><td>Linear</td><td>5</td><td>99.6</td><td>96.3–103.0</td><td>99.5</td><td>26.5</td><td>60</td></tr><tr class='nz-row-free'><td>Lasso</td><td>Linear</td><td>none (non-zero coefficients)</td><td>100.0</td><td>96.8–103.4</td><td>100.0</td><td>27</td><td>60</td></tr><tr><td>Lasso</td><td>LightGBM</td><td>1</td><td>68.7</td><td>60.6–77.8</td><td>67.6</td><td>4</td><td>60</td></tr><tr><td>Lasso</td><td>LightGBM</td><td>2</td><td>81.6</td><td>75.0–88.4</td><td>85.8</td><td>8</td><td>60</td></tr><tr><td>Lasso</td><td>LightGBM</td><td>3</td><td>89.8</td><td>84.2–95.1</td><td>93.2</td><td>12.5</td><td>60</td></tr><tr><td>Lasso</td><td>LightGBM</td><td>4</td><td>95.1</td><td>90.7–99.3</td><td>97.2</td><td>21</td><td>60</td></tr><tr><td>Lasso</td><td>LightGBM</td><td>5</td><td>97.0</td><td>93.0–101.0</td><td>99.2</td><td>26.5</td><td>60</td></tr><tr class='nz-row-free'><td>Lasso</td><td>LightGBM</td><td>none (non-zero coefficients)</td><td>98.6</td><td>95.5–101.8</td><td>100.0</td><td>27</td><td>60</td></tr><tr><td>ElasticNet</td><td>Linear</td><td>1</td><td>76.2</td><td>68.9–83.7</td><td>82.0</td><td>4</td><td>61</td></tr><tr><td>ElasticNet</td><td>Linear</td><td>2</td><td>85.7</td><td>79.8–91.1</td><td>89.9</td><td>8</td><td>61</td></tr><tr><td>ElasticNet</td><td>Linear</td><td>3</td><td>95.2</td><td>90.0–101.3</td><td>95.5</td><td>13</td><td>61</td></tr><tr><td>ElasticNet</td><td>Linear</td><td>4</td><td>100.6</td><td>93.9–110.3</td><td>97.9</td><td>22</td><td>61</td></tr><tr><td>ElasticNet</td><td>Linear</td><td>5</td><td>99.5</td><td>96.8–102.5</td><td>99.4</td><td>28</td><td>61</td></tr><tr class='nz-row-free'><td>ElasticNet</td><td>Linear</td><td>none (non-zero coefficients)</td><td>99.9</td><td>98.4–101.5</td><td>100.0</td><td>30</td><td>61</td></tr><tr><td>ElasticNet</td><td>LightGBM</td><td>1</td><td>72.0</td><td>63.8–79.9</td><td>70.1</td><td>4</td><td>61</td></tr><tr><td>ElasticNet</td><td>LightGBM</td><td>2</td><td>82.8</td><td>75.5–90.4</td><td>86.8</td><td>8</td><td>61</td></tr><tr><td>ElasticNet</td><td>LightGBM</td><td>3</td><td>88.8</td><td>83.9–93.7</td><td>91.9</td><td>13</td><td>61</td></tr><tr><td>ElasticNet</td><td>LightGBM</td><td>4</td><td>94.1</td><td>89.8–98.2</td><td>96.3</td><td>22</td><td>61</td></tr><tr><td>ElasticNet</td><td>LightGBM</td><td>5</td><td>96.1</td><td>93.2–98.5</td><td>99.2</td><td>28</td><td>61</td></tr><tr class='nz-row-free'><td>ElasticNet</td><td>LightGBM</td><td>none (non-zero coefficients)</td><td>99.2</td><td>97.6–100.6</td><td>100.0</td><td>30</td><td>61</td></tr></tbody></table></div>
+
+        <p class="caption nz-note">
+          <strong>Why some datasets are not part of this comparison.</strong> On 7 datasets (8 for
+          Lasso), the regularization strength chosen by cross-validation sets all coefficients to zero,
+          so without a budget the method keeps no feature:
+        </p>
+        <ul class="caption nz-note">
+          <li><strong>Imbalanced classification tasks</strong> (bad_customer_detection,
+            heart_disease_switzerland, thyroid_discordant, kdd_cup_09_appetency and, for Lasso,
+            porto_seguro, with 2&ndash;11% of samples in the minority class). For classification, the
+            regularization strength is chosen by cross-validated accuracy, the default of
+            scikit-learn&rsquo;s <code>LogisticRegressionCV</code>. Predicting the majority class already
+            reaches the highest accuracy on these datasets, so no feature improves the criterion, and the
+            strongest regularization is selected.</li>
+          <li><strong>Very few samples for many features</strong> (clock_protein_period and
+            clock_protein_toxicity, with 90 and 171 samples for more than 1,000 features).
+            Cross-validation finds no feature subset that reliably improves on the simplest model.</li>
+          <li><strong>A weak signal</strong> (forest_fires, a regression task in which most fires burn
+            almost no area). <code>LassoCV</code> finds no feature that lowers the cross-validated
+            error.</li>
+        </ul>
+        <p class="caption nz-note">
+          With a feature budget, the methods still select the required number of features on these
+          datasets: the features are ranked by their coefficients, and the remaining places are filled in
+          the order of the columns. In addition, on leukemia_allaml, nci_ovarian_cancer and
+          prostate_cancer, a few features already separate the classes perfectly, and the downstream
+          models reach zero error (a ROC AUC of 1) with all features or with a selection. A relative
+          performance cannot be computed there.
+        </p>
       </details>
 
       <details class="sec">

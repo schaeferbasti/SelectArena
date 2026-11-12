@@ -283,3 +283,11 @@ details.sec[open] { padding-bottom: 12px; }
 .nz-svg .nz-on-bar { fill: #ffffff; font-size: 10px; }
 .nz-svg .nz-on-free { fill: #1f2328; font-size: 10px; }
 .nz-svg g:hover rect { opacity: 0.85; }
+.nz-table-wrap { overflow-x: auto; margin: 6px 0 10px; }
+.nz-table { border-collapse: collapse; font-size: 0.85rem; width: 100%; max-width: 1000px; }
+.nz-table th, .nz-table td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.nz-table th:nth-child(-n+3), .nz-table td:nth-child(-n+3) { text-align: left; }
+.nz-table th { color: var(--muted); font-weight: 600; }
+.nz-table .nz-row-free td { background: rgba(242, 207, 178, 0.35); font-weight: 600; }
+ul.nz-note { margin: 4px 0 8px 1.2em; padding: 0; }
+ul.nz-note li { margin: 3px 0; }
