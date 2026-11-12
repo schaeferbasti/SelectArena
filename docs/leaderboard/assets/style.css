@@ -267,3 +267,19 @@ details.sec > summary h2 { margin: 6px 0; }
 details.sec > summary:hover h2 { text-decoration: underline; text-underline-offset: 3px; }
 details.sec[open] { padding-bottom: 12px; }
 .sec-intro { color: var(--muted); margin: 2px 0 6px; }
+
+/* Lasso / ElasticNet budget ablation (inline SVG in the Performance tab). */
+#nonzero-figure { max-width: 1000px; }
+.nz-svg { display: block; width: 100%; height: auto; font-family: inherit; font-size: 11px; }
+.nz-svg text { fill: var(--fg); }
+.nz-svg .nz-muted { fill: var(--muted); }
+.nz-svg .nz-title { font-weight: 600; font-size: 12px; }
+.nz-svg .nz-grid { stroke: var(--line); stroke-width: 0.6; }
+.nz-svg .nz-axis { stroke: var(--fg); stroke-width: 1; }
+.nz-svg .nz-ref { stroke: var(--fg); stroke-width: 1; stroke-dasharray: 4 3; opacity: 0.6; }
+.nz-svg .nz-bar { fill: #0072b2; }
+.nz-svg .nz-free { fill: #f2cfb2; }
+.nz-svg .nz-err { stroke: var(--fg); stroke-width: 1.2; }
+.nz-svg .nz-on-bar { fill: #ffffff; font-size: 10px; }
+.nz-svg .nz-on-free { fill: #1f2328; font-size: 10px; }
+.nz-svg g:hover rect { opacity: 0.85; }
