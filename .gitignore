@@ -1,6 +1,14 @@
 # Machine-specific config (start from configs/cluster.example.yaml)
 configs/cluster.yaml
 
+# Configs of additional / ablation experiments (kept locally). Only the example configs are published;
+# to publish a new one, add a "!configs/<name>.yaml" line below.
+configs/*.yaml
+configs/*.json
+!configs/benchmark.yaml
+!configs/cluster.example.yaml
+!configs/cluster.oar.example.yaml
+
 # Python
 __pycache__/
 *.py[cod]
@@ -32,8 +40,12 @@ private/
 
 # Repo-local workspace and caches of configs/cluster.yaml (benchmark runs, OpenML / Data Foundry data)
 /workspace/
+/workspace_*/
 /cache/
 
 # IDE and OS files
 .idea/
 .DS_Store
+
+# Local session notes
+HANDOFF.md
