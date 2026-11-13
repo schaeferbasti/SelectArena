@@ -224,6 +224,17 @@ def selector_and_config_from_string(*, preprocessing_name: str):
     )
 
 
+def autogluon_default_post_generators() -> list:
+    """AutoGluon's default post generators, which must run before the feature selector.
+
+    They replace AutoGluon's ``post_drop_duplicates``, so a pipeline using them sets it to ``False``.
+    """
+    from autogluon.features.generators.drop_duplicates import DropDuplicatesFeatureGenerator
+    from autogluon.features.generators.drop_unique import DropUniqueFeatureGenerator
+
+    return [DropUniqueFeatureGenerator(), DropDuplicatesFeatureGenerator(post_drop_duplicates=False)]
+
+
 def apply_fs_bench_preprocessing(*, preprocessing_name: str, method_kwargs: dict) -> dict:
     """Attach the feature selector described by ``preprocessing_name`` to ``method_kwargs`` (in place).
 
@@ -245,18 +256,13 @@ def apply_fs_bench_preprocessing(*, preprocessing_name: str, method_kwargs: dict
     dict
         ``method_kwargs``, edited in place.
     """
-    from autogluon.features.generators.drop_duplicates import DropDuplicatesFeatureGenerator
-    from autogluon.features.generators.drop_unique import DropUniqueFeatureGenerator
-
     selector, config = selector_and_config_from_string(preprocessing_name=preprocessing_name)
 
     fit_kwargs = method_kwargs.setdefault("fit_kwargs", {})
     prep_pipeline = fit_kwargs.get("_feature_generator_kwargs", {})
     prep_pipeline["post_generators"] = [
         *prep_pipeline.get("post_generators", []),
-        # AutoGluon's default post generators, which must run before the selector.
-        DropUniqueFeatureGenerator(),
-        DropDuplicatesFeatureGenerator(post_drop_duplicates=False),
+        *autogluon_default_post_generators(),
         selector,
     ]
     prep_pipeline["post_drop_duplicates"] = False  # already done by the generator above
