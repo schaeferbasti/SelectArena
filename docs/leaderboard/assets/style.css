@@ -298,3 +298,8 @@ details.nz-raw > summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
 .nz-raw .nz-table td:nth-child(2), .nz-raw .nz-table th:nth-child(2) { text-align: left; }
 .nz-raw .nz-table th:nth-child(3), .nz-raw .nz-table td:nth-child(3) { text-align: right; }
 .nz-svg .nz-pct { font-size: 9px; opacity: 0.9; }
+#longrun-figure { max-width: 1000px; }
+.nz-svg .nz-text-x { fill: var(--fg); font-size: 11px; }
+.nz-tl1 td:nth-child(5), .nz-tl1 td:nth-child(6), .nz-tl1 th:nth-child(5), .nz-tl1 th:nth-child(6) { text-align: left; }
+.nz-tl1 td:nth-child(4), .nz-tl1 th:nth-child(4) { text-align: right; }
+.nz-tl2 td:nth-child(3), .nz-tl2 th:nth-child(3) { text-align: left; }
