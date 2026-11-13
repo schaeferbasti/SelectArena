@@ -39,6 +39,29 @@ FEATURE_SELECTION_METHODS_WITH_PROXY_MODEL: list[str] = [
     "SequentialForwardSelectionFeatureSelector",
     "SHAPFeatureSelector",
 ]
+#: Methods whose stability / validity runs select on the raw task data, as in their published results.
+#: Every other method (including any method added later) selects on AutoGluon-preprocessed data, as in the
+#: performance benchmark (see :func:`selectarena.extra_benchmark.runner.run_benchmark`). Do not add new
+#: methods here: on raw data, the shared preprocessing fails on datetime, string and all-NaN columns.
+EXTRA_BENCHMARK_RAW_DATA_METHODS: frozenset[str] = frozenset(
+    {
+        "CARTFeatureSelector",
+        "ElasticNetFeatureSelector",
+        "FTestFeatureSelector",
+        "GainRatioFeatureSelector",
+        "LaplacianScoreFeatureSelector",
+        "LassoFeatureSelector",
+        "LOCOFeatureSelector",
+        "MarkovBlanketFeatureSelector",
+        "MIFeatureSelector",
+        "mRMRFeatureSelector",
+        "RandomFeatureSelector",
+        "ReliefFFeatureSelector",
+        "RFImportanceFeatureSelector",
+        "SequentialBackwardEliminationFeatureSelector",
+        "SequentialForwardSelectionFeatureSelector",
+    }
+)
 
 #: Method names as used in the paper (Table 2, Figure 1).
 PAPER_NAMES: dict[str, str] = {

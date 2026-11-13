@@ -30,11 +30,13 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from selectarena.benchmark.fs_config import selector_and_config_from_string
+from selectarena.benchmark.fs_config import autogluon_default_post_generators, selector_and_config_from_string
 from selectarena.extra_benchmark.stability import get_dataset_for_stability
 from selectarena.extra_benchmark.validity import get_dataset_for_validity
+from selectarena.methods.registry import EXTRA_BENCHMARK_RAW_DATA_METHODS
 
 logger = logging.getLogger(__name__)
+_OPTIONAL_COLUMNS = ("preprocessing", "selected_features_preprocessed")
 
 MODES = ("stability", "validity")
 STABILITY_REPEATS = 25
@@ -69,6 +71,11 @@ class FeatureSelectionResult:
     num_samples: int
     min_samples_per_class: int
     elapsed_time_fs: float
+    # Only for selectors run on AutoGluon-preprocessed data (not written otherwise, so the CSVs of the
+    # raw-data methods keep their published columns).
+    preprocessing: str | None = None
+    selected_features_preprocessed: list[Any] | None = None
+    """The selected features as named after preprocessing (``selected_features`` are raw columns)."""
 
 
 def get_cache_path(job: ExtraBenchmarkJob) -> Path:
@@ -105,6 +112,11 @@ def run_benchmark(job: ExtraBenchmarkJob) -> FeatureSelectionResult:
     if job.mode == "validity":
         kwargs = {"noise": job.noise, "noise_type": job.noise_type}
     X, y, original_features = _augment_dataset(mode=job.mode, X=X, y=y, rng=rng, **kwargs)
+    num_samples = int(X.shape[0])
+
+    sources: dict[str, list[str]] | None = None
+    if type(feature_selector).__name__ not in EXTRA_BENCHMARK_RAW_DATA_METHODS:
+        X, sources = autogluon_preprocess(X=X, y=y)
 
     start_time = time.monotonic()
     feature_selector.fit_transform(
@@ -117,7 +129,8 @@ def run_benchmark(job: ExtraBenchmarkJob) -> FeatureSelectionResult:
     elapsed_time = time.monotonic() - start_time
 
     selected = feature_selector._selected_features
-    return FeatureSelectionResult(
+    selected_names = [entry["feature"] for entry in selected] if selected is not None else None
+    result = FeatureSelectionResult(
         method=job.method_name,
         data_foundry_task_id=job.task_id,
         mode=job.mode,
@@ -125,12 +138,57 @@ def run_benchmark(job: ExtraBenchmarkJob) -> FeatureSelectionResult:
         repeat=job.repeat,
         original_features=original_features,
         max_features=feature_selector.max_features,
-        selected_features=[entry["feature"] for entry in selected] if selected is not None else None,
+        selected_features=selected_names,
         num_classes=int(y.nunique()),
-        num_samples=int(X.shape[0]),
+        num_samples=num_samples,
         min_samples_per_class=int(y.value_counts().min()),
         elapsed_time_fs=elapsed_time,
     )
+    if sources is not None:
+        # The metrics compare selections with the raw columns: map each selected feature back to the
+        # columns it was derived from (e.g. ``date.year`` -> ``date``).
+        result.preprocessing = "autogluon"
+        result.selected_features_preprocessed = selected_names
+        if selected_names is not None:
+            result.selected_features = list(dict.fromkeys(src for f in selected_names for src in sources.get(f, [f])))
+    return result
+
+
+def autogluon_preprocess(*, X: pd.DataFrame, y: pd.Series) -> tuple[pd.DataFrame, dict[str, list[str]]]:
+    """Preprocess ``X`` as the performance benchmark does before its feature selector.
+
+    That is AutoGluon's default ``AutoMLPipelineFeatureGenerator`` followed by its default post
+    generators (see :func:`~selectarena.benchmark.fs_config.apply_fs_bench_preprocessing`).
+
+    Returns:
+        The preprocessed data and, for each of its columns, the raw columns it was derived from.
+    """
+    from autogluon.features.generators import AutoMLPipelineFeatureGenerator
+
+    generator = AutoMLPipelineFeatureGenerator(
+        post_generators=autogluon_default_post_generators(), post_drop_duplicates=False, verbosity=1
+    )
+    X_out = generator.fit_transform(X=X, y=y)
+    links: dict[str, list[str]] = {}
+    for raw, derived in generator.get_feature_links().items():
+        for feature in derived:
+            links.setdefault(feature, []).append(raw)
+    return X_out, {feature: _raw_sources(feature, links.get(feature, []), X.columns) for feature in X_out.columns}
+
+
+def _raw_sources(feature: str, linked: list[str], raw_columns: pd.Index) -> list[str]:
+    """The raw columns a preprocessed feature comes from.
+
+    AutoGluon's links are coarse: a group generator (e.g. the one for datetime columns) links every
+    input to every output. Its derived features are named ``<raw column>.<suffix>`` (``date.year``), so
+    use the name where it identifies the column, and the links otherwise (e.g. text n-grams).
+    """
+    if feature in raw_columns:
+        return [feature]
+    named = [raw for raw in linked or raw_columns if feature.startswith(f"{raw}.")]
+    if named:
+        return [max(named, key=len)]
+    return linked or [feature]
 
 
 def save_results(job: ExtraBenchmarkJob, results: list[FeatureSelectionResult]) -> Path:
@@ -138,9 +196,17 @@ def save_results(job: ExtraBenchmarkJob, results: list[FeatureSelectionResult]) 
     cache_path = get_cache_path(job)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     new_file = not cache_path.exists() or cache_path.stat().st_size == 0
-    pd.DataFrame([r.__dict__ for r in results]).to_csv(
-        cache_path, index=False, mode="w" if new_file else "a", header=new_file
+    rows = pd.DataFrame(
+        [{k: v for k, v in r.__dict__.items() if k not in _OPTIONAL_COLUMNS or v is not None} for r in results]
     )
+    if not new_file:
+        existing = list(pd.read_csv(cache_path, nrows=0).columns)
+        if existing != list(rows.columns):
+            raise ValueError(
+                f"{cache_path} has the columns {existing}, the new results {list(rows.columns)}; "
+                "results of raw-data and AutoGluon-preprocessed runs cannot share a file. Move the old file away."
+            )
+    rows.to_csv(cache_path, index=False, mode="w" if new_file else "a", header=new_file)
     return cache_path
 
 
