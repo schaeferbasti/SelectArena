@@ -37,12 +37,13 @@ model_jobs:
   - name: gpu
     models:
       - [TabICLv2, 0]
+      - [RealMLP, 0]
     resources:
       num_gpus: 1
       fake_memory_for_estimates: 140  # GPU VRAM in GB
   - name: cpu
     models:
-      - [LightGBM, 25]
+      - [LightGBM, 0]  # default config only; no tuning (was 25 random configs)
       - [LinearModel, 0]
       - [RandomForest, 0]
 
