@@ -2,7 +2,7 @@
 
 Self-contained HTML pages with an inline SVG, like the other figures (:mod:`selectarena.website.figures`):
 a tooltip per cell or point, text and axes that follow the page's light or dark theme, and SVG / PNG /
-CSV downloads in the light paper look.
+PDF / CSV downloads in the light paper look.
 """
 
 from __future__ import annotations

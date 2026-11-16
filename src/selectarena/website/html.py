@@ -8,7 +8,7 @@ the Space repo needs no Git LFS:
   (``leaderboard_table.html``, ``per_model_table.html``);
 * :func:`elo_explorer_html`: the paper's main figure as SVG (``elo_explorer.html``): Elo per method
   with its 95% interval, the two bars of each method shaded by stability and validity, a tooltip
-  per method and SVG / PNG / CSV export.
+  per method and SVG / PNG / PDF / CSV export.
 
 Every page posts ``{saFrameHeight: <px>}`` to its parent window so the Space can size the iframe.
 
@@ -571,6 +571,45 @@ function saPng(name) {
   };
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
 }
+// PDF: one page of the figure's size (1 px = 0.75 pt) holding the figure rendered at 4x as a JPEG.
+// Built by hand: the pages are self-contained, without any library.
+function saPdfBlob(canvas, widthPt, heightPt) {
+  var jpeg = atob(canvas.toDataURL('image/jpeg', 0.95).split(',')[1]);
+  var w = widthPt.toFixed(2), h = heightPt.toFixed(2);
+  var content = 'q ' + w + ' 0 0 ' + h + ' 0 0 cm /Im0 Do Q';
+  var objects = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + w + ' ' + h + '] /Resources << /XObject << /Im0 5 0 R >> >> /Contents 4 0 R >>',
+    '<< /Length ' + content.length + ' >>\\nstream\\n' + content + '\\nendstream',
+    '<< /Type /XObject /Subtype /Image /Width ' + canvas.width + ' /Height ' + canvas.height +
+      ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + jpeg.length + ' >>\\nstream\\n' + jpeg + '\\nendstream'
+  ];
+  var pdf = '%PDF-1.4\\n', offsets = [];
+  objects.forEach(function (body, i) { offsets.push(pdf.length); pdf += (i + 1) + ' 0 obj\\n' + body + '\\nendobj\\n'; });
+  var xref = pdf.length;
+  pdf += 'xref\\n0 ' + (objects.length + 1) + '\\n0000000000 65535 f \\n';
+  offsets.forEach(function (o) { pdf += ('0000000000' + o).slice(-10) + ' 00000 n \\n'; });
+  pdf += 'trailer\\n<< /Size ' + (objects.length + 1) + ' /Root 1 0 R >>\\nstartxref\\n' + xref + '\\n%%EOF';
+  var bytes = new Uint8Array(pdf.length);
+  for (var i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
+  return new Blob([bytes], {type: 'application/pdf'});
+}
+function saPdf(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal, scale = 4;
+  var img = new Image();
+  img.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = box.width * scale; canvas.height = box.height * scale;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = SA_LIGHT['--bg'];
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    saDownload(name + '.pdf', saPdfBlob(canvas, box.width * 0.75, box.height * 0.75));
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
+}
 """
 
 
@@ -712,16 +751,17 @@ def elo_figure_svg(leaderboard: pd.DataFrame) -> str:
 
 
 def figure_toolbar(name: str, hint: str) -> str:
-    """Hint plus SVG / PNG / CSV buttons of a figure page; the files are ``<name>.svg`` etc."""
+    """Hint plus SVG / PNG / PDF / CSV buttons of a figure page; the files are ``<name>.svg`` etc."""
     return (
         f"<div class='toolbar'><span class='hint'>{html.escape(hint)}</span>"
         f"<button onclick=\"saSvg('{name}')\">SVG</button><button onclick=\"saPng('{name}')\">PNG</button>"
+        f"<button onclick=\"saPdf('{name}')\">PDF</button>"
         f"<button onclick=\"saCsv('{name}.csv')\">CSV</button></div>"
     )
 
 
 def elo_explorer_html(leaderboard: pd.DataFrame, *, title: str) -> str:
-    """``elo_explorer.html``: the main figure of one subset with SVG / PNG / CSV export."""
+    """``elo_explorer.html``: the main figure of one subset with SVG / PNG / PDF / CSV export."""
     toolbar = figure_toolbar("selectarena_elo", "Hover or tap a method for its values.")
     columns = ["Method", "Category", "Subgroup", "Elo", "Elo CI low", "Elo CI high", "Stability", "Validity"]
     csv = leaderboard[[c for c in columns if c in leaderboard]]
