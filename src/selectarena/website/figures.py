@@ -2,7 +2,7 @@
 
 Like the Elo figure (:func:`selectarena.website.html.elo_explorer_html`), each page is one
 self-contained HTML file with an inline SVG: a tooltip per point or cell, and colours of text, axes
-and grid that follow the page's light or dark theme. The SVG / PNG downloads always use the light
+and grid that follow the page's light or dark theme. The SVG / PNG / PDF downloads always use the light
 colours (the paper look). The layout follows the matplotlib figures of
 :mod:`selectarena.evaluation.pareto` and :mod:`selectarena.evaluation.lasagna`; the Pareto front
 even reuses their label positions (``adjustText``).
@@ -210,7 +210,7 @@ def pareto_svg(summary: pd.DataFrame, hidden: frozenset[str] = HIDDEN_IN_PLOT) -
 
 
 def pareto_explorer_html(summary: pd.DataFrame, *, title: str) -> str:
-    """``pareto.html``: the interactive Pareto front with SVG / PNG / CSV export."""
+    """``pareto.html``: the interactive Pareto front with SVG / PNG / PDF / CSV export."""
     return _figure_page(
         pareto_svg(summary),
         summary,
@@ -414,7 +414,7 @@ def lasagna_explorer_html(
     datasets: dict[float, list[str]] | None = None,
     title: str,
 ) -> str:
-    """``<variant>.html``: an interactive lasagna plot with SVG / PNG / CSV (``long``: per_epv.csv) export."""
+    """``<variant>.html``: an interactive lasagna plot with SVG / PNG / PDF / CSV (``long``: per_epv.csv) export."""
     svg = lasagna_svg(matrix, metric, variant, datasets=datasets)
     return _figure_page(
         svg, long, name=f"selectarena_{metric}_{variant}", hint="Hover or tap a cell for its value.", title=title

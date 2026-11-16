@@ -542,6 +542,7 @@ def test_interactive_pareto_and_lasagna(artifacts):
     shown = front[~front["method"].isin(["LaplacianScore", "Random"])]  # hidden in the figure, as in the paper
     assert pareto.count("class='sa-hit'") == len(shown)
     assert "Improvement over Random" in pareto and "saSvg('selectarena_pareto')" in pareto
+    assert "saPdf('selectarena_pareto')" in pareto and "function saPdfBlob(" in pareto
     lasagna = meta["lasagna"]["stability"]
     folder = data / lasagna["path"] / "tasks_all"
     long = pd.read_csv(folder / "per_epv.csv")
