@@ -571,8 +571,10 @@ function saPng(name) {
   };
   img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(saSvgString());
 }
-// PDF: one page of the figure's size (1 px = 0.75 pt) holding the figure rendered at 4x as a JPEG.
-// Built by hand: the pages are self-contained, without any library.
+// PDF. In the leaderboard, the page sends the figure's SVG to it (message {saPdf}), which makes a
+// vector PDF (the Space's assets/downloads.js) and answers {saPdfAck}. Without an answer (the page
+// alone or elsewhere), the PDF holds the figure rendered at 4x as a JPEG: one page of the figure's
+// size (1 px = 0.75 pt), built by hand as the pages are self-contained, without any library.
 function saPdfBlob(canvas, widthPt, heightPt) {
   var jpeg = atob(canvas.toDataURL('image/jpeg', 0.95).split(',')[1]);
   var w = widthPt.toFixed(2), h = heightPt.toFixed(2);
@@ -595,7 +597,25 @@ function saPdfBlob(canvas, widthPt, heightPt) {
   for (var i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 0xff;
   return new Blob([bytes], {type: 'application/pdf'});
 }
+var saPdfPending = {};
+window.addEventListener('message', function (event) {
+  var name = event.data && event.data.saPdfAck;
+  if (typeof name === 'string' && saPdfPending[name]) { clearTimeout(saPdfPending[name]); delete saPdfPending[name]; }
+});
 function saPdf(name) {
+  var svg = document.getElementById('sa-figure');
+  var box = svg.viewBox.baseVal;
+  if (window.parent !== window && !saPdfPending[name + '.pdf']) {
+    saPdfPending[name + '.pdf'] = setTimeout(function () {
+      delete saPdfPending[name + '.pdf'];
+      saRasterPdf(name);
+    }, 1500);
+    window.parent.postMessage({saPdf: {svg: saSvgString(), width: box.width, height: box.height, name: name + '.pdf'}}, '*');
+    return;
+  }
+  if (window.parent === window) saRasterPdf(name);
+}
+function saRasterPdf(name) {
   var svg = document.getElementById('sa-figure');
   var box = svg.viewBox.baseVal, scale = 4;
   var img = new Image();
