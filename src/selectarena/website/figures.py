@@ -173,9 +173,9 @@ def pareto_svg(summary: pd.DataFrame, hidden: frozenset[str] = HIDDEN_IN_PLOT) -
             f"<text class='{cls}' x='{tx:.1f}' y='{ty:.1f}' text-anchor='middle' dominant-baseline='central' "
             f"font-size='{12 * s:.0f}' font-weight='{weight}'>{html.escape(row.method)}</text>"
         )
-    # Legend (bottom right), as in the paper.
+    # Legend (bottom left, as in the paper's Figure 4): the slow search methods sit bottom right.
     lw, lh = 150 * s, 40 * s
-    lx0, ly0 = right - lw - 8 * s, bottom - lh - 8 * s
+    lx0, ly0 = left + 8 * s, bottom - lh - 8 * s
     parts.append(f"<rect class='sa-legend' x='{lx0:.1f}' y='{ly0:.1f}' width='{lw:.1f}' height='{lh:.1f}' rx='4'/>")
     for k, (fill, stroke, label) in enumerate(
         [("#d3d3d3", "#808080", "Dominated Methods"), (ORANGE, None, "Pareto Front")]

@@ -25,7 +25,9 @@ The SelectArena counterpart of TabArena's ``scripts/run_generate_website_artifac
     ``heatmap_<grouping>.html`` (improvement over Random per task type, dataset size, downstream
     model and budget, data in ``heatmap.csv``), ``rank_by_size.html`` / ``.csv`` (rank correlation with the
     dataset size), ``improvement_by_model.html``, ``improvement_by_task_type.html`` and
-    ``.csv`` (improvement over Random per downstream model and task type);
+    ``.csv`` (improvement over Random per downstream model and task type), ``elo_no_timeouts.html``
+    and ``leaderboard_no_timeouts.csv`` (the Elo on the datasets where no method ran out of time next
+    to the default Elo, as in the paper's Figure D.3, and the leaderboard of those datasets);
   - ``stability.csv`` and ``stability_table.html``; ``validity.csv`` and one
     ``validity_noise_<level>_table.html`` per noise level (listed in ``meta.json``), if available.
 
@@ -67,6 +69,7 @@ from selectarena.evaluation.leaderboard import (
 from selectarena.evaluation.pareto import improvement_and_runtime, improvement_over_random
 from selectarena.methods.registry import NAME_TO_MODULE_MAP
 from selectarena.website.characteristic_figures import (
+    elo_pair_html,
     group_improvement_html,
     improvement_heatmap_html,
     method_order,
@@ -482,6 +485,51 @@ def generate_website_artifacts(
 
     chars = characteristics.dataset_characteristics([val_all, stab_rows], problem_types)
     analysis_meta = _analysis_figures(df, scores, chars, website_data / "analysis", n_bootstrap, log)
+    # Elo on the datasets where no method ran out of time, next to the default Elo (the paper's
+    # Figure D.3 design), for the methods with complete results only (preliminary ones are left out).
+    complete = characteristics.complete_methods(scores)
+    complete_scores = scores[scores["method"].isin(complete)]
+    left_out = sorted(set(scores["method"].dropna()) - set(complete))
+    if left_out:
+        log(f"Time-out ablation without the methods with incomplete results: {left_out}.")
+    no_timeouts = characteristics.datasets_without_timeouts(complete_scores)
+    analysis_meta["elo_without_timeouts"] = bool(no_timeouts) and default_elo is not None
+    if no_timeouts and default_elo is not None:
+        sub = complete_scores[complete_scores["dataset_key"].isin(no_timeouts)]
+        reference_elo = compute_elo(complete_scores, n_bootstrap=n_bootstrap) if left_out else default_elo
+
+        def _mean_no_timeouts(rows: pd.DataFrame | None, column: str) -> pd.Series | None:
+            if rows is None:
+                return None
+            rows = rows[rows["dataset"].isin(no_timeouts) & rows["method"].isin(complete)]
+            return rows.groupby("method")[column].mean()
+
+        ablated_elo = compute_elo(sub, n_bootstrap=n_bootstrap)
+        leaderboard = format_leaderboard(
+            ablated_elo,
+            aggregate(sub),
+            stability=_mean_no_timeouts(stab_rows, "stability"),
+            validity=_mean_no_timeouts(val_rows, "validity"),
+            n_datasets=sub.groupby("method")["dataset_key"].nunique(),
+            improvement=improvement_over_random(
+                df[df["dataset_key"].isin(no_timeouts)].assign(dataset=lambda d: d["dataset_key"])
+            ),
+        )
+        leaderboard.to_csv(website_data / "analysis" / "leaderboard_no_timeouts.csv", index=False)
+        all_datasets = complete_scores["dataset_key"].nunique()
+        (website_data / "analysis" / "elo_no_timeouts.html").write_text(
+            elo_pair_html(
+                reference_elo,
+                ablated_elo,
+                labels=(
+                    f"with random fallback ({all_datasets} datasets)",
+                    f"no time-outs ({len(no_timeouts)} datasets)",
+                ),
+                title=f"SelectArena: Elo on the {len(no_timeouts)} datasets where no method timed out",
+                name="selectarena_elo_without_timeouts",
+            )
+        )
+        log(f"Leaderboard without time-outs: {len(no_timeouts)} datasets.")
 
     total_budget = _total_budget(df)
     results_table = _results_table(df)

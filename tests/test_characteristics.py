@@ -176,3 +176,31 @@ def test_every_benchmark_dataset_has_a_domain():
     assert set(DATASET_DOMAINS.values()) == set(PAPER_DOMAINS)  # the paper's domains, each used
     assert set(DATA_FOUNDRY_DOMAINS) == set(DATASET_DOMAINS)
     assert DATA_FOUNDRY_DOMAINS["framingham_heart_study"] == "medical & healthcare"  # corrected metadata
+
+
+def test_datasets_without_timeouts():
+    # SBE runs out of time on d2 (fallback) and finishes on d1; Random's fallback never counts.
+    rows = []
+    for dataset, sbe_fallback in (("d1", False), ("d2", True)):
+        rows += [
+            {"dataset_key": dataset, "method": "Random", "used_fallback": False},  # as set by prepare_results
+            {"dataset_key": dataset, "method": "F-Test", "used_fallback": False},
+            {"dataset_key": dataset, "method": "SBE", "used_fallback": sbe_fallback},
+        ]
+    scores = pd.DataFrame(rows)
+    assert C.datasets_without_timeouts(scores) == ["d1"]
+    # Without any time-out (or with time-outs everywhere) there is nothing to compare.
+    assert C.datasets_without_timeouts(scores.assign(used_fallback=False)) == []
+    assert C.datasets_without_timeouts(scores.assign(used_fallback=True)) == []
+
+
+def test_complete_methods():
+    # SHAP has results on one of two splits only (preliminary): it is left out.
+    rows = [
+        {"dataset_key": d, "split_idx": s, "method": m}
+        for d in ("d1", "d2")
+        for s in (0, 1)
+        for m in ("Random", "F-Test", "SHAP")
+        if not (m == "SHAP" and s == 1)
+    ]
+    assert C.complete_methods(pd.DataFrame(rows)) == ["F-Test", "Random"]
