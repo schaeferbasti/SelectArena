@@ -59,7 +59,7 @@ and the selection time.
 2. **Benchmark it:** see [Running the benchmark](#running-the-benchmark).
 3. **See it next to the other methods** on your local copy of the leaderboard (see
    [Your method on the leaderboard, locally](#your-method-on-the-leaderboard-locally)).
-4. **Open a pull request:** we check it and add it to the public leaderboard.
+4. **Open a pull request and provide the results:** we check your results and add it to the public leaderboard.
 
 ## Running the benchmark
 
