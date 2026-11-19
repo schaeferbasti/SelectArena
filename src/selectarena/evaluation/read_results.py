@@ -30,7 +30,7 @@ def parse_result(path: str | Path) -> dict:
     result = BaselineResult.from_dict(result=load_result(path))
     fs = (result.result.get("preprocessing_artifacts") or {}).get("feature_selection")
     budget = getattr(fs["max_features_input"], "keywords", {}) if fs is not None else {}
-    return {
+    row = {
         "experiment_method_name_string": result.framework,
         "model_details": result.result.get("hyperparameters"),
         **result.task_metadata,
@@ -51,6 +51,9 @@ def parse_result(path: str | Path) -> dict:
         "feature_selection_time_limit": fs["feature_selection_time_limit"] if fs else None,
         "path": str(path),
     }
+    if fs and "selection_diagnostics" in fs:
+        row["selection_diagnostics"] = fs["selection_diagnostics"]
+    return row
 
 
 def _parse_batch(file_paths: list[str]) -> list[dict]:

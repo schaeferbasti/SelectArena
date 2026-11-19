@@ -36,7 +36,7 @@ from selectarena.extra_benchmark.validity import get_dataset_for_validity
 from selectarena.methods.registry import EXTRA_BENCHMARK_RAW_DATA_METHODS
 
 logger = logging.getLogger(__name__)
-_OPTIONAL_COLUMNS = ("preprocessing", "selected_features_preprocessed")
+_OPTIONAL_COLUMNS = ("preprocessing", "selected_features_preprocessed", "selection_diagnostics")
 
 MODES = ("stability", "validity")
 STABILITY_REPEATS = 25
@@ -76,6 +76,8 @@ class FeatureSelectionResult:
     preprocessing: str | None = None
     selected_features_preprocessed: list[Any] | None = None
     """The selected features as named after preprocessing (``selected_features`` are raw columns)."""
+    selection_diagnostics: dict[str, Any] | None = None
+    """Optional selector-provided tuning/convergence audit, including failed budget matches."""
 
 
 def get_cache_path(job: ExtraBenchmarkJob) -> Path:
@@ -144,6 +146,9 @@ def run_benchmark(job: ExtraBenchmarkJob) -> FeatureSelectionResult:
         min_samples_per_class=int(y.value_counts().min()),
         elapsed_time_fs=elapsed_time,
     )
+    diagnostics = getattr(feature_selector, "get_selection_diagnostics", None)
+    if callable(diagnostics):
+        result.selection_diagnostics = diagnostics()
     if sources is not None:
         # The metrics compare selections with the raw columns: map each selected feature back to the
         # columns it was derived from (e.g. ``date.year`` -> ``date``).

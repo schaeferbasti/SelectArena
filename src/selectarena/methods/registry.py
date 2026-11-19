@@ -20,6 +20,7 @@ NAME_TO_MODULE_MAP: dict[str, str] = {
     "LaplacianScoreFeatureSelector": "laplacian_score",
     "LassoFeatureSelector": "lasso",
     "LassoNetFeatureSelector": "lasso_net",
+    "STGFeatureSelector": "stg",
     "MarkovBlanketFeatureSelector": "markov_blanket",
     "MIFeatureSelector": "mi",
     "mRMRFeatureSelector": "mrmr",
@@ -75,6 +76,7 @@ PAPER_NAMES: dict[str, str] = {
     "LaplacianScoreFeatureSelector": "LaplacianScore",
     "LassoFeatureSelector": "Lasso",
     "LassoNetFeatureSelector": "LassoNet",
+    "STGFeatureSelector": "STG",
     "MarkovBlanketFeatureSelector": "MarkovBlanket",
     "MIFeatureSelector": "MI",
     "mRMRFeatureSelector": "mRMR",
@@ -99,6 +101,7 @@ METHOD_PAPERS: dict[str, str] = {
     ),
     "LassoFeatureSelector": "https://doi.org/10.1111/j.2517-6161.1996.tb02080.x",  # Tibshirani, 1996
     "LassoNetFeatureSelector": "https://arxiv.org/abs/1907.12207",  # Lemhadri et al., 2021 (JMLR)
+    "STGFeatureSelector": "https://proceedings.mlr.press/v119/yamada20a.html",  # Yamada et al., 2020 (ICML)
     "LOCOFeatureSelector": "https://arxiv.org/abs/1604.04173",  # Lei et al., 2017 (Appendix B.4.7)
     "MarkovBlanketFeatureSelector": "http://ilpubs.stanford.edu:8090/208/",  # Koller & Sahami, 1996
     "mRMRFeatureSelector": "https://doi.org/10.1109/TPAMI.2005.159",  # Peng et al., 2005
@@ -130,6 +133,7 @@ METHOD_SUBGROUPS: dict[str, str] = {
     "LaplacianScoreFeatureSelector": "Distance",
     "LassoFeatureSelector": "Regularization",
     "LassoNetFeatureSelector": "Regularization",
+    "STGFeatureSelector": "Regularization",
     "LOCOFeatureSelector": "Leave-one-out",
     "MarkovBlanketFeatureSelector": "Backward search",
     "mRMRFeatureSelector": "Information theory",

@@ -6,6 +6,7 @@ configs/cluster.yaml
 configs/*.yaml
 configs/*.json
 !configs/benchmark.yaml
+!configs/benchmark_stg.yaml
 !configs/cluster.example.yaml
 !configs/cluster.oar.example.yaml
 

@@ -38,7 +38,7 @@ def iter_feature_selectors(generator) -> Iterator[AbstractFeatureSelector]:
 def feature_selection_metadata(selector: AbstractFeatureSelector) -> dict:
     """The metadata SelectArena records for one fitted feature selector."""
     selected = selector._selected_features
-    return {
+    metadata = {
         "method_type": selector.name,
         "feature_scoring_method": selector.feature_scoring_method,
         "original_feature_names": selector._original_features,
@@ -51,6 +51,10 @@ def feature_selection_metadata(selector: AbstractFeatureSelector) -> dict:
         "feature_selection_fit_time": selector._feature_selection_fit_time,
         "feature_selection_time_limit": selector._feature_selection_time_limit,
     }
+    diagnostics = getattr(selector, "get_selection_diagnostics", None)
+    if callable(diagnostics):
+        metadata["selection_diagnostics"] = diagnostics()
+    return metadata
 
 
 class SelectArenaBagWrapper(AGSingleBagWrapper):

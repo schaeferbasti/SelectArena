@@ -48,6 +48,8 @@ dependencies = [
   "shapiq>=1.4",
   # Regularization path of a sparse neural network (LassoNetFeatureSelector).
   "lassonet>=0.0.22",
+  # Stochastic gates and neural predictor (STGFeatureSelector).
+  "torch>=2.2",
 ]
 
 [project.optional-dependencies]
