@@ -1,4 +1,4 @@
-"""STG with native gate convergence and fold-local budget calibration."""
+"""STG with strict native selection and explicitly flagged gate-ranking recovery."""
 
 from __future__ import annotations
 
@@ -137,71 +137,95 @@ def _epoch_deadline(start, now, epoch, planned, hard, required_epochs):
 
 
 class STGFeatureSelector(AbstractFeatureSelector):
-    """Feature Selection using Stochastic Gates, calibrated to a native feature budget.
+    """Feature Selection using Stochastic Gates with auditable recovery.
 
-    Tanh MLPs with 3, 4 or 5 hidden layers jointly learn weights and stochastic gates
-    ``clip(mu + 0.5 + sigma * N(0,1), 0, 1)``. Loss is cross entropy or standardized
-    target MSE plus ``lambda * mean(Phi((mu + 0.5) / sigma))``. Adam learning rate,
-    depth/width and lambda are tuned inside the outer training fold. All inputs are
-    imputed and z-scored using INNER TRAINING statistics only; validation receives
-    the same transformation. Shared ordinal encoding honours the permutation ablation.
+    A tanh MLP (3-5 hidden layers) learns stochastic gates jointly with prediction.
+    Inner-training-only imputation/z-scoring precedes every fit. Lambda, Adam rate
+    and architecture are tuned using native-network inner-validation loss.
 
-    Validation uses the native gated network, with NO artificial top-k gate mask.
-    Before a checkpoint is eligible, train at least ``min_epochs`` and observe
-    unchanged native support and <= ``gate_tolerance`` peak-to-peak changes in BOTH
-    deterministic gate values and stochastic open probabilities over ``gate_window``
-    epochs (sampled every ``evaluate_every`` epochs). Predictive early stopping is
-    disabled until this operational gate-convergence criterion holds.
+    Strict selection requires at least 500 epochs, stable native support and <=.02
+    gate/open-probability ranges over 50 epochs, plus k..k+ceil(.1k) active gates.
+    Strict terminal-checkpoint checks are unchanged. A promising in-band fit gets
+    extra training time inside its hard deadline instead of immediately switching
+    architectures. Sequential lambda calibration receives larger group budgets.
 
-    A usable checkpoint has between k and k + ceil(k * budget_tolerance) native
-    nonzero gates. This one-sided tolerance
-    permits trimming a small surplus to the benchmark's exact k without adding
-    closed gates. Exact k is preferred, then native validation loss. Lambda is
-    calibrated separately for each architecture/rate: initial values, followed by
-    log-space bracket refinement or expansion. Finish a group's calibration before
-    moving to the next group, and use a successful lambda as the next group's seed.
-    Without a winner, mature terminal counts nearest the budget provide a proposal
-    for the next group; they cannot qualify a fit. Every trial is trained from scratch.
-    The balanced order starts with the shallowest MLP and the middle log learning
-    rate, and covers different depths and rates first. A group
-    gets at most a third of the remaining time while three or more groups remain.
-    Terminal counts of unfinished fits
-    may guide exploration, but can never qualify a checkpoint for selection.
-    Sparsity need not be strictly monotone; every attempted fit is recorded.
+    Reserve 35% of the selection deadline for recovery if strict selection fails.
+    Recovery broadens lambda by a factor of ten in each direction and explores
+    smaller 3-5-layer MLPs and lower learning rates. Completed finite checkpoints
+    after ranking_min_epochs can supply a full feature ranking by latent gate mu
+    (monotone in stochastic open probability). Prefer checkpoints whose maximum
+    gate/probability ranges are <=ranking_tolerance, then native validation loss.
+    Native validation never applies an artificial top-k mask. Ranking may include
+    closed gates and does NOT claim native sparsity or strict convergence: output
+    selection_mode='ranked_recovery', recovery_reason, measured drift and the number
+    of selected closed gates. Exact k features come from learned scores, not random
+    padding. If no finite trained ranking exists, raise an explicit training failure.
 
-    The last validated checkpoint must be converged and budget-matched. Restore an
-    earlier best checkpoint only if its support is identical to the terminal support
-    and its gate values AND open probabilities remain within the convergence tolerance
-    of the terminal values; otherwise use the terminal checkpoint. This rejects an
-    earlier sparse plateau that was subsequently lost. Only active gates receive scores.
-    If none qualifies, return no scores, set ``budget_converged_=False``, and let
-    the benchmark's separately labelled random fallback operate. Such a fallback
-    is NOT evidence of STG convergence and the smoke evaluator declines to score it.
-    ``search_results_`` records histories, gate values, probabilities, native counts,
-    convergence tests, epochs and timeout status. No test rows enter this process.
+    SELECTARENA_STG_CACHE_DIR optionally shares a selection across downstream models.
+    Its key hashes training values, labels, schema/order, split seed, code, budget
+    and search settings. Locking and atomic JSON prevent duplicate producers and
+    partial reads. A consumer never trains; all models apply the producer's same
+    gate ranking. Cached time accounting retains the original selection cost.
 
-    Large training folds use larger batches, capped by ``max_batch_size``, to target
-    ``max_batches_per_epoch`` batches per epoch (never smaller than ``batch_size``).
-    All training rows are still used in each completed epoch. CUDA scalar transfers
-    are accumulated within each epoch instead of synchronizing twice per minibatch.
-
-    Time limit: check every training/validation batch. Measured epoch cost protects
-    enough time for min_epochs + gate_window + patience, with a 25% timing margin,
-    inside the group and outer deadlines. Once the terminal count reaches the budget
-    band, compare other architectures/rates; reject the fit if it is not converged.
-    No epoch minimum or gate-convergence
-    threshold is relaxed. The search may be incomplete.
-    CPU/GPU RNG state and CPU thread count are restored; optional
-    torch imports stay lazy. ``device='auto'`` uses CUDA when available.
+    Every completed epoch uses all inner-training rows. Larger batches on large
+    folds avoid tiny CUDA launches; all tuning remains inside the selection limit.
+    CPU/CUDA RNG state and CPU thread count are restored. No test labels enter
+    preprocessing, search, checkpoint choice or selection reuse.
 
     Reference: Yamada, Yutaro, Ofir Lindenbaum, Sahand Negahban, and Yuval Kluger.
     "Feature Selection using Stochastic Gates." ICML (2020), PMLR 119:10648-10659.
     Implementation: own PyTorch implementation of the equations in the paper and
-    https://github.com/runopti/stg (MIT licence), with explicit convergence tracking.
+    https://github.com/runopti/stg (MIT licence), plus flagged gate-ranking recovery.
     """
 
     name = "STGFeatureSelector"
     feature_scoring_method = True
+
+    CACHE_SETTINGS = (
+        "lambdas",
+        "architectures",
+        "learning_rates",
+        "max_lambda_trials",
+        "sigma",
+        "val_fraction",
+        "max_epochs",
+        "min_epochs",
+        "patience",
+        "gate_window",
+        "evaluate_every",
+        "gate_tolerance",
+        "budget_tolerance",
+        "min_delta",
+        "batch_size",
+        "max_batch_size",
+        "max_batches_per_epoch",
+        "weight_decay",
+        "recovery_fraction",
+        "ranking_min_epochs",
+        "ranking_tolerance",
+    )
+    CACHE_STATE = (
+        "search_results_",
+        "best_params_",
+        "best_epoch_",
+        "best_validation_loss_",
+        "gate_means_",
+        "budget_converged_",
+        "native_count_",
+        "gate_diagnostics_",
+        "effective_batch_size_",
+        "selection_mode_",
+        "recovery_reason_",
+        "ranking_checkpoint_",
+    )
+
+    def _fit_transform(self, X, y, **kwargs):
+        output = super()._fit_transform(X=X, y=y, **kwargs)
+        cache = getattr(self, "selection_cache_", {})
+        if cache.get("enabled"):
+            cache["fit_wall_seconds"] = self._feature_selection_fit_time
+            self._feature_selection_fit_time = cache["source_fit_seconds"]
+        return output
 
     def get_selection_diagnostics(self) -> dict:
         """Compact, serializable audit metadata for performance and selection-only results."""
@@ -226,9 +250,15 @@ class STGFeatureSelector(AbstractFeatureSelector):
             "elapsed_seconds",
             "effective_batch_size",
             "planned_seconds",
+            "phase",
         )
         return {
-            "schema_version": 2,
+            "schema_version": 3,
+            "selection_mode": getattr(self, "selection_mode_", "not_fitted"),
+            "recovery_used": getattr(self, "selection_mode_", None) == "ranked_recovery",
+            "recovery_reason": getattr(self, "recovery_reason_", None),
+            "ranking_checkpoint": getattr(self, "ranking_checkpoint_", None),
+            "cache": getattr(self, "selection_cache_", {"enabled": False, "hit": False}),
             "budget_converged": getattr(self, "budget_converged_", False),
             "target_features": getattr(self, "max_features", None),
             "native_active_features": getattr(self, "native_count_", None),
@@ -257,7 +287,10 @@ class STGFeatureSelector(AbstractFeatureSelector):
                 "max_batch_size": self.max_batch_size,
                 "max_batches_per_epoch": self.max_batches_per_epoch,
                 "effective_batch_size": getattr(self, "effective_batch_size_", None),
-                "search_schedule": "shallow/middle-rate first, sequential lambda calibration, cross-group proposals, epoch-cost floor",
+                "search_schedule": "strict calibration then broader gate-ranking recovery; finish promising fits",
+                "recovery_fraction": self.recovery_fraction,
+                "ranking_min_epochs": self.ranking_min_epochs,
+                "ranking_tolerance": self.ranking_tolerance,
                 "preprocessing": "inner-training-only imputation and z-score",
                 "validation": "native gates, no artificial top-k mask",
             },
@@ -287,6 +320,9 @@ class STGFeatureSelector(AbstractFeatureSelector):
         max_batches_per_epoch=32,
         weight_decay=1e-3,
         device="auto",
+        recovery_fraction=0.35,
+        ranking_min_epochs=10,
+        ranking_tolerance=0.1,
         **kwargs,
     ):
         super().__init__(max_features=max_features, **kwargs)
@@ -332,6 +368,8 @@ class STGFeatureSelector(AbstractFeatureSelector):
             raise ValueError("tolerances and weight_decay must be finite and nonnegative")
         if device not in ("cpu", "cuda", "auto"):
             raise ValueError("device must be cpu, cuda or auto")
+        if not 0 < recovery_fraction < 1 or ranking_min_epochs < 1 or ranking_tolerance < 0:
+            raise ValueError("recovery_fraction must lie in (0,1); ranking settings must be positive/nonnegative")
         self.sigma, self.val_fraction = sigma, val_fraction
         self.max_epochs, self.min_epochs, self.patience = max_epochs, min_epochs, patience
         self.gate_window, self.evaluate_every = gate_window, evaluate_every
@@ -339,6 +377,11 @@ class STGFeatureSelector(AbstractFeatureSelector):
         self.max_lambda_trials, self.device = max_lambda_trials, device
         self.min_delta, self.batch_size, self.weight_decay = min_delta, batch_size, weight_decay
         self.max_batch_size, self.max_batches_per_epoch = max_batch_size, max_batches_per_epoch
+        self.recovery_fraction, self.ranking_min_epochs, self.ranking_tolerance = (
+            recovery_fraction,
+            ranking_min_epochs,
+            ranking_tolerance,
+        )
 
     def _batch_size(self, n_train):
         if self.max_batches_per_epoch is None:
@@ -402,6 +445,7 @@ class STGFeatureSelector(AbstractFeatureSelector):
         best_state, best_record, last_record, terminal_state = None, None, None, None
         best_key, patience_loss, stale = (math.inf, math.inf), math.inf, 0
         history, status, epochs = [], "max_epochs", 0
+        ranking_record, ranking_key = None, (True, math.inf)
         upper = self.max_features + math.ceil(self.max_features * self.budget_tolerance)
         for epoch in range(1, self.max_epochs + 1):
             if time.monotonic() >= deadline:
@@ -442,6 +486,16 @@ class STGFeatureSelector(AbstractFeatureSelector):
             observed_now = time.monotonic()
             horizon = min(self.max_epochs, self.min_epochs + self.gate_window + self.patience)
             deadline = _epoch_deadline(started, observed_now, epoch, deadline, hard_deadline, horizon)
+            if self.max_features <= count <= upper and not converged and epoch >= self.min_epochs:
+                # Keep training the promising lambda rather than switching architecture.
+                deadline = _epoch_deadline(
+                    started,
+                    observed_now,
+                    epoch,
+                    deadline,
+                    hard_deadline,
+                    min(self.max_epochs, epoch + self.gate_window + self.patience),
+                )
             record = {
                 "epoch": epoch,
                 "validation_loss": value,
@@ -454,9 +508,17 @@ class STGFeatureSelector(AbstractFeatureSelector):
                 "probability_change": probability_change,
                 "converged": converged,
                 "budget_matched": matched,
+                "window_complete": len(window) == window.maxlen,
             }
             history.append(record)
             last_record = dict(record, mu=mu.tolist(), gates=gates.tolist(), open_probabilities=probabilities.tolist())
+            if epoch >= self.ranking_min_epochs and np.isfinite(mu).all() and np.ptp(mu) > 1e-8:
+                key_rank = (
+                    not record["window_complete"] or max(gate_change, probability_change) > self.ranking_tolerance,
+                    value,
+                )
+                if key_rank < ranking_key:
+                    ranking_record, ranking_key = last_record, key_rank
             terminal_state = (
                 {name: tensor.detach().clone() for name, tensor in model.state_dict().items()} if matched else None
             )
@@ -507,21 +569,30 @@ class STGFeatureSelector(AbstractFeatureSelector):
             elapsed_seconds=time.monotonic() - started,
             effective_batch_size=batch_size,
             planned_seconds=planned_seconds,
+            ranking_checkpoint=ranking_record if status != "nonfinite_loss" else None,
         )
         return selected_mu, result
 
     def _fit_feature_scoring(self, *, X: pd.DataFrame, y: pd.Series, time_limit: int | None = None) -> dict[str, float]:
+        from selectarena.methods.stg_cache import cached_selection
+
+        return cached_selection(self, X, y, time_limit, self._search_feature_scores)
+
+    def _search_feature_scores(
+        self, *, X: pd.DataFrame, y: pd.Series, time_limit: int | None = None
+    ) -> dict[str, float]:
         start = time.monotonic()
         self.search_results_, self.best_params_, self.best_epoch_ = [], None, None
         self.best_validation_loss_, self.gate_means_ = math.inf, None
         self.budget_converged_, self.native_count_, self.gate_diagnostics_ = False, None, None
+        self.selection_mode_, self.recovery_reason_, self.ranking_checkpoint_ = "training_failed", None, None
         if self._timed_out(time_limit, start):
-            return {}
+            raise RuntimeError("STG has no training time; refusing random feature selection")
         import torch
         from autogluon.core.utils.utils import generate_train_test_split
 
         if self._timed_out(time_limit, start):
-            return {}
+            raise RuntimeError("STG timed out before training; refusing random feature selection")
         device = torch.device(
             "cuda"
             if self.device == "auto" and torch.cuda.is_available()
@@ -538,25 +609,42 @@ class STGFeatureSelector(AbstractFeatureSelector):
             X=X, y=labels, problem_type=self.problem_type, test_size=self.val_fraction, random_state=self.random_state
         )
         if len(X_train) == 0 or len(X_val) == 0:
-            return {}
+            raise ValueError("STG needs nonempty inner training and validation sets")
         data = tuple(torch.from_numpy(a).to(device) for a in self._prepare_data(X_train, X_val, y_train, y_val))
         self.effective_batch_size_ = self._batch_size(len(X_train))
         output_dim = 1 if self.problem_type == "regression" else int(labels.max()) + 1
-        groups = _balanced_groups(self.architectures, self.learning_rates, self._rng)
+        strict_groups = _balanced_groups(self.architectures, self.learning_rates, self._rng)
+        recovery_architectures = tuple(tuple(max(8, width // 2) for width in dims) for dims in self.architectures)
+        recovery_rates = tuple(rate / 3 for rate in self.learning_rates)
+        recovery_groups = _balanced_groups(recovery_architectures, recovery_rates, self._rng)
         seed = int(self._rng.integers(0, 2**31 - 1))
         outer_deadline = math.inf if time_limit is None else start + time_limit
+        # Unbounded development fits still have a finite search space and epoch cap.
+        strict_deadline = start + (1 - self.recovery_fraction) * time_limit if time_limit is not None else math.inf
         threads, best_key = torch.get_num_threads(), (math.inf, math.inf)
+        ranked_best, ranked_key = None, (True, math.inf)
         try:
             torch.set_num_threads(1)
             with torch.random.fork_rng(devices=[device.index] if device.type == "cuda" else []):
                 # Warm lazy optimizer imports within the overall limit, before slicing trial budgets.
                 torch.optim.Adam([torch.nn.Parameter(torch.zeros(1, device=device))])
-                for group_index, group in enumerate(groups):
-                    now = time.monotonic()
-                    remaining = max(0, outer_deadline - now)
-                    if remaining <= 0:
+                groups = [("strict", group) for group in strict_groups] + [
+                    ("recovery", group) for group in recovery_groups
+                ]
+                for group_index, (phase, group) in enumerate(groups):
+                    if phase == "recovery" and self.gate_means_ is not None:
                         break
-                    group_deadline = min(outer_deadline, now + remaining / min(3, len(groups) - group_index))
+                    now = time.monotonic()
+                    phase_deadline = strict_deadline if phase == "strict" else outer_deadline
+                    remaining = max(0, phase_deadline - now)
+                    if remaining <= 0:
+                        continue
+                    phase_groups_left = (
+                        len(strict_groups) - group_index if phase == "strict" else len(groups) - group_index
+                    )
+                    # Allocate half the remaining phase to completing calibration, rather
+                    # than scattering unusable sub-500-epoch fits over all nine groups.
+                    group_deadline = min(phase_deadline, now + remaining / min(2, phase_groups_left))
                     observations = []
                     candidate = (
                         self.best_params_["lambda"]
@@ -569,6 +657,10 @@ class STGFeatureSelector(AbstractFeatureSelector):
                         )
                     )
                     initial = (candidate,) if candidate is not None else self.lambdas
+                    if phase == "recovery" and candidate is not None:
+                        initial = tuple(dict.fromkeys((candidate / 10, candidate, candidate * 10)))[
+                            : self.max_lambda_trials
+                        ]
                     for _ in range(self.max_lambda_trials):
                         now = time.monotonic()
                         remaining = max(0, group_deadline - now)
@@ -586,8 +678,17 @@ class STGFeatureSelector(AbstractFeatureSelector):
                         mu, result = self._fit_trial(
                             data, params, output_dim, seed, now + allowance, hard_deadline=group_deadline
                         )
+                        result["phase"] = phase
                         self.search_results_.append(result)
                         observations.append(result)
+                        ranking = result.get("ranking_checkpoint")
+                        if ranking is not None:
+                            stable_rank = ranking["window_complete"] and (
+                                max(ranking["gate_change"], ranking["probability_change"]) <= self.ranking_tolerance
+                            )
+                            rank_key = (not stable_rank, ranking["validation_loss"])
+                            if rank_key < ranked_key:
+                                ranked_key, ranked_best = rank_key, dict(ranking, params=params)
                         self._log(
                             20,
                             f"STG trial: lambda={lam:.6g}, layers={len(group['hidden_dims'])}, "
@@ -605,20 +706,33 @@ class STGFeatureSelector(AbstractFeatureSelector):
                                     result["native_count"],
                                     result["selected_checkpoint"],
                                 )
-                        terminal_count = result.get("terminal_native_count")
-                        if result["budget_matched"] or (
-                            result["epochs"] >= self.min_epochs
-                            and terminal_count is not None
-                            and self.max_features
-                            <= terminal_count
-                            <= self.max_features + math.ceil(self.max_features * self.budget_tolerance)
-                        ):
+                        if result["budget_matched"]:
                             break  # Spend the remaining time comparing architectures/rates.
         finally:
             torch.set_num_threads(threads)
         self.budget_converged_ = self.gate_means_ is not None
         if not self.budget_converged_:
-            self._log(30, "STG found no converged native-gate fit near the target budget; returning no scores.")
-            return {}
-        active = self.gate_means_ > -0.5
+            self.recovery_reason_ = "no_terminal_converged_fit_in_native_budget_band"
+            if ranked_best is None:
+                raise RuntimeError("STG produced no finite trained gate ranking; refusing random feature selection")
+            self.selection_mode_ = "ranked_recovery"
+            self.best_params_, self.best_epoch_ = ranked_best["params"], ranked_best["epoch"]
+            self.best_validation_loss_ = ranked_best["validation_loss"]
+            self.gate_means_ = ranked_best["mu"]
+            self.native_count_, self.gate_diagnostics_ = ranked_best["native_count"], ranked_best
+            self.ranking_checkpoint_ = {
+                key: value
+                for key, value in ranked_best.items()
+                if key not in ("mu", "gates", "open_probabilities", "params")
+            }
+            self.ranking_checkpoint_["relaxed_stability"] = not ranked_key[0]
+            ranked = sorted(zip(X.columns, self.gate_means_, strict=True), key=lambda item: item[1], reverse=True)
+            self.ranking_checkpoint_["selected_closed_gates"] = sum(mu <= -0.5 for _, mu in ranked[: self.max_features])
+            self._log(
+                30, "STG strict selection failed; using FLAGGED trained-gate ranking after broader recovery search"
+            )
+            return {name: float(mu) for name, mu in ranked}
+        self.selection_mode_ = "native_converged"
+        self.gate_means_ = np.asarray(self.gate_means_).tolist()
+        active = np.asarray(self.gate_means_) > -0.5
         return {name: float(mu) for name, mu, keep in zip(X.columns, self.gate_means_, active, strict=True) if keep}

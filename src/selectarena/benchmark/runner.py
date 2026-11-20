@@ -21,4 +21,13 @@ class SelectArenaExperimentRunner(OOFExperimentRunner):
         out = super().post_evaluate(out=out)
         if self.compute_preprocessing_artifacts and getattr(self.model, "can_get_preprocessing", False):
             out["preprocessing_artifacts"] = self.model.get_preprocessing_results()
+            fs = out["preprocessing_artifacts"].get("feature_selection", {})
+            cache = fs.get("selection_diagnostics", {}).get("cache", {})
+            if cache.get("enabled"):
+                # Reuse saves real compute, but runtime comparisons still charge
+                # each prediction model the original selector's computation cost.
+                out["time_train_s_wall"] = out["time_train_s"]
+                out["time_train_s"] = (
+                    max(0, out["time_train_s"] - cache["fit_wall_seconds"]) + cache["source_fit_seconds"]
+                )
         return out

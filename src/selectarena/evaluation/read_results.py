@@ -53,6 +53,11 @@ def parse_result(path: str | Path) -> dict:
     }
     if fs and "selection_diagnostics" in fs:
         row["selection_diagnostics"] = fs["selection_diagnostics"]
+        row["selection_mode"] = fs["selection_diagnostics"].get("selection_mode")
+        row["selection_recovery_used"] = fs["selection_diagnostics"].get("recovery_used", False)
+        row["selection_cache_hit"] = fs["selection_diagnostics"].get("cache", {}).get("hit", False)
+    if "time_train_s_wall" in result.result:
+        row["time_train_s_wall"] = result.result["time_train_s_wall"]
     return row
 
 

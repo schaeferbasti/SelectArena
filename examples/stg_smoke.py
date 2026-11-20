@@ -69,7 +69,7 @@ def main():
             "Random": np.random.default_rng(args.seed).choice(X.columns, size=budget, replace=False).tolist(),
             "All": list(X.columns),
         }
-        valid = selector.budget_converged_ and not selector._feature_selection_random_features
+        valid = selector.gate_means_ is not None and not selector._feature_selection_random_features
         if valid:
             features["STG"] = list(selected.columns)
         scores = {}
@@ -110,11 +110,12 @@ def main():
             "feature_count": X.shape[1],
             "scores": scores,
             "selected_features": list(selected.columns) if valid else [],
-            "evaluation_status": "converged_budget_match" if valid else "not_evaluated_no_converged_budget_match",
+            "evaluation_status": selector.selection_mode_,
             "native_active_count": selector.native_count_,
             "budget_converged": selector.budget_converged_,
             "gate_diagnostics": selector.gate_diagnostics_,
-            "gate_means": selector.gate_means_.astype(float).tolist() if valid else None,
+            "gate_means": np.asarray(selector.gate_means_, dtype=float).tolist() if valid else None,
+            "selection_diagnostics": selector.get_selection_diagnostics(),
             "selection_seconds": elapsed,
             "best_params": selector.best_params_,
             "best_epoch": selector.best_epoch_,

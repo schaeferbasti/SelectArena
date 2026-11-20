@@ -50,6 +50,8 @@ dependencies = [
   "lassonet>=0.0.22",
   # Stochastic gates and neural predictor (STGFeatureSelector).
   "torch>=2.2",
+  # Atomic, cross-process reuse of model-independent STG selections.
+  "filelock>=3.13",
 ]
 
 [project.optional-dependencies]

@@ -1,4 +1,4 @@
-"""Native sparsity and convergence are prerequisites for STG evaluation."""
+"""Strict convergence and ranked recovery must remain distinguishable and reproducible."""
 
 from __future__ import annotations
 
@@ -274,15 +274,20 @@ def test_later_loss_of_sparse_support_invalidates_earlier_checkpoint(monkeypatch
 
 
 @pytest.mark.parametrize("problem", ["binary", "multiclass", "regression"])
-def test_failed_budget_is_explicit_and_rng_is_preserved(problem):
+def test_failed_strict_budget_uses_flagged_ranking_without_random_padding(problem):
     X, y = synthetic_data(problem, n_samples=40)
     first, second = small_selector(gate_tolerance=0), small_selector(gate_tolerance=0)
     state, threads = torch.random.get_rng_state().clone(), torch.get_num_threads()
     output = first.fit_transform(X=X, y=y, problem_type=problem)
     second.fit_transform(X=X, y=y, problem_type=problem)
     assert output.shape == (40, 3)
-    assert not first.budget_converged_ and first.gate_means_ is None
-    assert len(first._feature_selection_random_features) == 3
+    assert not first.budget_converged_ and first.gate_means_ is not None
+    assert first._feature_selection_random_features == []
+    assert first.selection_mode_ == "ranked_recovery"
+    assert first.get_selection_diagnostics()["recovery_used"]
+    assert any(t["phase"] == "recovery" for t in first.search_results_)
+    expected = sorted(zip(X.columns, first.gate_means_, strict=True), key=lambda pair: pair[1], reverse=True)[:3]
+    assert list(output.columns) == [name for name, _ in expected]
     assert first._selected_features == second._selected_features
     assert all(not r["budget_matched"] for r in first.search_results_)
     assert torch.equal(state, torch.random.get_rng_state())
@@ -292,8 +297,30 @@ def test_failed_budget_is_explicit_and_rng_is_preserved(problem):
 def test_timeout_does_not_claim_convergence():
     X, y = synthetic_data("regression", n_samples=40)
     selector = small_selector()
-    selector.fit_transform(X=X, y=y, problem_type="regression", time_limit=0)
+    with pytest.raises(RuntimeError, match="refusing random"):
+        selector.fit_transform(X=X, y=y, problem_type="regression", time_limit=0)
     assert not selector.budget_converged_ and selector.search_results_ == []
+
+
+def test_total_training_failure_is_not_replaced_with_random_features(monkeypatch):
+    X, y = synthetic_data("regression", n_samples=40)
+    selector = small_selector()
+    monkeypatch.setattr(selector, "_validation_loss", lambda *args: math.nan)
+    with pytest.raises(RuntimeError, match="no finite trained gate ranking"):
+        selector.fit_transform(X=X, y=y, problem_type="regression", time_limit=3)
+    assert selector.selection_mode_ == "training_failed"
+    assert not selector._feature_selection_random_features
+
+
+def test_relaxed_checkpoint_does_not_claim_stability_from_one_observation(monkeypatch):
+    selector = small_selector(max_epochs=5, min_epochs=5, ranking_min_epochs=5)
+    selector.problem_type, selector.max_features = "regression", 1
+    data = (torch.ones(8, 3), torch.ones(2, 3), torch.ones(8, 1), torch.ones(2, 1))
+    _, result = selector._fit_trial(
+        data, {"lambda": 0.1, "hidden_dims": (8, 8, 8), "learning_rate": 0.01}, 1, 0, math.inf
+    )
+    assert result["ranking_checkpoint"] is not None
+    assert not result["ranking_checkpoint"]["window_complete"]
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
