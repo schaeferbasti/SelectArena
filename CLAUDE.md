@@ -57,6 +57,8 @@ Use the `add-method` skill (`.claude/skills/add-method/`); in short:
 - Run `ruff check --fix . && ruff format .` before committing; every file needs
   `from __future__ import annotations`.
 - Run `pytest`. The integration test fits small models through TabArena's runner (about a minute).
+- To check running SLURM jobs (failures, cluster usage, finish-time estimates, throttle suggestions), use the
+  `check-jobs` skill (`.claude/skills/check-jobs/`); it is read-only.
 - Keep machine-specific values (paths, partitions) out of the code; they belong in
   `configs/cluster.yaml` (git-ignored).
 - When bumping the TabArena pin, update every SHA in `pyproject.toml` and rerun the full test
