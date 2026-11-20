@@ -7,7 +7,7 @@ benchmark_name: feature_selection_benchmark_2026_all
 
 feature_selection:
   # Registry names (selectarena.methods.FEATURE_SELECTION_METHODS) or "all".
-  methods: [SHAPFeatureSelector]
+  methods: all
   # Number of feature-count budgets per dataset. For d features and budget index i (0-based) the
   # selector keeps ceil(d * (i+1)/(b+1)) features when d <= 100, else ceil(d ** ((i+1)/(b+1))).
   total_budget: 5
@@ -30,7 +30,7 @@ experiment:
 
 # Scope of the run (tabarena TaskSubset fields). Omit to run every split of every dataset.
 task_subset:
-  split_indices: [r0f0]
+  split_indices: [r0f0, r0f1, r0f2]
 
 # One entry per group of models sharing resources (tabflow_slurm.ModelJob fields).
 model_jobs:

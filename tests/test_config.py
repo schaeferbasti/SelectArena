@@ -58,7 +58,9 @@ def test_example_configs_build_a_plan(tmp_path):
     pipelines = benchmark.feature_selection.pipelines()
     assert len(pipelines) == len(FEATURE_SELECTION_METHODS) * 5  # methods: all, 5 budgets
 
-    (setup,) = plan.build_setups(num_ray_cpus=1)  # one model job in the example config
+    gpu_setup, cpu_setup = plan.build_setups(num_ray_cpus=1)  # the published model jobs
+    assert len(cpu_setup.experiment_bundle.build_experiments()) == 3 * len(pipelines)  # LightGBM, Linear, RF
+    setup = gpu_setup
     experiments = setup.experiment_bundle.build_experiments()
     assert len(experiments) == 2 * len(pipelines)  # TabICLv2 + RealMLP, default configs
     assert all(isinstance(exp, SelectArenaBagExperiment) for exp in experiments)
