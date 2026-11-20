@@ -56,7 +56,10 @@ and the selection time.
 1. **Add it:** Use "/add-method" with an agent in this
    repo. It writes the method, registers it and checks that it works with the benchmark (you can
    rerun the check with `python scripts/check_method.py <YourMethod>`).
-2. **Benchmark it:** see [Running the benchmark](#running-the-benchmark).
+2. **Benchmark it:** use "/benchmark-method <YourMethod>" (full run) or "/benchmark-method-light <YourMethod>"
+   (performance on one split, for a first look) with an agent on the cluster's login node: it checks the free
+   CPUs/GPUs, suggests an allocation and submits the jobs after your OK. By hand: see
+   [Running the benchmark](#running-the-benchmark).
 3. **See it next to the other methods** on your local copy of the leaderboard (see
    [Your method on the leaderboard, locally](#your-method-on-the-leaderboard-locally)).
 4. **Open a pull request and provide the results:** we check your results and add it to the public leaderboard.
@@ -76,7 +79,9 @@ python scripts/run_extra_benchmark.py collect          # stability_results.csv, 
 `configs/benchmark.yaml` sets what runs (methods, budgets, models, splits); keep the published
 values to compare with the leaderboard. Rerunning `setup` skips jobs whose results exist. Results
 land in `<workspace>/output/<benchmark_name>/`. On an OAR cluster, start from
-`configs/cluster.oar.example.yaml` instead: the same scripts print `oarsub` commands.
+`configs/cluster.oar.example.yaml` instead: the same scripts print `oarsub` commands. Without a cluster,
+`configs/cluster.local.example.yaml` runs every job on your machine, one after the other (a full run of
+one method takes weeks there; restrict `task_subset` for a test).
 
 ## Leaderboard
 
@@ -112,10 +117,13 @@ src/selectarena/
   datasets.py       the dataset suite (Data Foundry containers)
   published_results.py  the published results (download, merge with your own)
   config.py         YAML configs and the tabflow_slurm plan built from them
-configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.example.yaml (OAR)
+configs/            benchmark.yaml, cluster.example.yaml (SLURM), cluster.oar.example.yaml (OAR),
+                    cluster.local.example.yaml (this machine)
 scripts/            prepare_datasets.py, run_benchmark.py, run_extra_benchmark.py,
                     run_generate_website_artifacts.py, preview_leaderboard.py, check_method.py
 .claude/skills/     add-method: add a feature selection method;
+                    benchmark-method(-light): benchmark it on the cluster;
+                    check-jobs: status of the running jobs;
                     update-leaderboard: publish new results (maintainers)
 examples/           quickstart.py, run_local.py
 tests/

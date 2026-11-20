@@ -8,6 +8,7 @@ configs/*.json
 !configs/benchmark.yaml
 !configs/cluster.example.yaml
 !configs/cluster.oar.example.yaml
+!configs/cluster.local.example.yaml
 
 # Python
 __pycache__/

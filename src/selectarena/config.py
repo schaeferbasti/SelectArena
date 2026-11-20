@@ -6,7 +6,8 @@ Two files keep what is benchmarked apart from where it runs:
   budgets, downstream models, splits;
 * a **cluster config** (``configs/cluster.yaml``, git-ignored; start from
   ``configs/cluster.example.yaml`` for SLURM or ``configs/cluster.oar.example.yaml`` for OAR):
-  workspace, Python environment, cache locations, scheduler settings and resources.
+  workspace, Python environment, cache locations, scheduler settings and resources
+  (``configs/cluster.local.example.yaml`` runs everything on this machine, one item at a time).
 
 ``load_config`` reads both. The ``build_*`` functions turn them into the TabArena / tabflow_slurm
 objects the scripts use.
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
 #: Environment variable naming the cluster config when ``--cluster-config`` is not given.
 CLUSTER_CONFIG_ENV = "SELECTARENA_CLUSTER_CONFIG"
 DEFAULT_CLUSTER_CONFIG = Path("configs/cluster.yaml")
+SCHEDULERS = ("slurm", "oar", "local")
 
 
 @dataclass
@@ -128,15 +130,18 @@ class ClusterConfig:
     extra_benchmark_slurm: dict[str, Any] = field(default_factory=dict)
     """``ExtraBenchmarkSlurmSettings`` fields for the stability/validity array jobs."""
     scheduler: str = "slurm"
-    """``"slurm"`` (``slurm`` and ``extra_benchmark_slurm`` apply) or ``"oar"`` (``oar`` and ``extra_benchmark_oar``)."""
+    """``"slurm"`` (``slurm`` and ``extra_benchmark_slurm`` apply), ``"oar"`` (``oar`` and ``extra_benchmark_oar``)
+    or ``"local"`` (``local``: every job on this machine, one after the other)."""
     oar: dict[str, Any] = field(default_factory=dict)
     """``selectarena.benchmark.oar.OarSetup`` fields (resources, queue, properties, modules, ...)."""
     extra_benchmark_oar: dict[str, Any] = field(default_factory=dict)
     """``ExtraBenchmarkOarSettings`` fields for the stability/validity array jobs."""
+    local: dict[str, Any] = field(default_factory=dict)
+    """``tabflow_slurm.LocalSequentialSetup`` fields (``continue_on_error``, ``execution_mode``)."""
 
     def __post_init__(self) -> None:
-        if self.scheduler not in ("slurm", "oar"):
-            raise ValueError(f"Unknown scheduler {self.scheduler!r}; options are 'slurm' and 'oar'.")
+        if self.scheduler not in SCHEDULERS:
+            raise ValueError(f"Unknown scheduler {self.scheduler!r}; options are {', '.join(SCHEDULERS)}.")
 
     @property
     def output_dir(self) -> Path:
@@ -203,7 +208,7 @@ def _preprocessing_time_overhead(benchmark: BenchmarkConfig) -> int | None:
 
 
 def build_plan(benchmark: BenchmarkConfig, cluster: ClusterConfig) -> TabArenaBenchmarkPlan:
-    """The ``tabflow_slurm`` plan running ``benchmark`` on the SLURM or OAR cluster in ``cluster``."""
+    """The ``tabflow_slurm`` plan running ``benchmark`` on the SLURM / OAR cluster (or locally) in ``cluster``."""
     from tabarena.benchmark.experiment import ModelConstraints
     from tabarena.benchmark.task.metadata import TaskSubset
     from tabflow_slurm import ModelJob, PathSetup, SlurmSetup, TabArenaBenchmarkPlan, TabArenaV0pt1ResourcesSetup
@@ -222,6 +227,11 @@ def build_plan(benchmark: BenchmarkConfig, cluster: ClusterConfig) -> TabArenaBe
         from selectarena.benchmark.oar import OarSetup
 
         scheduler_setup = OarSetup(**cluster.oar)
+    elif cluster.scheduler == "local":
+        from tabflow_slurm import LocalSequentialSetup
+
+        # A failed item should not stop a run of thousands; rerunning setup retries it.
+        scheduler_setup = LocalSequentialSetup(**{"continue_on_error": True, **cluster.local})
     else:
         slurm = {"gpu_partition": None, "cpu_partition": None, "extra_gres": None, **cluster.slurm}
         scheduler_setup = SlurmSetup(**slurm)

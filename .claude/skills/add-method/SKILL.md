@@ -159,6 +159,10 @@ to OpenML on the first run.
 
 ## Step 8: Benchmark it (hand off: cluster)
 
+Point the user to **`/benchmark-method <MethodName>`** (full run) or **`/benchmark-method-light <MethodName>`**
+(performance on one split, for a first look): they check the cluster's free resources, write the config below,
+and submit after the user's OK. The manual steps they automate:
+
 The default config runs `methods: all`, so a full run includes the new method automatically. To run
 only the new method and add it to existing results:
 

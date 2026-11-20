@@ -22,6 +22,8 @@ overview.
   the same job JSON as SLURM plus OAR array scripts; each subjob runs `python -m selectarena.benchmark.oar`
   in place of TabArena's SLURM `submit_template.sh`.
 - `src/selectarena/extra_benchmark/`: stability/validity runs, plain SLURM arrays.
+- `scheduler: local` (`configs/cluster.local.example.yaml`) runs every job on this machine through
+  tabflow_slurm's `LocalSequentialSetup` and `extra_benchmark/local.py`.
 - `src/selectarena/evaluation/`: results table, leaderboard metrics, Elo (`elo.py`), Pareto front
   (`pareto.py`) and lasagna plots (`lasagna.py`), computed as for the paper's figures; their
   interactive website versions are in `website/figures.py`. `characteristics.py` breaks the ranks
@@ -51,6 +53,9 @@ Use the `add-method` skill (`.claude/skills/add-method/`); in short:
    `tests/test_website.py` fails if it has no subgroup (it would show as "Other" on the leaderboard).
 4. `python scripts/check_method.py <ClassName>` checks registration, output format, determinism
    and the time limit; it must pass before the method is benchmarked.
+5. To benchmark it, use the `benchmark-method` skill (full run: 3 splits, stability/validity) or
+   `benchmark-method-light` (1 split, performance only) (`.claude/skills/benchmark-method*/`). They write
+   `configs/benchmark_<module>[_light].yaml` with the published settings and submit after the user's OK.
 
 ## Working style
 

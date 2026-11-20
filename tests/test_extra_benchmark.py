@@ -105,3 +105,27 @@ def test_slurm_array_scripts(tmp_path):
     assert len(scripts) == 2
     assert "#SBATCH --array=0-2%100" in scripts[0].read_text()
     assert "-m selectarena.extra_benchmark.runner" in scripts[1].read_text()
+
+
+def test_local_runner_runs_every_job(tmp_path, monkeypatch):
+    import subprocess
+
+    from selectarena.extra_benchmark.local import run_commands, write_job_file
+
+    commands = build_job_commands(
+        modes=["stability", "validity"],
+        method_names=[PIPELINE],
+        task_ids=["UserTask|1|a/1"],
+        results_dir=tmp_path / "results",
+    )
+    job_file = write_job_file(commands, out_dir=tmp_path / "setup")
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        return subprocess.CompletedProcess(cmd, 0 if "stability" in cmd else 1)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert run_commands(job_file, python="/venv/bin/python") == 1  # the validity job failed
+    assert len(calls) == 2
+    assert calls[0][:4] == ["/venv/bin/python", "-P", "-m", "selectarena.extra_benchmark.runner"]

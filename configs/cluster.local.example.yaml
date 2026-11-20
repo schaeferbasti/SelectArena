@@ -1,0 +1,32 @@
+# Run the benchmark on this machine instead of a cluster: every model fit and every stability /
+# validity job runs one after the other. A full run of one method takes weeks on one machine; use
+# it for a few datasets (task_subset.dataset_names in the benchmark config) or the light run.
+# Copy to configs/cluster.yaml (git-ignored) and edit, or point $SELECTARENA_CLUSTER_CONFIG /
+# --cluster-config at your copy. `run_benchmark.py setup` then prints the command(s) to run.
+
+scheduler: local
+
+# Results land in <workspace>/output/<benchmark_name>/ (/workspace/ in the repo is git-ignored).
+workspace: ./workspace
+# Python of the environment SelectArena is installed in.
+python_path: .venv/bin/python
+
+# tabarena.caching.CacheConfig fields. null keeps the library default.
+caches:
+  openml: ./cache/openml
+  data_foundry: ./cache/data_foundry
+  huggingface: null
+  tabarena: null
+
+# Local directory with the suite's Data Foundry containers as <dataset>/<container uuid>. null
+# downloads them from Hugging Face (selectarena.datasets.HF_REPO_ID) into caches.data_foundry.
+data_foundry_warehouse: null
+
+# tabflow_slurm.LocalSequentialSetup fields.
+local:
+  continue_on_error: true   # log a failed fit and go on; rerunning setup retries it
+
+# tabflow_slurm.ResourcesSetup fields: what each fit may use of this machine.
+resources:
+  num_cpus: 8
+  memory_limit: 32

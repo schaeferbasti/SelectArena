@@ -69,3 +69,21 @@ def test_example_configs_build_a_plan(tmp_path):
 
     jobs = plan.context.build_jobs(experiments, task_subset=setup.task_subset)
     assert len(jobs) == len(experiments) * 3  # splits r0f0, r0f1, r0f2
+
+
+def test_local_example_config_runs_jobs_on_this_machine(tmp_path):
+    cluster = yaml.safe_load((REPO_ROOT / "configs" / "cluster.local.example.yaml").read_text())
+    cluster.update(workspace=str(tmp_path / "workspace"), caches={"openml": str(tmp_path / "openml")})
+    cluster_path = tmp_path / "cluster.yaml"
+    cluster_path.write_text(yaml.safe_dump(cluster))
+    _write_suite_metadata(tmp_path / "openml")
+    benchmark = load_benchmark_config(REPO_ROOT / "configs" / "benchmark.yaml")
+    benchmark.model_jobs = [{"name": "cpu", "models": [["LightGBM", 0]]}]
+
+    plan = build_plan(benchmark, load_cluster_config(cluster_path))
+    commands = plan.setup_jobs(num_ray_cpus=1)
+
+    assert type(plan.scheduler_setup).__name__ == "LocalSequentialSetup"
+    assert plan.scheduler_setup.continue_on_error
+    assert len(commands) == 1
+    assert "-m tabflow_slurm.run_local" in commands[0] and "--continue_on_error True" in commands[0]

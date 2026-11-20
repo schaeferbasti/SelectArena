@@ -5,7 +5,8 @@
 
 ``setup`` runs on the head node: it builds every (model config x FSBench pipeline x split) job,
 skips the ones with cached results, writes the job batch and prints the ``sbatch`` command(s), or
-the ``oarsub`` command(s) with ``scheduler: oar`` in the cluster config (``--submit`` submits those).
+the ``oarsub`` command(s) with ``scheduler: oar`` in the cluster config (``--submit`` submits those),
+or with ``scheduler: local`` the command(s) running every job on this machine, one after the other.
 ``eval`` collects all ``results.pkl`` of the run into ``<output>/<benchmark_name>/results.csv``.
 The cluster config is read from ``--cluster-config``, ``$SELECTARENA_CLUSTER_CONFIG`` or
 ``configs/cluster.yaml``.
@@ -15,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 
 from selectarena.config import build_plan, load_benchmark_config, load_cluster_config
 
@@ -23,10 +25,14 @@ def setup(args: argparse.Namespace) -> None:
     benchmark = load_benchmark_config(args.config)
     cluster = load_cluster_config(args.cluster_config)
     print(f"{len(benchmark.feature_selection.pipelines())} preprocessing pipelines")
-    commands = build_plan(benchmark, cluster).setup_jobs()
+    # tabflow_slurm sizes its Ray pool with os.sched_getaffinity, which macOS lacks (local runs).
+    num_ray_cpus = "auto" if hasattr(os, "sched_getaffinity") else (os.cpu_count() or 1)
+    commands = build_plan(benchmark, cluster).setup_jobs(num_ray_cpus=num_ray_cpus)
     if args.submit:
         if cluster.scheduler != "oar":
-            raise SystemExit("--submit is only supported with `scheduler: oar`; run the printed sbatch commands.")
+            raise SystemExit(
+                "--submit is only supported with `scheduler: oar`; run the printed sbatch (or local) commands."
+            )
         from selectarena.oar import submit
 
         for line in submit(commands):

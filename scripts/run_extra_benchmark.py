@@ -5,7 +5,7 @@
 
 ``setup`` writes one array job per chunk of (mode x FSBench pipeline x task) jobs and prints the
 ``sbatch`` (or, with ``scheduler: oar`` in the cluster config, ``oarsub``) commands (``--submit``
-submits them). ``collect`` merges the per-job CSVs into
+submits them); with ``scheduler: local`` it prints the command running every job on this machine. ``collect`` merges the per-job CSVs into
 ``stability_results.csv`` and ``validity_results.csv``. A single job can also be run directly with
 ``python -m selectarena.extra_benchmark.runner``.
 """
@@ -39,7 +39,16 @@ def setup(args: argparse.Namespace) -> None:
         noise_type=benchmark.extra_benchmark.noise_type,
     )
     out_dir = Path(cluster.workspace) / "setup_out" / f"{benchmark.benchmark_name}_extra"
+    if cluster.scheduler == "local":
+        from selectarena.extra_benchmark.local import write_job_file
+
+        job_file = write_job_file(commands, out_dir=out_dir)
+        print(f"{len(commands)} jobs. Run them on this machine (rerun to resume):")
+        print(f"{cluster.python_path} -P -m selectarena.extra_benchmark.local {job_file}")
+        return
     if cluster.scheduler == "oar":
+        if args.parallel is not None:
+            print("--parallel is ignored on OAR (no per-array limit: every subjob that fits starts).")
         from selectarena.extra_benchmark.oar import ExtraBenchmarkOarSettings, write_oar_arrays
         from selectarena.oar import submit as submit_oar
 
@@ -56,11 +65,14 @@ def setup(args: argparse.Namespace) -> None:
 
     from selectarena.extra_benchmark.slurm import ExtraBenchmarkSlurmSettings, submit, write_slurm_arrays
 
+    slurm_settings = dict(cluster.extra_benchmark_slurm)
+    if args.parallel is not None:
+        slurm_settings["parallel"] = args.parallel
     scripts = write_slurm_arrays(
         commands,
         out_dir=out_dir,
         python_path=cluster.python_path,
-        settings=ExtraBenchmarkSlurmSettings(**cluster.extra_benchmark_slurm),
+        settings=ExtraBenchmarkSlurmSettings(**slurm_settings),
     )
     print(f"{len(commands)} jobs in {len(scripts)} array script(s).")
     if args.submit:
@@ -89,6 +101,9 @@ def main() -> None:
     parser.add_argument("--config", default="configs/benchmark.yaml")
     parser.add_argument("--cluster-config", default=None)
     parser.add_argument("--submit", action="store_true", help="setup: submit the array jobs (sbatch / oarsub).")
+    parser.add_argument(
+        "--parallel", type=int, default=None, help="setup (SLURM): array tasks at once; overrides the cluster config."
+    )
     args = parser.parse_args()
     {"setup": setup, "collect": collect}[args.mode](args)
 
