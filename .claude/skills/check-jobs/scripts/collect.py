@@ -1,72 +1,46 @@
 #!/usr/bin/env python3
-"""Snapshot of the user's SLURM jobs and the cluster, for the check-jobs skill.
+"""Snapshot of the user's cluster jobs and the cluster, for the check-jobs skill (SLURM or OAR).
 
 Prints (plain text, for Claude to read):
-  1. per array job: state counts, throttle, partitions, CPUs/GPUs per task, runtimes of completed tasks,
-     running tasks near their time limit, and every task that ended in a non-COMPLETED state;
-  2. per partition the user's jobs touch: account usage vs. the QOS per-account cap, cluster-wide free CPUs/GPUs,
-     pending jobs of others;
-  3. a runtime estimate per array for the current throttle and alternatives (list scheduling with the
-     median runtime of the completed tasks; capped by what the account cap / free resources allow).
+  1. per array job: state counts, concurrency limit, partitions/queues, CPUs/GPUs per task, runtimes, completions
+     since the last check, running tasks near their time limit, and every task that ended in a non-COMPLETED state;
+  2. per partition/queue the user's jobs use: cluster idle CPUs/GPUs, the account's usage vs. its cap (if the
+     scheduler exposes one), usage by user, pending jobs of others, free room for the account;
+  3. per active array a finish-time estimate (bootstrap over its own task durations) for the current concurrency
+     and alternatives.
 
-Usage: collect.py [--since 24h] [--array ID ...]
+Usage: collect.py [--scheduler auto|slurm|oar] [--since 24h] [--array ID ...] [--raw]
   --since  also report arrays that finished in this window (default: since the last run, at most 48h; first run 24h)
-  --array  extra array IDs to include even if they have no tasks queued (e.g. ones named in the HANDOFF)
-Read-only: only squeue/sacct/scontrol/sinfo/sacctmgr queries. Stores the time of the last run in
-~/.cache/check-jobs/last_run.
+  --array  extra array IDs to include even if they have no tasks queued
+  --raw    (OAR) print one raw job and resource record, to check the field mapping on a new cluster
+Read-only: only status queries. Stores the time of the last run in ~/.cache/check-jobs/last_run.
 """
 
 from __future__ import annotations
 
 import argparse
 import heapq
-import os
 import random
 import re
 import statistics
-import subprocess
+import sys
 import time
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import datetime, timedelta
 from pathlib import Path
 
-USER = os.environ.get("USER", "")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from backends import detect
+from backends.common import USER
+
 STATE_FILE = Path.home() / ".cache" / "check-jobs" / "last_run"
-TERMINAL_OK = {"COMPLETED"}
-
-
-def run(cmd: list[str]) -> str:
-    try:
-        return subprocess.run(cmd, capture_output=True, text=True, timeout=120).stdout
-    except Exception as e:
-        return f"__ERROR__ {e}"
-
-
-def secs(t: str) -> int:
-    """SLURM time ([D-]HH:MM:SS, MM:SS, UNLIMITED) -> seconds."""
-    if not t or t in ("UNLIMITED", "INVALID", "Partition_Limit", "NOT_SET"):
-        return 0
-    days = 0
-    if "-" in t:
-        d, t = t.split("-", 1)
-        days = int(d)
-    parts = [int(float(p)) for p in t.split(":")]
-    while len(parts) < 3:
-        parts.insert(0, 0)
-    h, m, s = parts
-    return days * 86400 + h * 3600 + m * 60 + s
+ACTIVE = {"PENDING", "RUNNING"}
+SLOT_STATES = {"COMPLETED", "TIMEOUT"}  # durations used for the estimate (a timed-out task held its slot that long)
 
 
 def hfmt(s: float) -> str:
     return f"{s / 3600:.1f}h" if s >= 3600 else f"{s / 60:.0f}m"
-
-
-def gpus_of(tres: str) -> int:
-    """'gres/gpu:1,gres/localtmp:10' or 'gres/gpu=2' or 'gpu:l40s:1' -> 1/2/1."""
-    n = 0
-    for m in re.finditer(r"gpu(?::[A-Za-z0-9_-]+)?[:=](\d+)", tres or ""):
-        n += int(m.group(1))
-    return n
 
 
 def makespan(running_left: list[float], pending: list[float], slots: int) -> float:
@@ -100,9 +74,15 @@ def simulate(
 
 def main() -> None:
     ap = argparse.ArgumentParser()
+    ap.add_argument("--scheduler", default="auto", choices=["auto", "slurm", "oar"])
     ap.add_argument("--since", default=None)
     ap.add_argument("--array", nargs="*", default=[])
+    ap.add_argument("--raw", action="store_true")
     args = ap.parse_args()
+    be = detect(args.scheduler)
+    if args.raw:
+        print(be.raw_samples() if hasattr(be, "raw_samples") else "--raw is only implemented for OAR")
+        return
 
     now = datetime.now()
     if args.since:
@@ -112,109 +92,42 @@ def main() -> None:
         since = max(datetime.fromtimestamp(float(STATE_FILE.read_text().strip())), now - timedelta(hours=48))
     else:
         since = now - timedelta(hours=24)
-    print(f"# check-jobs snapshot {now:%Y-%m-%d %H:%M} (user {USER}; 'since' = {since:%Y-%m-%d %H:%M})")
+    since_s = since.strftime("%Y-%m-%dT%H:%M")
+    print(
+        f"# check-jobs snapshot {now:%Y-%m-%d %H:%M} (scheduler {be.name}; user {USER};"
+        f" 'since' = {since:%Y-%m-%d %H:%M})"
+    )
 
-    # ---- queued tasks (expanded per task) ----
-    q = run(["squeue", "-u", USER, "-r", "-h", "-o", "%i|%T|%P|%C|%b|%M|%l|%R|%a|%j|%N"])
-    arrays: dict[str, dict] = defaultdict(lambda: {"queued": [], "acct": None, "name": None})
-    for line in q.strip().splitlines():
-        jid, st, part, cpus, tres, elapsed, limit, reason, acct, name, node = line.split("|")
-        aid = jid.split("_")[0]
-        a = arrays[aid]
-        a["queued"].append(
-            dict(
-                id=jid,
-                state=st,
-                part=part,
-                cpus=int(cpus),
-                gpus=gpus_of(tres),
-                elapsed=secs(elapsed),
-                limit=secs(limit),
-                reason=reason,
-                node=node,
-            )
-        )
-        a["acct"], a["name"] = acct, name
-
-    # ---- arrays that ended recently / named explicitly ----
-    s = run(["sacct", "-u", USER, "-X", "-n", "-P", "-S", since.strftime("%Y-%m-%dT%H:%M"), "-o", "JobID,State"])
-    for line in s.strip().splitlines():
-        jid = line.split("|")[0]
-        if re.match(r"^\d+(_\d+)?$", jid):
-            arrays[jid.split("_")[0]]
-    for aid in args.array:
-        arrays[aid]
-
-    part_usage_hint = defaultdict(lambda: {"cpus": 0, "gpus": 0})
+    arrays = be.collect(since, args.array)
     report = []
-    for aid in sorted(arrays, key=int):
+    for aid in sorted(arrays, key=lambda x: int(x) if x.isdigit() else 0):
         a = arrays[aid]
-        acc = run(
-            [
-                "sacct",
-                "-j",
-                aid,
-                "-X",
-                "-n",
-                "-P",
-                "-o",
-                "JobID,State,Elapsed,End,NodeList,Partition,AllocCPUS,AllocTRES,Timelimit,Account,JobName,ExitCode",
-            ]
-        )
-        tasks = {}
-        for line in acc.strip().splitlines():
-            f = line.split("|")
-            if len(f) < 12 or "[" in f[0]:
-                continue
-            tasks[f[0]] = dict(
-                state=f[1].split()[0],
-                elapsed=secs(f[2]),
-                end=f[3],
-                node=f[4],
-                part=f[5],
-                cpus=int(f[6] or 0),
-                gpus=gpus_of(f[7]),
-                limit=secs(f[8]),
-                acct=f[9],
-                name=f[10],
-                exit=f[11],
-            )
-        if not tasks and not a["queued"]:
+        tasks = a["tasks"]
+        if not tasks:
             continue
-        a["acct"] = a["acct"] or next((t["acct"] for t in tasks.values()), "?")
-        a["name"] = a["name"] or next((t["name"] for t in tasks.values()), "?")
-        states = Counter(t["state"] for t in tasks.values() if t["state"] not in ("PENDING", "RUNNING"))
-        running = [t for t in a["queued"] if t["state"] in ("RUNNING", "CONFIGURING", "COMPLETING")]
-        pending = [t for t in a["queued"] if t["state"] == "PENDING"]
+        running = [dict(t, id=k) for k, t in tasks.items() if t["state"] == "RUNNING"]
+        pending = [dict(t, id=k) for k, t in tasks.items() if t["state"] == "PENDING"]
+        states = Counter(t["state"] for t in tasks.values() if t["state"] not in ACTIVE)
         states.update({"RUNNING": len(running), "PENDING": len(pending)})
         done = [t["elapsed"] for t in tasks.values() if t["state"] == "COMPLETED" and t["elapsed"] > 60]
-        # durations for the estimate: completed (also fast ones) + tasks that hit the limit (they occupied a slot that long)
-        durs = [t["elapsed"] for t in tasks.values() if t["state"] in ("COMPLETED", "TIMEOUT") and t["elapsed"] > 0]
-        sc = run(["scontrol", "show", "job", aid])
-        throttle = re.search(r"ArrayTaskThrottle=(\d+)", sc)
-        throttle = int(throttle.group(1)) if throttle else 0
-        parts = sorted(set(re.findall(r"Partition=(\S+)", sc)) | {t["part"] for t in a["queued"]})
-        exc = re.search(r"ExcNodeList=(\S+)", sc)
-        sample = (running or pending or list(tasks.values()) or [{}])[0]
-        cpt, gpt = sample.get("cpus", 0), sample.get("gpus", 0)
-        limit = sample.get("limit", 0)
-        for t in running:
-            part_usage_hint[t["part"]]["cpus"] += t["cpus"]
-            part_usage_hint[t["part"]]["gpus"] += t["gpus"]
-
-        bad = {k: t for k, t in tasks.items() if t["state"] not in TERMINAL_OK | {"PENDING", "RUNNING"}}
+        durs = [t["elapsed"] for t in tasks.values() if t["state"] in SLOT_STATES and t["elapsed"] > 0]
+        bad = {k: t for k, t in tasks.items() if t["state"] not in ACTIVE | {"COMPLETED"}}
         if not running and not pending:
-            new_bad = {k: t for k, t in bad.items() if t["end"] >= since.strftime("%Y-%m-%dT%H:%M")}
+            new_bad = {k: t for k, t in bad.items() if t["end"] >= since_s}
             last_end = max((t["end"] for t in tasks.values()), default="?")
             print(f"\n## Array {aid} FINISHED (last end {last_end})  name={a['name']}  states={dict(states)}")
             for k, t in sorted(new_bad.items(), key=lambda kv: kv[1]["end"]):
                 print(f"  {k} {t['state']} {hfmt(t['elapsed'])} {t['end']} {t['node']} {t['exit']} NEW")
             continue
+        info = be.array_info(aid, tasks)
+        sample = (running or pending or list(tasks.values()))[0]
+        cpt, gpt, limit = sample["cpus"], sample["gpus"], sample["limit"]
         print(f"\n## Array {aid}  name={a['name']}  account={a['acct']}")
         print(
-            f"states: {dict(states)}  | throttle={throttle or 'none'} | partitions={','.join(p for p in parts if p)}"
+            f"states: {dict(states)}  | {be.throttle_word}={info['throttle'] or 'none'}"
+            f" | partitions={','.join(info['partitions'])}"
             f" | per task {cpt} CPU, {gpt} GPU, limit {hfmt(limit) if limit else '?'}"
-            + (f" | ExcNodeList={exc.group(1)}" if exc and exc.group(1) != "(null)" else "")
+            + (f" | {info['notes']}" if info["notes"] else "")
         )
         if running:
             print("running on: " + ", ".join(f"{p}x{n}" for p, n in Counter(t["part"] for t in running).items()))
@@ -226,17 +139,16 @@ def main() -> None:
                 f"completed runtimes (n={len(done)}): median {hfmt(statistics.median(done))}, mean "
                 f"{hfmt(statistics.mean(done))}, p90 {hfmt(q90)}, max {hfmt(max(done))}"
             )
-        recent_ok = [
-            k for k, t in tasks.items() if t["state"] == "COMPLETED" and t["end"] >= since.strftime("%Y-%m-%dT%H:%M")
-        ]
+        recent_ok = [k for k, t in tasks.items() if t["state"] == "COMPLETED" and t["end"] >= since_s]
         print(f"completed since {since:%m-%d %H:%M}: {len(recent_ok)}")
         if bad:
             print("NON-COMPLETED tasks (id state elapsed end node exit):")
             for k, t in sorted(bad.items(), key=lambda kv: kv[1]["end"]):
-                new = " NEW" if t["end"] >= since.strftime("%Y-%m-%dT%H:%M") else ""
-                print(f"  {k} {t['state']} {hfmt(t['elapsed'])} {t['end']} {t['node']} {t['exit']}{new}")
-        nodes = Counter(t["node"] for t in bad.values() if t["state"] not in ("CANCELLED",))
-        if len(bad) >= 3 and nodes.most_common(1)[0][1] >= 0.6 * len(bad):
+                new = " NEW" if t["end"] >= since_s else ""
+                raw = f" [{t['raw']}]" if be.name != "slurm" and t["raw"] else ""
+                print(f"  {k} {t['state']} {hfmt(t['elapsed'])} {t['end']} {t['node']} {t['exit']}{new}{raw}")
+        nodes = Counter(t["node"] for t in bad.values() if t["state"] != "CANCELLED")
+        if len(bad) >= 3 and nodes and nodes.most_common(1)[0][1] >= 0.6 * len(bad):
             print(f"  NOTE: {nodes.most_common(1)[0][1]}/{len(bad)} failures on {nodes.most_common(1)[0][0]}")
         near = [t for t in running if t["limit"] and t["elapsed"] > 0.8 * t["limit"]]
         if near:
@@ -248,98 +160,57 @@ def main() -> None:
                 acct=a["acct"],
                 running=running,
                 pending=len(pending),
-                throttle=throttle,
+                throttle=info["throttle"],
                 cpt=cpt,
                 gpt=gpt,
-                done=done,
                 durs=durs,
-                parts=parts,
-                limit=limit,
+                parts=info["partitions"],
+                gpu_parts={t["part"] for t in tasks.values() if t["gpus"]},
             )
         )
 
-    # ---- partitions ----
+    # ---- partitions / queues ----
     parts_seen = sorted({p for r in report for p in r["parts"] if p})
+    gpu_parts = set().union(*(r["gpu_parts"] for r in report)) if report else set()
+    cpu_parts = {p for r in report if not r["gpt"] for p in r["parts"]}
     accts = sorted({r["acct"] for r in report if r["acct"] and r["acct"] != "?"})
     free = {}
-    print("\n# Partitions")
+    print("\n# Partitions" if be.name == "slurm" else "\n# Queues")
     for p in parts_seen:
-        sp = run(["scontrol", "show", "partition", p])
-        qos = re.search(r"\bQoS=(\S+)", sp)
-        qos = qos.group(1) if qos and qos.group(1) != "N/A" else None
-        cap_cpu = cap_gpu = None
-        if qos:
-            line = run(["sacctmgr", "-n", "-P", "show", "qos", qos, "format=MaxTRESPA,GrpTRES"]).strip()
-            m = re.search(r"cpu=(\d+)", line)
-            cap_cpu = int(m.group(1)) if m else None
-            m = re.search(r"gres/gpu=(\d+)", line)
-            cap_gpu = int(m.group(1)) if m else None
-        # cluster-wide
-        nodes = run(["sinfo", "-p", p, "-h", "-N", "-o", "%N"]).split()
-        tot_cpu = alloc_cpu = tot_gpu = alloc_gpu = 0
-        down = []
-        if nodes:
-            for ln in run(["scontrol", "show", "node", "-o", ",".join(sorted(set(nodes)))]).splitlines():
-                name = re.search(r"NodeName=(\S+)", ln).group(1)
-                st = re.search(r"State=(\S+)", ln).group(1)
-                if set(st.split("+")) & {
-                    "DOWN",
-                    "DRAIN",
-                    "DRAINED",
-                    "DRAINING",
-                    "FAIL",
-                    "FAILING",
-                    "MAINT",
-                    "NOT_RESPONDING",
-                }:
-                    down.append(f"{name}:{st}")
-                    continue
-                tot_cpu += int(re.search(r"CPUTot=(\d+)", ln).group(1))
-                alloc_cpu += int(re.search(r"CPUAlloc=(\d+)", ln).group(1))
-                g = re.search(r"Gres=\S*?gpu(?::[A-Za-z0-9_-]+)?:(\d+)", ln)
-                tot_gpu += int(g.group(1)) if g else 0
-                ga = re.search(r"AllocTRES=\S*gres/gpu=(\d+)", ln)
-                alloc_gpu += int(ga.group(1)) if ga else 0
-        # account usage
-        acct_cpu = acct_gpu = 0
-        by_user = Counter()
-        for acct in accts:
-            for ln in run(["squeue", "-A", acct, "-p", p, "-t", "R", "-h", "-o", "%u|%C|%b"]).splitlines():
-                u, c, b = ln.split("|")
-                acct_cpu += int(c)
-                acct_gpu += gpus_of(b)
-                by_user[u] += gpus_of(b) if "gpu" in p else int(c)
-        pend_others = Counter(
-            ln.split("|")[1]
-            for ln in run(["squeue", "-p", p, "-t", "PD", "-h", "-o", "%u|%r"]).splitlines()
-            if not ln.startswith(USER + "|")
-        )
-        unit = "GPUs" if "gpu" in p else "CPUs"
-        print(f"\n## {p} (QOS {qos}; per-account cap cpu={cap_cpu} gpu={cap_gpu})")
+        pi = be.partition_info(p, accts)
+        print(f"\n## {pi['header']}")
         print(
-            f"cluster: CPUs {alloc_cpu}/{tot_cpu} allocated ({tot_cpu - alloc_cpu} idle)"
-            + (f", GPUs {alloc_gpu}/{tot_gpu} allocated ({tot_gpu - alloc_gpu} idle)" if tot_gpu else "")
-            + (f"; unavailable nodes: {' '.join(down)}" if down else "")
+            f"cluster: CPUs {pi['alloc_cpu']}/{pi['tot_cpu']} allocated ({pi['tot_cpu'] - pi['alloc_cpu']} idle)"
+            + (
+                f", GPUs {pi['alloc_gpu']}/{pi['tot_gpu']} allocated ({pi['tot_gpu'] - pi['alloc_gpu']} idle)"
+                if pi["tot_gpu"]
+                else ""
+            )
+            + (f"; unavailable nodes: {' '.join(pi['down'])}" if pi["down"] else "")
         )
-        print(f"account {','.join(accts)}: {acct_cpu} CPUs, {acct_gpu} GPUs running; by user ({unit}): {dict(by_user)}")
-        if pend_others:
-            print(f"pending jobs of others by reason: {dict(pend_others)}")
-        idle_gpu = tot_gpu - alloc_gpu
-        idle_cpu = tot_cpu - alloc_cpu
-        if "gpu" in p or tot_gpu:
-            room = min(idle_gpu, (cap_gpu - acct_gpu) if cap_gpu else idle_gpu)
-            free[p] = ("gpu", max(0, room))
-            print(f"=> more GPU tasks possible here now: {max(0, room)} (min of idle GPUs and account cap headroom)")
-        else:
-            room = min(idle_cpu, (cap_cpu - acct_cpu) if cap_cpu else idle_cpu)
-            free[p] = ("cpu", max(0, room))
-            print(f"=> free CPUs for the account now: {max(0, room)} (min of idle CPUs and account cap headroom)")
+        print(
+            f"{pi['acct_label']}: {pi['acct_cpu']} CPUs, {pi['acct_gpu']} GPUs running;"
+            f" by user ({pi['by_user_unit']}): {pi['by_user']}"
+        )
+        if pi["pend_others"]:
+            print(f"pending jobs of others by reason: {pi['pend_others']}")
+        idle_cpu = pi["tot_cpu"] - pi["alloc_cpu"]
+        idle_gpu = pi["tot_gpu"] - pi["alloc_gpu"]
+        room_cpu = max(0, min(idle_cpu, (pi["cap_cpu"] - pi["acct_cpu"]) if pi["cap_cpu"] else idle_cpu))
+        room_gpu = max(0, min(idle_gpu, (pi["cap_gpu"] - pi["acct_gpu"]) if pi["cap_gpu"] else idle_gpu))
+        free[p] = (room_cpu, room_gpu)
+        what = "account cap headroom" if (pi["cap_cpu"] or pi["cap_gpu"]) else "no cap known"
+        if p in gpu_parts:
+            print(f"=> more GPU tasks possible here now: {room_gpu} (min of idle GPUs and {what})")
+        if p in cpu_parts or p not in gpu_parts:
+            print(f"=> free CPUs for the account now: {room_cpu} (min of idle CPUs and {what})")
 
     # ---- estimates ----
     print(
         "\n# Estimates (bootstrap over the array's own completed/timed-out task durations; median / 90th pct of"
         " the finish time; free capacity is SHARED between arrays on the same partition)"
     )
+    word = be.throttle_word
     for r in report:
         if not r["running"] and not r["pending"]:
             continue
@@ -349,16 +220,21 @@ def main() -> None:
                 f"({len(r['running'])} running, {r['pending']} pending)"
             )
             continue
-        cur = r["throttle"] or (len(r["running"]) + r["pending"])
-        unit_free = 0
+        units_free = 0
         for p in r["parts"]:
-            kind, room = free.get(p, ("cpu", 0))
-            per = r["gpt"] if kind == "gpu" else r["cpt"]
-            if per:
-                unit_free += room // per
-        max_now = len(r["running"]) + unit_free
+            rc, rg = free.get(p, (0, 0))
+            fits = [rc // r["cpt"]] if r["cpt"] else []
+            if r["gpt"]:
+                fits.append(rg // r["gpt"])
+            units_free += min(fits) if fits else 0
+        max_now = len(r["running"]) + units_free
         total = len(r["running"]) + r["pending"]
-        opts = sorted({max(1, cur // 2), cur, max(cur, min(max_now, total)), min(total, cur + max(1, cur // 2))} - {0})
+        # without a per-array limit the scheduler runs what fits: currently that is max_now
+        cur = r["throttle"] or min(total, max_now)
+        opts = {max(1, cur // 2), cur}
+        if r["throttle"]:
+            opts |= {max(cur, min(max_now, total)), min(total, cur + max(1, cur // 2))}
+        opts = sorted(opts - {0})
         print(
             f"\n## {r['aid']} {r['name']}: {len(r['running'])} running, {r['pending']} pending; durations "
             f"median {hfmt(statistics.median(r['durs']))}, mean {hfmt(statistics.mean(r['durs']))}, "
@@ -376,9 +252,10 @@ def main() -> None:
             delta = (eff - min(cur, total)) * per
             res = f" {'+' if delta > 0 else ''}{delta} {unit} vs. now" if delta else ""
             print(
-                f"  throttle {o}{tag}: done ~{(now + timedelta(seconds=med)):%a %H:%M} (+{hfmt(med)}), "
+                f"  {word} {o}{tag}: done ~{(now + timedelta(seconds=med)):%a %H:%M} (+{hfmt(med)}), "
                 f"90%: {(now + timedelta(seconds=p90)):%a %H:%M} (+{hfmt(p90)}){res}"
             )
+    print(f"\n(change concurrency: {be.throttle_hint})")
 
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
     STATE_FILE.write_text(str(time.time()))
