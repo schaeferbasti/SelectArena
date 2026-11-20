@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import time
 from collections import deque
-from itertools import pairwise, product
+from itertools import pairwise
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -86,6 +86,8 @@ def _next_lambda(observations, initial, max_trials, target):
         proposed = max(r["lambda"] for r in observations) * 10
     elif sparse and not dense:
         proposed = min(r["lambda"] for r in observations) / 10
+    elif len(observations) == 1:
+        proposed = observations[0]["lambda"] / math.sqrt(10)
     else:
         # Count need not be monotone in lambda. Explore the widest untried log interval.
         values = sorted(r["lambda"] for r in observations)
@@ -98,6 +100,40 @@ def _next_lambda(observations, initial, max_trials, target):
     ):
         return None
     return proposed
+
+
+def _balanced_groups(architectures, learning_rates, rng):
+    """Cover depths and rates before revisiting a depth/rate combination."""
+    depths = [architectures[i] for i in rng.permutation(len(architectures))]
+    rates = [learning_rates[i] for i in rng.permutation(len(learning_rates))]
+    depths.sort(key=lambda dims: (len(dims), sum(a * b for a, b in pairwise(dims))))
+    middle = float(np.median(np.log(rates)))
+    rates.sort(key=lambda rate: abs(math.log(rate) - middle))
+    return [
+        {"hidden_dims": dims, "learning_rate": rates[(index + shift) % len(rates)]}
+        for shift in range(len(rates))
+        for index, dims in enumerate(depths)
+    ]
+
+
+def _calibration_seed(trials, target, upper, min_epochs):
+    """Borrow only a lambda proposal from mature terminal counts, never a fitted gate state."""
+    measured = [t for t in trials if t.get("epochs", 0) >= min_epochs and t.get("terminal_checkpoint") is not None]
+    if not measured:
+        return None
+
+    def priority(trial):
+        terminal = trial["terminal_checkpoint"]
+        count = terminal["native_count"]
+        return (not target <= count <= upper, abs(count - target), terminal["validation_loss"])
+
+    return min(measured, key=priority)["lambda"]
+
+
+def _epoch_deadline(start, now, epoch, planned, hard, required_epochs):
+    """Protect a usable training horizon, bounded by the actual group/outer deadline."""
+    seconds_per_epoch = (now - start) / epoch
+    return min(hard, max(planned, start + 1.25 * seconds_per_epoch * required_epochs))
 
 
 class STGFeatureSelector(AbstractFeatureSelector):
@@ -122,7 +158,14 @@ class STGFeatureSelector(AbstractFeatureSelector):
     permits trimming a small surplus to the benchmark's exact k without adding
     closed gates. Exact k is preferred, then native validation loss. Lambda is
     calibrated separately for each architecture/rate: initial values, followed by
-    log-space bracket refinement or expansion. Terminal counts of unfinished fits
+    log-space bracket refinement or expansion. Finish a group's calibration before
+    moving to the next group, and use a successful lambda as the next group's seed.
+    Without a winner, mature terminal counts nearest the budget provide a proposal
+    for the next group; they cannot qualify a fit. Every trial is trained from scratch.
+    The balanced order starts with the shallowest MLP and the middle log learning
+    rate, and covers different depths and rates first. A group
+    gets at most a third of the remaining time while three or more groups remain.
+    Terminal counts of unfinished fits
     may guide exploration, but can never qualify a checkpoint for selection.
     Sparsity need not be strictly monotone; every attempted fit is recorded.
 
@@ -137,9 +180,18 @@ class STGFeatureSelector(AbstractFeatureSelector):
     ``search_results_`` records histories, gate values, probabilities, native counts,
     convergence tests, epochs and timeout status. No test rows enter this process.
 
-    Time limit: check every training/validation batch; allocate at least 30 seconds
-    per attempted fit when available, rather than starving every trial. The search
-    may be incomplete. CPU/GPU RNG state and CPU thread count are restored; optional
+    Large training folds use larger batches, capped by ``max_batch_size``, to target
+    ``max_batches_per_epoch`` batches per epoch (never smaller than ``batch_size``).
+    All training rows are still used in each completed epoch. CUDA scalar transfers
+    are accumulated within each epoch instead of synchronizing twice per minibatch.
+
+    Time limit: check every training/validation batch. Measured epoch cost protects
+    enough time for min_epochs + gate_window + patience, with a 25% timing margin,
+    inside the group and outer deadlines. Once the terminal count reaches the budget
+    band, compare other architectures/rates; reject the fit if it is not converged.
+    No epoch minimum or gate-convergence
+    threshold is relaxed. The search may be incomplete.
+    CPU/GPU RNG state and CPU thread count are restored; optional
     torch imports stay lazy. ``device='auto'`` uses CUDA when available.
 
     Reference: Yamada, Yutaro, Ofir Lindenbaum, Sahand Negahban, and Yuval Kluger.
@@ -168,9 +220,15 @@ class STGFeatureSelector(AbstractFeatureSelector):
             "best_epoch",
             "validation_loss",
             "calibration_count",
+            "terminal_native_count",
+            "terminal_gate_change",
+            "terminal_probability_change",
+            "elapsed_seconds",
+            "effective_batch_size",
+            "planned_seconds",
         )
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "budget_converged": getattr(self, "budget_converged_", False),
             "target_features": getattr(self, "max_features", None),
             "native_active_features": getattr(self, "native_count_", None),
@@ -195,6 +253,11 @@ class STGFeatureSelector(AbstractFeatureSelector):
                 "evaluate_every": self.evaluate_every,
                 "gate_tolerance": self.gate_tolerance,
                 "budget_tolerance": self.budget_tolerance,
+                "batch_size": self.batch_size,
+                "max_batch_size": self.max_batch_size,
+                "max_batches_per_epoch": self.max_batches_per_epoch,
+                "effective_batch_size": getattr(self, "effective_batch_size_", None),
+                "search_schedule": "shallow/middle-rate first, sequential lambda calibration, cross-group proposals, epoch-cost floor",
                 "preprocessing": "inner-training-only imputation and z-score",
                 "validation": "native gates, no artificial top-k mask",
             },
@@ -220,6 +283,8 @@ class STGFeatureSelector(AbstractFeatureSelector):
         budget_tolerance=0.1,
         min_delta=1e-4,
         batch_size=256,
+        max_batch_size=8192,
+        max_batches_per_epoch=32,
         weight_decay=1e-3,
         device="auto",
         **kwargs,
@@ -242,9 +307,23 @@ class STGFeatureSelector(AbstractFeatureSelector):
             raise ValueError("sigma must be positive and val_fraction must lie in (0, 1)")
         if any(
             not isinstance(x, int) or x < 1
-            for x in (max_epochs, min_epochs, patience, batch_size, gate_window, evaluate_every, max_lambda_trials)
+            for x in (
+                max_epochs,
+                min_epochs,
+                patience,
+                batch_size,
+                max_batch_size,
+                gate_window,
+                evaluate_every,
+                max_lambda_trials,
+            )
         ):
             raise ValueError("epoch, batch and trial settings must be positive integers")
+        if max_batch_size < batch_size or (
+            max_batches_per_epoch is not None
+            and (not isinstance(max_batches_per_epoch, int) or max_batches_per_epoch < 1)
+        ):
+            raise ValueError("max_batch_size must cover batch_size; max_batches_per_epoch must be positive or None")
         if min_epochs > max_epochs or gate_window < evaluate_every or gate_window % evaluate_every:
             raise ValueError("min_epochs must not exceed max_epochs; gate_window must be a multiple of evaluate_every")
         if max_lambda_trials < len(self.lambdas):
@@ -259,6 +338,14 @@ class STGFeatureSelector(AbstractFeatureSelector):
         self.gate_tolerance, self.budget_tolerance = gate_tolerance, budget_tolerance
         self.max_lambda_trials, self.device = max_lambda_trials, device
         self.min_delta, self.batch_size, self.weight_decay = min_delta, batch_size, weight_decay
+        self.max_batch_size, self.max_batches_per_epoch = max_batch_size, max_batches_per_epoch
+
+    def _batch_size(self, n_train):
+        if self.max_batches_per_epoch is None:
+            return self.batch_size
+        target = math.ceil(n_train / self.max_batches_per_epoch)
+        rounded = self.batch_size * math.ceil(target / self.batch_size)
+        return max(self.batch_size, min(self.max_batch_size, rounded))
 
     def _prepare_data(self, X_train, X_val, y_train, y_val):
         from sklearn.impute import SimpleImputer
@@ -286,19 +373,25 @@ class STGFeatureSelector(AbstractFeatureSelector):
         import torch
 
         model.eval()
-        total = 0.0
+        total = torch.zeros((), device=X.device)
+        batch_size = getattr(self, "effective_batch_size_", self.batch_size)
         with torch.no_grad():
-            for offset in range(0, len(X), self.batch_size):
+            for offset in range(0, len(X), batch_size):
                 if time.monotonic() >= deadline:
                     return None
-                batch = slice(offset, offset + self.batch_size)
-                total += float(loss_fn(model(X[batch]), y[batch])) * len(X[batch])
-        return total / len(X)
+                batch = slice(offset, offset + batch_size)
+                total += loss_fn(model(X[batch]), y[batch]) * len(X[batch])
+        return float(total) / len(X)
 
-    def _fit_trial(self, data, params, output_dim, seed, deadline):
+    def _fit_trial(self, data, params, output_dim, seed, deadline, *, hard_deadline=None):
         import torch
 
         X_train, X_val, y_train, y_val = data
+        started = time.monotonic()
+        hard_deadline = deadline if hard_deadline is None else hard_deadline
+        planned_seconds = deadline - started
+        planned_seconds = planned_seconds if math.isfinite(planned_seconds) else None
+        batch_size = getattr(self, "effective_batch_size_", self.batch_size)
         torch.random.default_generator.manual_seed(seed)
         if X_train.is_cuda:
             torch.cuda.default_generators[X_train.device.index].manual_seed(seed)
@@ -316,21 +409,21 @@ class STGFeatureSelector(AbstractFeatureSelector):
                 break
             model.train()
             order = torch.randperm(len(X_train), device=X_train.device)
-            train_total = 0.0
-            for offset in range(0, len(order), self.batch_size):
+            train_total = torch.zeros((), device=X_train.device)
+            for offset in range(0, len(order), batch_size):
                 if time.monotonic() >= deadline:
                     status = "time_limit"
                     break
-                indices = order[offset : offset + self.batch_size]
+                indices = order[offset : offset + batch_size]
                 optimizer.zero_grad()
                 loss = loss_fn(model(X_train[indices]), y_train[indices]) + params["lambda"] * model.regularizer()
-                if not torch.isfinite(loss):
-                    status = "nonfinite_loss"
-                    break
                 loss.backward()
                 optimizer.step()
-                train_total += float(loss.detach()) * len(indices)
+                train_total += loss.detach() * len(indices)
             if status != "max_epochs":
+                break
+            if not torch.isfinite(train_total):
+                status = "nonfinite_loss"
                 break
             epochs = epoch
             if epoch % self.evaluate_every and epoch != self.max_epochs:
@@ -346,10 +439,13 @@ class STGFeatureSelector(AbstractFeatureSelector):
             converged = epoch >= self.min_epochs and len(window) == window.maxlen and stable
             count = int(np.sum(gates > 0))
             matched = converged and self.max_features <= count <= upper
+            observed_now = time.monotonic()
+            horizon = min(self.max_epochs, self.min_epochs + self.gate_window + self.patience)
+            deadline = _epoch_deadline(started, observed_now, epoch, deadline, hard_deadline, horizon)
             record = {
                 "epoch": epoch,
                 "validation_loss": value,
-                "training_objective": train_total / len(X_train),
+                "training_objective": float(train_total) / len(X_train),
                 "native_count": count,
                 "zero_gates": int(np.sum(gates == 0)),
                 "one_gates": int(np.sum(gates == 1)),
@@ -378,7 +474,7 @@ class STGFeatureSelector(AbstractFeatureSelector):
                 status = "early_stopping"
                 break
         selected_mu = None
-        if last_record is None or not last_record["budget_matched"]:
+        if status == "nonfinite_loss" or last_record is None or not last_record["budget_matched"]:
             best_state, best_record = None, None
         elif best_record is not None:
             a, b = np.asarray(best_record["gates"]), np.asarray(last_record["gates"])
@@ -405,6 +501,12 @@ class STGFeatureSelector(AbstractFeatureSelector):
             calibration_count=last_record["native_count"] if last_record and last_record["converged"] else None,
             selected_checkpoint=best_record,
             terminal_checkpoint=last_record,
+            terminal_native_count=last_record["native_count"] if last_record else None,
+            terminal_gate_change=last_record["gate_change"] if last_record else None,
+            terminal_probability_change=last_record["probability_change"] if last_record else None,
+            elapsed_seconds=time.monotonic() - started,
+            effective_batch_size=batch_size,
+            planned_seconds=planned_seconds,
         )
         return selected_mu, result
 
@@ -438,46 +540,61 @@ class STGFeatureSelector(AbstractFeatureSelector):
         if len(X_train) == 0 or len(X_val) == 0:
             return {}
         data = tuple(torch.from_numpy(a).to(device) for a in self._prepare_data(X_train, X_val, y_train, y_val))
+        self.effective_batch_size_ = self._batch_size(len(X_train))
         output_dim = 1 if self.problem_type == "regression" else int(labels.max()) + 1
-        groups = [
-            {"hidden_dims": dims, "learning_rate": rate, "observations": [], "done": False}
-            for dims, rate in product(self.architectures, self.learning_rates)
-        ]
-        order = self._rng.permutation(len(groups))
+        groups = _balanced_groups(self.architectures, self.learning_rates, self._rng)
         seed = int(self._rng.integers(0, 2**31 - 1))
+        outer_deadline = math.inf if time_limit is None else start + time_limit
         threads, best_key = torch.get_num_threads(), (math.inf, math.inf)
         try:
             torch.set_num_threads(1)
             with torch.random.fork_rng(devices=[device.index] if device.type == "cuda" else []):
                 # Warm lazy optimizer imports within the overall limit, before slicing trial budgets.
                 torch.optim.Adam([torch.nn.Parameter(torch.zeros(1, device=device))])
-                for _ in range(self.max_lambda_trials):
-                    for group_index in order:
-                        group = groups[group_index]
-                        if group["done"]:
-                            continue
-                        if self._timed_out(time_limit, start):
-                            break
-                        lam = _next_lambda(
-                            group["observations"], self.lambdas, self.max_lambda_trials, self.max_features
+                for group_index, group in enumerate(groups):
+                    now = time.monotonic()
+                    remaining = max(0, outer_deadline - now)
+                    if remaining <= 0:
+                        break
+                    group_deadline = min(outer_deadline, now + remaining / min(3, len(groups) - group_index))
+                    observations = []
+                    candidate = (
+                        self.best_params_["lambda"]
+                        if self.best_params_
+                        else _calibration_seed(
+                            self.search_results_,
+                            self.max_features,
+                            self.max_features + math.ceil(self.max_features * self.budget_tolerance),
+                            self.min_epochs,
                         )
+                    )
+                    initial = (candidate,) if candidate is not None else self.lambdas
+                    for _ in range(self.max_lambda_trials):
+                        now = time.monotonic()
+                        remaining = max(0, group_deadline - now)
+                        if remaining <= 0:
+                            break
+                        lam = _next_lambda(observations, initial, self.max_lambda_trials, self.max_features)
                         if lam is None:
-                            group["done"] = True
-                            continue
+                            break
                         params = {
                             "lambda": lam,
                             "hidden_dims": group["hidden_dims"],
                             "learning_rate": group["learning_rate"],
                         }
-                        remaining_trials = sum(
-                            self.max_lambda_trials - len(g["observations"]) for g in groups if not g["done"]
+                        allowance = min(remaining, max(30.0, remaining / (self.max_lambda_trials - len(observations))))
+                        mu, result = self._fit_trial(
+                            data, params, output_dim, seed, now + allowance, hard_deadline=group_deadline
                         )
-                        now = time.monotonic()
-                        remaining = math.inf if time_limit is None else max(0, time_limit - (now - start))
-                        allowance = min(remaining, max(30.0, remaining / max(1, remaining_trials)))
-                        mu, result = self._fit_trial(data, params, output_dim, seed, now + allowance)
                         self.search_results_.append(result)
-                        group["observations"].append(result)
+                        observations.append(result)
+                        self._log(
+                            20,
+                            f"STG trial: lambda={lam:.6g}, layers={len(group['hidden_dims'])}, "
+                            f"lr={group['learning_rate']}, epochs={result['epochs']}, "
+                            f"native={result['terminal_native_count']}, "
+                            f"converged={result['converged']}, budget_matched={result['budget_matched']}",
+                        )
                         if mu is not None:
                             key = (result["native_count"] - self.max_features, result["validation_loss"])
                             if key < best_key:
@@ -488,8 +605,15 @@ class STGFeatureSelector(AbstractFeatureSelector):
                                     result["native_count"],
                                     result["selected_checkpoint"],
                                 )
-                    if self._timed_out(time_limit, start) or all(g["done"] for g in groups):
-                        break
+                        terminal_count = result.get("terminal_native_count")
+                        if result["budget_matched"] or (
+                            result["epochs"] >= self.min_epochs
+                            and terminal_count is not None
+                            and self.max_features
+                            <= terminal_count
+                            <= self.max_features + math.ceil(self.max_features * self.budget_tolerance)
+                        ):
+                            break  # Spend the remaining time comparing architectures/rates.
         finally:
             torch.set_num_threads(threads)
         self.budget_converged_ = self.gate_means_ is not None

@@ -10,7 +10,16 @@ import pytest
 import torch
 
 from selectarena.methods.checks import synthetic_data
-from selectarena.methods.stg import STGFeatureSelector, _gate_snapshot, _make_model, _next_lambda, _stability
+from selectarena.methods.stg import (
+    STGFeatureSelector,
+    _balanced_groups,
+    _calibration_seed,
+    _epoch_deadline,
+    _gate_snapshot,
+    _make_model,
+    _next_lambda,
+    _stability,
+)
 
 
 def small_selector(**kwargs):
@@ -124,6 +133,105 @@ def test_unfinished_dense_fit_can_guide_exploration_without_qualifying():
     assert not any(r["budget_matched"] for r in observations)
 
 
+def test_large_fold_batching_uses_all_rows_without_tiny_batches():
+    selector = small_selector()
+    assert selector._batch_size(40) == 256
+    assert selector._batch_size(128_000) == 4096
+    assert math.ceil(128_000 / selector._batch_size(128_000)) <= 32
+    assert selector._batch_size(10_000_000) == 8192
+    assert small_selector(max_batches_per_epoch=None)._batch_size(128_000) == 256
+
+
+def test_measured_epoch_cost_protects_training_but_never_extends_the_hard_budget():
+    # Ten measured one-second epochs cannot justify a 20-second trial for 650 required epochs.
+    assert 650 <= _epoch_deadline(0, 10, 10, 20, 1000, 650) <= 1000
+    assert _epoch_deadline(0, 10, 10, 20, 100, 650) == 100
+
+
+def test_first_groups_cover_depths_and_rates():
+    architectures = ((8, 8, 8), (8, 8, 8, 8), (8, 8, 8, 8, 8))
+    rates = (0.001, 0.003, 0.01)
+    groups = _balanced_groups(architectures, rates, np.random.default_rng(0))
+    assert len({(g["hidden_dims"], g["learning_rate"]) for g in groups}) == 9
+    assert {len(g["hidden_dims"]) for g in groups[:3]} == {3, 4, 5}
+    assert {g["learning_rate"] for g in groups[:3]} == set(rates)
+    assert len(groups[0]["hidden_dims"]) == 3 and groups[0]["learning_rate"] == 0.003
+
+
+def test_calibration_proposals_can_use_mature_unconverged_counts_but_skip_immature_fits():
+    trials = [
+        {"lambda": 0.1, "epochs": 600, "terminal_checkpoint": {"native_count": 20, "validation_loss": 0.5}},
+        {"lambda": 1.0, "epochs": 600, "terminal_checkpoint": {"native_count": 4, "validation_loss": 0.7}},
+        {"lambda": 3.0, "epochs": 20, "terminal_checkpoint": {"native_count": 3, "validation_loss": 0.1}},
+    ]
+    assert _calibration_seed(trials, 3, 4, 500) == 1.0
+    assert _calibration_seed(trials, 3, 4, 700) is None
+
+
+def test_calibrate_lambda_before_switching_group_and_reuse_a_successful_seed(monkeypatch):
+    selector = small_selector(architectures=((8, 8, 8), (8, 8, 8, 8), (8, 8, 8, 8, 8)))
+    X, y = synthetic_data("regression", n_samples=40)
+    attempts = []
+
+    def fake_trial(data, params, output_dim, seed, deadline, *, hard_deadline):
+        assert deadline <= hard_deadline
+        attempts.append(params)
+        matched = params["lambda"] >= 1
+        mu = np.array([0.0] * 3 + [-1.0] * (data[0].shape[1] - 3)) if matched else None
+        return mu, dict(
+            params,
+            epochs=30,
+            converged=True,
+            budget_matched=matched,
+            native_count=3 if matched else None,
+            calibration_count=3 if matched else 5,
+            validation_loss=1.0 if matched else None,
+            best_epoch=30 if matched else None,
+            selected_checkpoint={},
+            terminal_native_count=3 if matched else 5,
+        )
+
+    monkeypatch.setattr(selector, "_fit_trial", fake_trial)
+    selector.fit_transform(X=X, y=y, problem_type="regression", time_limit=10)
+    assert selector.budget_converged_
+    assert attempts[0]["hidden_dims"] == attempts[1]["hidden_dims"]
+    assert [p["lambda"] for p in attempts] == [0.1, 1.0, 1.0, 1.0]
+    assert {len(p["hidden_dims"]) for p in attempts} == {3, 4, 5}
+
+
+def test_seed_lambda_with_unfinished_exact_count_does_not_crash():
+    observation = {
+        "lambda": 1.0,
+        "calibration_count": None,
+        "native_count": None,
+        "budget_matched": False,
+        "terminal_checkpoint": {"native_count": 3},
+    }
+    assert _next_lambda([observation], (1.0,), 8, 3) == pytest.approx(1 / math.sqrt(10))
+
+
+def test_divergence_invalidates_an_earlier_eligible_checkpoint(monkeypatch):
+    selector = small_selector(max_features=1)
+    selector.problem_type, selector.max_features = "regression", 1
+    data = (torch.ones(8, 3), torch.ones(2, 3), torch.ones(8, 1), torch.ones(2, 1))
+    calls = []
+
+    def validation(model, *args):
+        with torch.no_grad():
+            model.mu.copy_(torch.tensor([-1.0, -1.0, 1.0]))
+            if len(calls) == 3:
+                model.network[0].weight.fill_(math.nan)
+        calls.append(1)
+        return float(len(calls)) * -1  # Keep predictive patience from firing first.
+
+    monkeypatch.setattr(selector, "_validation_loss", validation)
+    mu, record = selector._fit_trial(
+        data, {"lambda": 0.1, "hidden_dims": (8, 8, 8), "learning_rate": 0.01}, 1, 0, math.inf
+    )
+    assert any(h["budget_matched"] for h in record["history"])
+    assert record["status"] == "nonfinite_loss" and not record["budget_matched"] and mu is None
+
+
 def test_unstable_support_cannot_early_stop_or_qualify(monkeypatch):
     selector = small_selector(max_features=1)
     selector.problem_type, selector.max_features = "regression", 1
@@ -207,6 +315,8 @@ def test_cuda_rng_is_preserved():
         {"learning_rates": (0,)},
         {"patience": 0},
         {"sigma": 0},
+        {"max_batch_size": 0},
+        {"max_batches_per_epoch": 0},
     ],
 )
 def test_invalid_search_space(kwargs):
