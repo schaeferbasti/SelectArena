@@ -22,9 +22,9 @@ Your method on the leaderboard, locally (no access to the published results need
         --results <run dir>/results.csv [--extra-dir <dir with stability/validity_results.csv>]
     python scripts/preview_leaderboard.py                 # http://localhost:8000
 
-``--with-published-results`` downloads the published results of all methods
-(``selectarena.published_results``, several GB, once) into ``results/`` if they are not there yet,
-and adds your own results (``--results`` / ``--extra-dir``), which replace the published results of
+``--with-published-results`` syncs the published results of all methods (one folder per method,
+``selectarena.published_results``; several GB the first time, then only new or changed folders) into
+``results/published/``, and adds your own results (``--results`` / ``--extra-dir``), which replace the published results of
 the same method on the same task.
 
 Publishing procedure (maintainers; or run the ``update-leaderboard`` skill):
@@ -49,7 +49,12 @@ import pandas as pd
 
 from selectarena.config import load_benchmark_config
 from selectarena.evaluation.leaderboard import VALIDITY_NOISE_MAIN_FIGURE
-from selectarena.published_results import RESULT_FILES, ensure_published_results, merge_results
+from selectarena.published_results import (
+    RESULT_FILES,
+    ensure_published_results,
+    merge_results,
+    read_published_results,
+)
 from selectarena.website import generate_website_artifacts
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -86,6 +91,13 @@ def main() -> None:
         help="Rank against the published results of all methods: downloads them into results/ if missing "
         "(several GB, once) and adds --results / --extra-dir to them.",
     )
+    parser.add_argument(
+        "--replace-published-methods",
+        action="store_true",
+        help="With --with-published-results: your results replace ALL published results of their methods "
+        "(every task and pipeline), not only those of the same tasks. For methods rerun from scratch whose "
+        "published results are outdated.",
+    )
     parser.add_argument("--out", default=str(REPO_ROOT / "generated_website_artifacts"), help="Output folder.")
     parser.add_argument("--elo-bootstrap-rounds", type=int, default=1000, help="Bootstrap resamples per Elo interval.")
     parser.add_argument(
@@ -108,7 +120,8 @@ def main() -> None:
 
     benchmark = load_benchmark_config(args.config)
     if args.with_published_results:
-        published = ensure_published_results(DEFAULT_RESULTS_DIR)
+        published_dir = ensure_published_results(DEFAULT_RESULTS_DIR)
+        published = read_published_results(published_dir)
         # Your own results: --results, and the extra results in --extra-dir (default: next to --results).
         own = dict.fromkeys(RESULT_FILES)
         if args.results:
@@ -119,10 +132,14 @@ def main() -> None:
             own["validity"] = own_extra_dir / RESULT_FILES["validity"]
         frames = {}
         for kind in RESULT_FILES:
-            mine = own[kind] if own[kind] is not None and own[kind].resolve() != published[kind].resolve() else None
-            frames[kind] = merge_results(_read_optional(published[kind]), _read_optional(mine), kind)
+            frames[kind] = merge_results(
+                published[kind],
+                _read_optional(own[kind]),
+                kind,
+                replace_methods=args.replace_published_methods,
+            )
         if frames["performance"] is None:
-            parser.error(f"no performance results in {published['performance']}")
+            parser.error(f"no performance results in {published_dir}")
     else:
         if args.results is None:
             # The result files copied off the cluster, in results/.

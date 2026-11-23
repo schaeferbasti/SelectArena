@@ -100,8 +100,9 @@ python scripts/preview_leaderboard.py      # the whole leaderboard website at ht
 ```
 
 `--with-published-results` downloads the published results of all methods from
-[SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) into
-`results/` (several GB, only once) and adds yours; your results replace the published ones of the
+[SelectArena/SelectArena_Results](https://huggingface.co/datasets/SelectArena/SelectArena_Results) (one
+folder per method, e.g. `methods/SHAP/performance_SHAP.csv`) into `results/published/` (several GB the first
+time, then only new or changed folders) and adds yours; your results replace the published ones of the
 same method on the same dataset (e.g. a rerun). Methods are compared on the same dataset splits, so
 run your method with the published `configs/benchmark.yaml`.
 

@@ -30,8 +30,10 @@ overview.
   down by dataset size, task type, downstream model and budget (figures in
   `website/characteristic_figures.py`, the Performance tab's "Where Methods Win" section).
 - `src/selectarena/published_results.py`: the published raw results (`RESULTS_REPO_ID` on Hugging Face,
-  pin `RESULTS_REVISION` to a commit), downloaded into `results/` by
-  `run_generate_website_artifacts.py --with-published-results` and merged with a user's own results.
+  one folder per method, e.g. `methods/SHAP/performance_SHAP.csv`; pin `RESULTS_REVISION` to a commit), synced into
+  `results/published/` by `run_generate_website_artifacts.py --with-published-results` and merged with a
+  user's own results. `scripts/stage_published_results.py` sorts result CSVs into those folders for an upload
+  (a rerun replaces the method's folder).
 - `src/selectarena/website/`: the data of the leaderboard Space (`scripts/run_generate_website_artifacts.py`)
   and its local preview (`website/preview.py`, `scripts/preview_leaderboard.py`).
   The Space's app lives in its own repo (`huggingface.co/spaces/SelectArena/Leaderboard`), as for

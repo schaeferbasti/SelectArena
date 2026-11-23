@@ -41,7 +41,7 @@ python $P resolve <name>
   prints (maybe a typo), and suggest **`/add-method <name>`** first (it writes, registers and checks the
   method, then comes back here). Stop.
 - Otherwise note `class`, `module`, `paper_name`. If the published results already contain the method
-  (`results/performance_results.csv`, or ask), say that a rerun replaces the published results of that
+  (a folder `results/published/methods/<paper name>/`, or ask), say that a rerun replaces the published results of that
   method in the local leaderboard preview, and confirm that is intended.
 
 ## Step 1: Context and method check
