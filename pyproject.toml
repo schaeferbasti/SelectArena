@@ -53,6 +53,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+pace = ["tabicl==2.2.0", "torch"]
 # Downstream models used in the benchmark config beyond AutoGluon's defaults, and the search spaces
 # of their random configs (`[<model>, n_configs > 0]` in model_jobs).
 models = [

@@ -10,6 +10,12 @@ if TYPE_CHECKING:
 
 #: Class name of each method mapped to the module (under ``selectarena.methods``) defining it.
 NAME_TO_MODULE_MAP: dict[str, str] = {
+    "RawSISFeatureSelector": "pace",
+    "RawDCFeatureSelector": "pace",
+    "RawHSICFeatureSelector": "pace",
+    "PACESISFeatureSelector": "pace",
+    "PACEDCFeatureSelector": "pace",
+    "PACEHSICFeatureSelector": "pace",
     "LOCOFeatureSelector": "loco",
     "RandomFeatureSelector": "random_baseline",
     "FTestFeatureSelector": "f_test",
@@ -66,6 +72,12 @@ EXTRA_BENCHMARK_RAW_DATA_METHODS: frozenset[str] = frozenset(
 
 #: Method names as used in the paper (Table 2, Figure 1).
 PAPER_NAMES: dict[str, str] = {
+    "RawSISFeatureSelector": "Raw-SIS",
+    "RawDCFeatureSelector": "Raw-DC",
+    "RawHSICFeatureSelector": "Raw-HSIC",
+    "PACESISFeatureSelector": "PACE-SIS",
+    "PACEDCFeatureSelector": "PACE-DC",
+    "PACEHSICFeatureSelector": "PACE-HSIC",
     "LOCOFeatureSelector": "LOCO",
     "RandomFeatureSelector": "Random",
     "FTestFeatureSelector": "F-Test",
@@ -125,6 +137,12 @@ LEGACY_NAMES: dict[str, str] = {
 #: proxy (univariate relevance, distances, information theory, trees, regularization). Shown in the
 #: leaderboard's Type column; every registered method needs an entry, or it shows as "Other".
 METHOD_SUBGROUPS: dict[str, str] = {
+    "RawSISFeatureSelector": "Correlation",
+    "RawDCFeatureSelector": "Distance",
+    "RawHSICFeatureSelector": "Distance",
+    "PACESISFeatureSelector": "Correlation",
+    "PACEDCFeatureSelector": "Distance",
+    "PACEHSICFeatureSelector": "Distance",
     "CARTFeatureSelector": "Tree",
     "CPIFeatureSelector": "Conditional Importance",
     "CDPFNFeatureSelector": "TFM",

@@ -83,6 +83,22 @@ land in `<workspace>/output/<benchmark_name>/`. On an OAR cluster, start from
 `configs/cluster.local.example.yaml` runs every job on your machine, one after the other (a full run of
 one method takes weeks there; restrict `task_subset` for a test).
 
+### Raw and PACE screening
+
+Install the selectors' dependencies with `pip install -e '.[pace]'`. The PACE variants use
+the first two column-encoder blocks of the frozen TabICL v1.1 classifier (128 coordinates).
+The checkpoint is downloaded from `jingang/TabICL` on first use. For offline evaluation,
+set `PACE_ENCODER_CHECKPOINT` to the local `tabicl-classifier-v1.1-20250506.ckpt`.
+The selectors use CUDA when available. Set `PACE_DEVICE=cpu` to use the CPU.
+
+Raw and PACE each support SIS, normalized distance correlation and HSIC. PACE-HSIC sets
+the feature bandwidth to the lower median positive pairwise distance in representation space.
+Feature scoring uses up to 2,000 outer-training observations. Downstream fitting uses the benchmark split.
+
+```bash
+python scripts/check_method.py RawSISFeatureSelector PACESISFeatureSelector RawDCFeatureSelector PACEDCFeatureSelector RawHSICFeatureSelector PACEHSICFeatureSelector
+```
+
 ## Leaderboard
 
 The [public leaderboard](https://huggingface.co/spaces/SelectArena/Leaderboard) is generated from
