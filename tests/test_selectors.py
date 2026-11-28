@@ -115,3 +115,22 @@ def test_feature_selector_dataset_combo(problem_type, evaluation_metric, method_
     assert all(set(entry) == {"feature", "value"} for entry in feature_selector._selected_features)
     selected_names = [entry["feature"] for entry in feature_selector._selected_features]
     assert all(f in train_data.columns for f in selected_names)
+
+
+@pytest.mark.skipif(not HAS_LIGHTGBM, reason="needs LightGBM")
+def test_lgbm_gain_small_data_ties_and_time_limit():
+    X = pd.DataFrame(np.zeros((32, 30)), columns=[f"f[{i}]: a,b" for i in range(30)])
+    X.iloc[:, 29] = np.arange(32.0)
+    y = pd.Series(np.arange(32) >= 16).astype(int)
+    selector_cls = get_feature_selector_from_name(name="LGBMGainFeatureSelector")
+
+    def selection(seed, time_limit=None):
+        selector = selector_cls(max_features=5, random_state=seed, verbosity=0)
+        selector.fit_transform(X=X, y=y, time_limit=time_limit, problem_type="binary")
+        assert not selector._feature_selection_random_features
+        return [entry["feature"] for entry in selector._selected_features]
+
+    first, second = selection(0), selection(1)
+    assert first[0] == second[0] == X.columns[29]  # 32 rows still get a split
+    assert first[1:] != second[1:]  # unused features are not ranked by column order
+    assert selection(0, time_limit=0)[0] == X.columns[29]  # one tree is kept past the limit
